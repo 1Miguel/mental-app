@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
 class User(BaseModel):
-    username: str
+    """ User authentication schema."""
+    name: str
+    email: str
     password: str
