@@ -1,7 +1,19 @@
 from pydantic import BaseModel
 
-class UserSchema(BaseModel):
-    """ User authentication schema."""
-    name: str
+
+class MoodLog(BaseModel):
+    """Daily mood API schema.
+    Method: POST
+    """
+    mood: int
+
+class UserApi(BaseModel):
+    """API model of a users."""
+
     email: str
-    password: str
+    password_hash: str
+    firstname: str
+    lastname: str
+    address: str
+    age: int
+    occupation: str
