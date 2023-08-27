@@ -2,6 +2,7 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'ui_views/login_views.dart';
+import 'ui_views/dashboard_views.dart';
 
 void main() {
   runApp(MyApp());
@@ -19,10 +20,10 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             useMaterial3: true,
             primarySwatch: Colors.blue,
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
             scaffoldBackgroundColor: Colors.white,
             platform: TargetPlatform.android),
-        home: LoginMainPage(),
+        home: DashboardPage(),
       ),
     );
   }
