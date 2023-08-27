@@ -5,9 +5,6 @@ import unittest
 import requests
 from typing import Dict, Tuple
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
-
 # logger module
 log = logging.getLogger("requests_oauthlib")
 # TODO: Add a flag if logging must be displayed in the terminal
@@ -142,7 +139,12 @@ class TestServer(unittest.TestCase):
         self.assertEqual(response.status_code, 409)
 
     def test_user_logout(self) -> None:
-        pass
+        """Test User logout.
+
+        Given: User is login and user has token
+         When: User logout
+         Then: Serve must return unauthorize access to all API request. 
+        """
 
 
 if __name__ == "__main__":
