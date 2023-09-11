@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'ui_views/login_views.dart';
 import 'ui_views/dashboard_views.dart';
+import 'ui_views/appbar_views.dart';
+import 'ui_views/mood_views.dart';
+import 'ui_views/membership_views.dart';
 
 void main() {
   runApp(MyApp());
@@ -23,7 +26,7 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
             scaffoldBackgroundColor: Colors.white,
             platform: TargetPlatform.android),
-        home: DashboardPage(),
+        home: MembershipView(),
       ),
     );
   }
