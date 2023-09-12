@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/ui_views/dashboard_views.dart';
 
 class MoodModalPage extends StatelessWidget {
   @override
@@ -79,6 +80,7 @@ class MoodModalPage extends StatelessWidget {
                       builder: ((context) => MoodIntroPage(
                             moodName: "Good",
                             moodInfo: moodMessageList['Good'],
+                            onTap: () {},
                           )),
                     ),
                   );
@@ -94,6 +96,7 @@ class MoodModalPage extends StatelessWidget {
                       builder: ((context) => MoodIntroPage(
                             moodName: "Unwell",
                             moodInfo: moodMessageList['Unwell'],
+                            onTap: () {},
                           )),
                     ),
                   );
@@ -114,6 +117,7 @@ class MoodModalPage extends StatelessWidget {
                       builder: ((context) => MoodIntroPage(
                             moodName: "Unsure",
                             moodInfo: moodMessageList['Unsure'],
+                            onTap: () {},
                           )),
                     ),
                   );
@@ -192,11 +196,13 @@ class MoodCardWidget extends StatelessWidget {
 class MoodIntroPage extends StatelessWidget {
   final String moodName;
   Map<String, String>? moodInfo;
+  final VoidCallback onTap;
 
   MoodIntroPage({
     super.key,
     required this.moodName,
     required this.moodInfo,
+    required this.onTap,
   });
 
   @override
@@ -204,55 +210,67 @@ class MoodIntroPage extends StatelessWidget {
     String moodIcon = moodInfo!['moodIcon'] ?? 'images/missing.png';
     String mainMessage = moodInfo!['mainMessage'] ?? 'UNKNOWN';
     String secondaryMessage = moodInfo!['secondaryMessage'] ?? 'UNKNOWN';
-    return Scaffold(
-      body: Column(
-        children: [
-          SizedBox(
-            height: 100,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        onTap();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: ((context) => DashboardPage()),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
+        );
+      },
+      child: Scaffold(
+        body: Column(
+          children: [
+            SizedBox(
+              height: 100,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: 300,
+                  child: Image.asset(
+                    moodIcon,
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+              child: SizedBox(
                 width: MediaQuery.of(context).size.width,
-                height: 300,
-                child: Image.asset(
-                  moodIcon,
+                height: 220,
+                child: Text(
+                  mainMessage,
+                  maxLines: 3,
+                  softWrap: true,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.deepPurple,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 50,
+                  ),
                 ),
               ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: 220,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(15.0),
               child: Text(
-                mainMessage,
-                maxLines: 3,
-                softWrap: true,
+                secondaryMessage,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.deepPurple,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 50,
+                  fontFamily: 'Roboto',
+                  fontSize: 20,
+                  color: Colors.blue,
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Text(
-              secondaryMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                fontSize: 20,
-                color: Colors.blue,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

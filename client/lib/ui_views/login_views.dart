@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dashboard_views.dart';
+import 'mood_views.dart';
 
 class LoginMainPage extends StatelessWidget {
   @override
@@ -192,6 +194,7 @@ class LoginPage extends StatelessWidget {
             ),
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
                 width: 50,
@@ -555,7 +558,7 @@ class WelcomePage extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: () {
           Navigator.push(context,
-              MaterialPageRoute(builder: ((context) => TheraphyIntroPage())));
+              MaterialPageRoute(builder: ((context) => MoodModalPage())));
         },
         child: Container(
           child: Column(
@@ -698,8 +701,10 @@ class TheraphyIntroPage extends StatelessWidget {
               SizedBox(height: 40),
               FilledButton(
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: ((context) => SignupPage())));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => DashboardPage())));
                 },
                 style: ButtonStyle(
                     minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),

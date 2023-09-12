@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'membership_views.dart';
 
 class DashboardPage extends StatelessWidget {
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -370,7 +371,14 @@ class AccountsPage extends StatelessWidget {
             AccountActionsCard(
               actionTitle: action.key,
               actionInfo: action.value,
-              onPressed: () {},
+              onPressed: () {
+                action.key == 'Membership'
+                    ? Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: ((context) => MembershipView())))
+                    : {};
+              },
             )
         ],
       ),

@@ -111,7 +111,7 @@ class MembershipView extends StatelessWidget {
                 color: Colors.grey,
               ),
               onPressed: () {
-                //Navigator.pop(context);
+                Navigator.pop(context);
               },
             ),
           ),
