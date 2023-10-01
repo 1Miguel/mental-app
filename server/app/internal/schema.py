@@ -5,7 +5,9 @@ class MoodLog(BaseModel):
     """Daily mood API schema.
     Method: POST
     """
+
     mood: int
+
 
 class UserApi(BaseModel):
     """API model of a users."""

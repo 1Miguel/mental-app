@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import IntEnum, auto
 from passlib.hash import bcrypt
 from typing_extensions import Self
 from tortoise.fields import (
@@ -6,6 +6,7 @@ from tortoise.fields import (
     IntEnumField,
     IntField,
     CharField,
+    BooleanField,
     ForeignKeyField,
 )
 from tortoise.models import Model
@@ -13,10 +14,21 @@ from tortoise.models import Model
 
 class MoodId(IntEnum):
     AWFUL = 0
-    BAD = 1
-    UNSURE = 2
-    GOOD = 3
-    GREAT = 4
+    BAD = auto()
+    UNSURE = auto()
+    GOOD = auto()
+    GREAT = auto()
+
+
+class SubscriptionType(IntEnum):
+    LIFE = 0
+    CONTRIBUTING = auto()
+    SUSTAINING = auto()
+    CORPORATE = auto()
+
+
+class ServiceType(IntEnum):
+    pass
 
 
 class UserModel(Model):
@@ -39,8 +51,32 @@ class UserModel(Model):
         return bcrypt.verify(password, self.password_hash)
 
 
+class Subscription(Model):
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    start_time = DateField()
+    end_time = DateField()
+
+
 class MoodModel(Model):
     id = IntField(pk=True)
     user = ForeignKeyField("models.UserModel")
     mood = IntEnumField(MoodId)
     date = DateField()
+
+
+class ScheduleModel(Model):
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    type = IntEnumField(SubscriptionType)
+    date_from = DateField()
+    date_to = DateField()
+
+
+class Appointment(Model):
+    id = IntField(pk=True)
+    time_created = DateField()
+    patient = ForeignKeyField("models.UserModel")
+    start_time = DateField()
+    end_time = DateField()
+    cancelled = BooleanField()

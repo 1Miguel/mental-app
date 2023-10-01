@@ -44,7 +44,9 @@ register_tortoise(
 
 # user(pydantic dataclass) schema from usermodel
 UserSchema = pydantic_model_creator(UserModel, name="User", exclude_readonly=False)
-UserSchemaReadOnly = pydantic_model_creator(UserModel, name="User", exclude_readonly=True)
+UserSchemaReadOnly = pydantic_model_creator(
+    UserModel, name="User", exclude_readonly=True
+)
 # oauth authentication scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -112,26 +114,22 @@ def login(user: UserSchema = Depends(get_current_user)) -> Any:
 
 
 @app.get("/users/mood", response_model=UserSchema)
-async def mood_log(user: UserSchema = Depends(get_current_user), mood: Optional[MoodLog]=None):
+async def mood_log(
+    user: UserSchema = Depends(get_current_user), mood: Optional[MoodLog] = None
+):
     """Daily Mood Logging."""
     if mood is None:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid Data."
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Data."
         )
     today = datetime.datetime.today().date()
     if MoodModel.get(date=today):
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Mood already set for today."
+            status_code=status.HTTP_409_CONFLICT, detail="Mood already set for today."
         )
     log.debug("Create new mood for %s", user)
     # log new mood today
-    new_mood = MoodModel(
-        user=user,
-        mood=MoodId(mood.mood),
-        date=today
-    )
+    new_mood = MoodModel(user=user, mood=MoodId(mood.mood), date=today)
     await new_mood.save()
     return await UserSchema.from_tortoise_orm(user)
 
@@ -163,8 +161,9 @@ async def users(user: UserApi) -> Any:
     else:
         return await UserSchema.from_tortoise_orm(user)
 
+def main() -> None:
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
 
 if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    main()
