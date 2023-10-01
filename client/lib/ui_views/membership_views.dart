@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/ui_views/dashboard_views.dart';
 
 class TitleText extends StatelessWidget {
   final String title;
@@ -518,76 +519,117 @@ class CancelMembershipView extends StatelessWidget {
   }
 }
 
-class MemberCancellationForm extends StatelessWidget {
+class MemberCancellationForm extends StatefulWidget {
+  const MemberCancellationForm({super.key});
+
+  @override
+  MemberCancellationState createState() {
+    return MemberCancellationState();
+  }
+}
+
+class MemberCancellationState extends State<MemberCancellationForm> {
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            height: 20,
-          ),
-          SizedBox(
-            width: 350,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: Text('Please choose the reason you are canceling'),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 20,
             ),
-          ),
-          RadioCancellation(),
-          SizedBox(
-            width: 350,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextField(
-                maxLines: 2,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(25.0)),
+            SizedBox(
+              width: 350,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: Text('Please choose the reason you are canceling'),
+              ),
+            ),
+            RadioCancellation(),
+            SizedBox(
+              width: 350,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  // TODO: only trigger validation if others is selected
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter reason';
+                    } else if (value.length > 140) {
+                      return 'Character Limit Error! Exceeds 140 Characters';
+                    }
+                    return null;
+                  },
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                    ),
+                    hintText: 'Please write here (Maximum: 140 char)',
                   ),
-                  hintText: 'Please write here (Maximum: 140 char)',
                 ),
               ),
             ),
-          ),
-          SizedBox(
-            width: 350,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 15.0),
-              child: FormHeadingText(
-                title: 'Suggestion',
-                textColor: Colors.deepPurple,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 350,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextField(
-                maxLines: 2,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                  ),
-                  hintText: 'Please write here (Maximum: 140 char)',
+            SizedBox(
+              width: 350,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 15.0),
+                child: FormHeadingText(
+                  title: 'Suggestion',
+                  textColor: Colors.deepPurple,
                 ),
               ),
             ),
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          FilledButton(
-            onPressed: () {},
-            style: ButtonStyle(
-                minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    Color.fromARGB(255, 0, 74, 173))),
-            child: Text('CONFIRM'),
-          ),
-        ],
+            SizedBox(
+              width: 350,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  maxLines: 2,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter suggestion';
+                    } else if (value.length > 140) {
+                      return 'Character Limit Error! Exceeds 140 Characters';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                    ),
+                    hintText: 'Please write here (Maximum: 140 char)',
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            FilledButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  // TODO: REST API
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((context) => DashboardPage()),
+                    ),
+                  );
+                }
+              },
+              style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      Color.fromARGB(255, 0, 74, 173))),
+              child: Text('CONFIRM'),
+            ),
+          ],
+        ),
       ),
     );
   }
