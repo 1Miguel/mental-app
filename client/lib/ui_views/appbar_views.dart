@@ -26,7 +26,7 @@ class _HomeState extends State<Home> {
           title: Text("Open/Close Drawer Flutter"),
         ),
         drawer: Drawer(),
-        body: Container(
+        body: SizedBox(
           height: 150,
           child: Center(
             child: ElevatedButton(
