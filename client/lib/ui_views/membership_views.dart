@@ -112,7 +112,8 @@ class MembershipView extends StatelessWidget {
                 color: Colors.grey,
               ),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: ((context) => DashboardPage())));
               },
             ),
           ),
@@ -1275,7 +1276,7 @@ class MembershipForm extends StatelessWidget {
               child: Row(
                 children: [
                   FormHeadingText(
-                    title: membershipHeading + ' ',
+                    title: '$membershipHeading ',
                     textColor: Colors.lightGreen,
                   ),
                   FormHeadingText(
@@ -1429,6 +1430,70 @@ class MembershipForm extends StatelessWidget {
             child: Text('SUBMIT'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class MembershipIntroPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        child: Column(
+          children: [
+            SizedBox(height: 60),
+            Image.asset(
+              'images/therapy_logo.png',
+              fit: BoxFit.fitWidth,
+              height: 400,
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'MEMBERSHIP',
+                  style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 40,
+                      fontWeight: FontWeight.w800,
+                      color: const Color.fromARGB(255, 0, 74, 173)),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Join us and be a mental health\nadvocate',
+                  softWrap: true,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 20,
+                      color: Colors.deepPurple),
+                ),
+              ],
+            ),
+            SizedBox(height: 40),
+            FilledButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => MembershipView())));
+              },
+              style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      const Color.fromARGB(255, 0, 74, 173))),
+              child: Text('GET STARTED'),
+            ),
+          ],
+        ),
       ),
     );
   }

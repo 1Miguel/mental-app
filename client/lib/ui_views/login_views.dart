@@ -10,6 +10,124 @@ import 'mood_views.dart';
 // External import
 import 'package:get/get.dart';
 import 'package:email_validator/email_validator.dart';
+// Common
+// MainHeadingText
+// SubHeading
+
+class MainHeadingText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+
+  const MainHeadingText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 25 : 40;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: Colors.deepPurple,
+        fontFamily: 'Roboto',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
+class HeadingDescText extends StatelessWidget {
+  final String title;
+
+  const HeadingDescText({
+    super.key,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: TextStyle(
+        color: Colors.deepPurple,
+        fontFamily: 'Roboto',
+        fontSize: 18,
+      ),
+    );
+  }
+}
+
+class ContentBigHeadingText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color textColor;
+
+  const ContentBigHeadingText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 35 : 45;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: textColor,
+        fontFamily: 'Roboto',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
+class ContentText extends StatelessWidget {
+  final String title;
+  final bool isHeavy;
+  final Color textColor;
+
+  const ContentText({
+    super.key,
+    required this.title,
+    required this.isHeavy,
+    required this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    FontWeight newWeight = isHeavy ? FontWeight.bold : FontWeight.normal;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 5,
+      style: TextStyle(
+        color: textColor,
+        fontFamily: 'Roboto',
+        fontWeight: newWeight,
+        fontSize: 15,
+      ),
+    );
+  }
+}
 
 class LoginMainPage extends StatelessWidget {
   @override
@@ -46,30 +164,27 @@ class LoginMainPage extends StatelessWidget {
           FilledButton(
             onPressed: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: ((context) => SignupPage())));
+                  MaterialPageRoute(builder: ((context) => LoginPage())));
             },
             style: ButtonStyle(
                 minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
                 backgroundColor: MaterialStateProperty.all<Color>(
                     const Color.fromARGB(255, 0, 74, 173))),
-            child: Text('SIGN UP'),
+            child: Text('LOGIN'),
           ),
-          FilledButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: ((context) => LoginPage())));
-              },
-              style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all<Size>(Size(200, 10)),
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.white)),
-              child: Text(
-                'LOGIN',
-                style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-              )),
+          TextButton(
+            child: Text(
+              'Sign Up',
+              style: TextStyle(
+                  fontFamily: 'Roboto',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
+            ),
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: ((context) => SignupPage())));
+            },
+          ),
         ],
       ),
     );
@@ -653,98 +768,6 @@ class WelcomePage extends StatelessWidget {
                         color: Colors.lightGreen),
                   ),
                 ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class TheraphyIntroPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: ((context) => ForgotPasswordPage())));
-        },
-        child: Container(
-          child: Column(
-            children: [
-              SizedBox(height: 60),
-              Image.asset(
-                'images/therapy_logo.png',
-                fit: BoxFit.fitWidth,
-                height: 400,
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Therapy & Care',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 40,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.lightGreen),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'We will continue to enhance',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 20,
-                        color: Colors.lightGreen),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'individual and collective well-being',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 20,
-                        color: Colors.lightGreen),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'for a mentally stable Philippines!',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 20,
-                        color: Colors.lightGreen),
-                  ),
-                ],
-              ),
-              SizedBox(height: 40),
-              FilledButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => DashboardPage())));
-                },
-                style: ButtonStyle(
-                    minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 0, 74, 173))),
-                child: Text('GET STARTED'),
               ),
             ],
           ),
