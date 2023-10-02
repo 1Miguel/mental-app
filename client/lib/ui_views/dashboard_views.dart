@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/ui_views/book_appointment.dart';
 import 'membership_views.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -16,7 +17,7 @@ class DashboardPage extends StatelessWidget {
             pinned: true,
             snap: false,
             centerTitle: false,
-            toolbarHeight: 120,
+            toolbarHeight: 100,
             backgroundColor: Colors.deepPurple,
             leading: Builder(
               builder: (BuildContext context) {
@@ -27,65 +28,62 @@ class DashboardPage extends StatelessWidget {
                     padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
                     child: IconButton(
                       icon: const Icon(
-                        Icons.account_circle_rounded,
-                        size: 70,
+                        Icons.menu,
+                        size: 40.0,
                         color: Colors.white,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => AccountsPage())));
+                      },
                     ),
                   ),
                 );
               },
             ),
-            leadingWidth: 110,
-            title: Text(
-              'Hi, User!',
-              style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 30,
-                  color: Colors.white),
-            ),
+            leadingWidth: 80,
             actions: [
-              IconButton(
-                icon: const Icon(Icons.menu),
-                iconSize: 40.0,
-                color: Colors.white,
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => AccountsPage())));
-                },
+              Padding(
+                padding: const EdgeInsets.only(right: 20.0),
+                child: Text(
+                  'Hi, User!',
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 30,
+                      color: Colors.white),
+                ),
               ),
             ],
-            bottom: AppBar(
-                automaticallyImplyLeading: false,
-                title: Container(
-                  width: double.infinity,
-                  height: 40,
-                  color: Colors.deepPurple,
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        hintText: 'Enter Keyword',
-                        suffixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white),
-                  ),
-                ),
-                backgroundColor: Colors.deepPurple,
-                actions: [Container()]),
           ),
           // Other Sliver Widgets
           SliverList(
             delegate: SliverChildListDelegate([
-              const SizedBox(
+              SizedBox(
                 child: Column(
                   children: [
+                    SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(
+                      height: 40,
+                      width: MediaQuery.sizeOf(context).width - 80,
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(left: 30.0),
+                            hintText: 'Enter Keyword',
+                            suffixIcon: Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white),
+                      ),
+                    ),
                     SizedBox(
                       width: 380,
                       child: Padding(
@@ -173,7 +171,13 @@ class DashboardPage extends StatelessWidget {
                         DashboardCategoryButtons(
                           title: 'Book Appointment',
                           imageIcon: 'images/dashboard_category_book.png',
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) =>
+                                        BookAppointmentIntroPage())));
+                          },
                         ),
                         DashboardCategoryButtons(
                           title: 'Talk To Us',
@@ -275,7 +279,7 @@ class DashboardFeatureContext extends StatelessWidget {
                     fontFamily: 'Roboto',
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -292,7 +296,7 @@ class DashboardFeatureContext extends StatelessWidget {
                   softWrap: true,
                   textAlign: TextAlign.justify,
                   style: TextStyle(
-                      fontFamily: 'Roboto', fontSize: 12, color: Colors.blue),
+                      fontFamily: 'Roboto', fontSize: 12, color: Colors.black),
                 ),
               ),
               Row(
@@ -308,7 +312,7 @@ class DashboardFeatureContext extends StatelessWidget {
                             fontFamily: 'Roboto',
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue),
+                            color: Colors.black),
                       ),
                       onPressed: () {/* ... */},
                     ),
@@ -324,20 +328,11 @@ class DashboardFeatureContext extends StatelessWidget {
 }
 
 class AccountsPage extends StatelessWidget {
-  final accountActions = const {
-    'Membership':
-        "Become a PMHA member to be part of our roster volunteers and professional and company partners. The membership fees also help sustain the mental health services for indigent service users and in the implementation of PMHA's programs and services.",
-    'Donate':
-        "With you as our partner, imagine what we can do together and how many more lives we can transform. With PMHA, donors and funders are not helping just another organization. They are a part of a worthy purpose of formulating new quality programs to respond to the changing times and ensure that mental health services.",
-    'About Us':
-        "Founded on January 15, 1950, the Philippine Mental Health Association, Inc. (PMHA) is a private, non-stock, non-profit organization that provides premier Mental Health Services through Education, Advocacy, Intervention and Research.",
-  };
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        toolbarHeight: 80,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -360,26 +355,42 @@ class AccountsPage extends StatelessWidget {
         children: [
           AccountSummaryCard(
             name: "Katon, Benj",
-            address: "Puerto Princesa, Palawan",
-            age: "29 years. old",
             image: 'images/sample_cover_image.png',
+            details: '',
           ),
           SizedBox(
             height: 20,
           ),
-          for (MapEntry<String, String> action in accountActions.entries)
-            AccountActionsCard(
-              actionTitle: action.key,
-              actionInfo: action.value,
-              onPressed: () {
-                action.key == 'Membership'
-                    ? Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) => MembershipView())))
-                    : {};
-              },
-            )
+          AccountMenuTile(
+            menu: 'Profile',
+            menuIcon: Icons.account_circle_rounded,
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: ((context) => AccountProfilePage())));
+            },
+          ),
+          AccountMenuTile(
+            menu: 'Membership',
+            menuIcon: Icons.badge,
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: ((context) => MembershipIntroPage())));
+            },
+          ),
+          AccountMenuTile(
+            menu: 'Donate',
+            menuIcon: Icons.volunteer_activism,
+            onTap: () {},
+          ),
+          AccountMenuTile(
+            menu: 'About Us',
+            menuIcon: Icons.diversity_3,
+            onTap: () {},
+          ),
         ],
       ),
     );
@@ -388,16 +399,14 @@ class AccountsPage extends StatelessWidget {
 
 class AccountSummaryCard extends StatelessWidget {
   final String name;
-  final String address;
-  final String age;
   final String image;
+  final String details;
 
   const AccountSummaryCard({
     super.key,
     required this.name,
-    required this.address,
-    required this.age,
     required this.image,
+    required this.details,
   });
 
   @override
@@ -413,6 +422,7 @@ class AccountSummaryCard extends StatelessWidget {
             children: <Widget>[
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
                     width: 80,
@@ -424,29 +434,42 @@ class AccountSummaryCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                    width: 200,
+                    width: 250,
                     height: 100,
-                    child: Container(
-                      padding: EdgeInsets.only(
-                          top: 10.0, left: 10.0, right: 10.0, bottom: 10.0),
-                      color: Colors.white,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Katon Benj',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(color: Colors.blue, fontSize: 25),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 15.0, right: 15.0, top: 5.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                name,
+                                textAlign: TextAlign.left,
+                                style:
+                                    TextStyle(color: Colors.blue, fontSize: 40),
+                              ),
+                            ],
                           ),
-                          Text(
-                            'San Pedro, Puerto Princesa City Student 29, yo',
-                            maxLines: 2,
-                            softWrap: true,
-                            textAlign: TextAlign.left,
-                            style: TextStyle(color: Colors.blue, fontSize: 12),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 15.0, right: 15.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                details,
+                                textAlign: TextAlign.left,
+                                style:
+                                    TextStyle(color: Colors.blue, fontSize: 20),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   )
                 ],
@@ -536,6 +559,189 @@ class AccountActionsCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class MenuTitleText extends StatelessWidget {
+  final String menuText;
+
+  const MenuTitleText({
+    super.key,
+    required this.menuText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      menuText,
+      style: TextStyle(
+        color: const Color.fromARGB(255, 0, 74, 173),
+        fontFamily: 'Roboto',
+        fontWeight: FontWeight.w700,
+        fontSize: 28,
+      ),
+    );
+  }
+}
+
+class MenuSubTitleText extends StatelessWidget {
+  final String menuText;
+
+  const MenuSubTitleText({
+    super.key,
+    required this.menuText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      menuText,
+      style: TextStyle(
+        color: Colors.deepPurple,
+        fontFamily: 'Roboto',
+        fontWeight: FontWeight.w500,
+        fontSize: 24,
+      ),
+    );
+  }
+}
+
+class AccountMenuTile extends StatelessWidget {
+  final String menu;
+  final IconData menuIcon;
+  final VoidCallback onTap;
+
+  const AccountMenuTile({
+    super.key,
+    required this.menu,
+    required this.menuIcon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding:
+          EdgeInsets.only(left: 50.0, right: 50.0, top: 10.0, bottom: 10.0),
+      leading: Icon(menuIcon, size: 50.0),
+      horizontalTitleGap: 30.0,
+      title: MenuTitleText(menuText: menu),
+      onTap: () {
+        onTap();
+      },
+    );
+  }
+}
+
+class AccountSubMenuTile extends StatelessWidget {
+  final String menu;
+  final IconData menuIcon;
+  final VoidCallback onTap;
+
+  const AccountSubMenuTile({
+    super.key,
+    required this.menu,
+    required this.menuIcon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.only(
+        left: 50.0,
+        right: 50.0,
+        top: 5.0,
+      ),
+      leading: Icon(menuIcon, size: 40.0),
+      horizontalTitleGap: 30.0,
+      title: MenuSubTitleText(menuText: menu),
+      onTap: () {
+        onTap();
+      },
+    );
+  }
+}
+
+class AccountProfilePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    //Image img = Image.asset('images/sample_cover_image.png');
+    Image img = Image.asset('images/google_logo.png');
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 80,
+        leading: SizedBox(
+          width: 20,
+          height: 20,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            child: IconButton(
+              icon: const Icon(
+                Icons.arrow_back,
+                size: 30,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
+        title: Text('Profile'),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AccountSummaryCard(
+            name: "Katon, Benj",
+            image: "images/google_logo.png",
+            details: "Benj@yahoo.com",
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 50, right: 20, top: 15.0),
+            child: MenuTitleText(menuText: 'Information'),
+          ),
+          AccountSubMenuTile(
+            menu: 'Edit Profile',
+            menuIcon: Icons.edit_square,
+            onTap: () {},
+          ),
+          AccountSubMenuTile(
+            menu: 'Email',
+            menuIcon: Icons.mail_rounded,
+            onTap: () {},
+          ),
+          AccountSubMenuTile(
+            menu: 'Password',
+            menuIcon: Icons.lock,
+            onTap: () {},
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 50, right: 20, top: 15.0),
+            child: MenuTitleText(menuText: 'Account'),
+          ),
+          AccountSubMenuTile(
+            menu: 'Notifications',
+            menuIcon: Icons.notifications,
+            onTap: () {},
+          ),
+          AccountSubMenuTile(
+            menu: 'Switch Account',
+            menuIcon: Icons.sync_alt_outlined,
+            onTap: () {},
+          ),
+          AccountSubMenuTile(
+            menu: 'Logout',
+            menuIcon: Icons.logout,
+            onTap: () {},
+          ),
+        ],
       ),
     );
   }
