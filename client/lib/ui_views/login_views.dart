@@ -2,12 +2,14 @@
 import 'package:flutter/material.dart';
 
 // Local import
+import 'package:flutter_intro/controllers/signup_controller.dart';
+import 'package:flutter_intro/controllers/login_controller.dart';
 import 'dashboard_views.dart';
 import 'mood_views.dart';
 
 // External import
+import 'package:get/get.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter_pw_validator/flutter_pw_validator.dart';
 
 class LoginMainPage extends StatelessWidget {
   @override
@@ -86,16 +88,10 @@ class LoginPage extends StatefulWidget {
 
 class LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final loginEmailController = TextEditingController();
-  final loginPasswordController = TextEditingController();
+  SignupController signupController = Get.put(SignupController());
+  LoginController loginController = Get.put(LoginController());
 
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is disposed.
-    loginEmailController.dispose();
-    loginPasswordController.dispose();
-    super.dispose();
-  }
+  var isLogin = false.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +164,7 @@ class LoginPageState extends State<LoginPage> {
                         }
                         return null;
                       },
-                      controller: loginEmailController,
+                      controller: loginController.emailController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.only(left: 30.0),
@@ -199,7 +195,7 @@ class LoginPageState extends State<LoginPage> {
                         }
                         return null;
                       },
-                      controller: loginPasswordController,
+                      controller: loginController.passwordController,
                       obscureText: true,
                       initialValue: null,
                       decoration: InputDecoration(
@@ -217,10 +213,7 @@ class LoginPageState extends State<LoginPage> {
             FilledButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  // TODO: REST API
-                  //loginEmailController.txt
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: ((context) => WelcomePage())));
+                  loginController.loginWithEmail();
                 }
               },
               style: ButtonStyle(
@@ -584,26 +577,6 @@ class SignupState extends State<SignupPage> {
               child: Text('SIGN UP'),
             ),
             SizedBox(height: 10),
-            // FilledButton(
-            //   onPressed: () {
-            //     if (_formKey.currentState!.validate()) {
-            //       // TODO: REST API
-            //       Navigator.pop(context);
-            //     }
-            //   },
-            //   style: ButtonStyle(
-            //       minimumSize: MaterialStateProperty.all<Size>(Size(300, 10)),
-            //       backgroundColor:
-            //           MaterialStateProperty.all<Color>(Colors.white)),
-            //   child: Text(
-            //     'Go Back',
-            //     style: TextStyle(
-            //         fontFamily: 'Roboto',
-            //         fontSize: 15,
-            //         decoration: TextDecoration.underline,
-            //         color: Colors.grey),
-            //   ),
-            // ),
           ],
         ),
       ),
