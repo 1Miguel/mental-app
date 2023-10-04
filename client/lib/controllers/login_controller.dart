@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/model/user.dart';
 import 'package:flutter_intro/ui_views/login_views.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,7 +17,7 @@ class LoginController extends GetxController {
       print(emailController.text);
       print(passwordController.text);
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:8000/token'),
+        Uri.parse('http://10.0.2.2:8000/token'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
@@ -35,23 +36,32 @@ class LoginController extends GetxController {
         var tokenType = data['token_type'];
 
         final loginResponse = await http.get(
-            Uri.parse('http://127.0.0.1:8000/login'),
+            Uri.parse('http://10.0.2.2:8000/login'),
             headers: <String, String>{
               'Authorization': '$tokenType $accessToken'
             });
 
         if (loginResponse.statusCode == 200) {
-          final Map<String, dynamic> userdata =
-              jsonDecode(loginResponse.body.toString());
+          final Map<String, dynamic> userdata = jsonDecode(loginResponse.body);
+          print(userdata);
+          print('encode');
+          print(userdata);
+
+          // User userData = User.fromJson(jsonDecode(loginResponse.body));
+          // print('userData here');
+          // print(userData);
 
           final SharedPreferences? prefs = await _prefs;
 
+          await prefs?.setString('user_data', jsonEncode(userdata));
           await prefs?.setString('token', accessToken);
+          await prefs?.setString('first_name', userdata['firstname']);
+          await prefs?.setString('last_name', userdata['lastname']);
           emailController.clear();
           passwordController.clear();
 
           //Go to Home
-          Get.off(WelcomePage());
+          Get.off(() => WelcomePage());
         } else {
           // If the server did not return a 201 CREATED response,
           // then throw an exception.

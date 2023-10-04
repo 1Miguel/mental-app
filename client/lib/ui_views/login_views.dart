@@ -4,31 +4,39 @@ import 'package:flutter/material.dart';
 // Local import
 import 'package:flutter_intro/controllers/signup_controller.dart';
 import 'package:flutter_intro/controllers/login_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dashboard_views.dart';
 import 'mood_views.dart';
+import 'package:flutter_intro/utils/colors_scheme.dart';
 
 // External import
 import 'package:get/get.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:hexcolor/hexcolor.dart';
+
 // Common
 // MainHeadingText
 // SubHeading
+
+// Constants
 
 class MainHeadingText extends StatelessWidget {
   final String title;
   final bool isOverflow;
   final bool isHeavy;
+  final Color customColor;
 
   const MainHeadingText({
     super.key,
     required this.title,
     required this.isOverflow,
     required this.isHeavy,
+    required this.customColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    double newSize = isOverflow ? 25 : 40;
+    double newSize = isOverflow ? 20 : 20;
     FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
     return Text(
       title,
@@ -36,10 +44,78 @@ class MainHeadingText extends StatelessWidget {
       softWrap: true,
       maxLines: 2,
       style: TextStyle(
-        color: Colors.deepPurple,
-        fontFamily: 'Roboto',
+        color: customColor,
+        fontFamily: 'Proza Libre',
         fontWeight: newWeight,
         fontSize: newSize,
+      ),
+    );
+  }
+}
+
+final TextStyle inputStyle = TextStyle(
+  fontFamily: 'Open Sans',
+  color: Colors.black87,
+  fontSize: 13,
+);
+
+final InputDecoration decor = InputDecoration(
+  filled: true,
+  fillColor: Colors.white,
+  contentPadding: EdgeInsets.only(left: 30.0),
+  errorStyle: TextStyle(
+    fontFamily: 'Open Sans',
+    color: Colors.red,
+    fontSize: 10,
+  ),
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(30)),
+    borderSide: BorderSide(
+      color: Colors.grey,
+      width: 1.0,
+    ),
+  ),
+  enabledBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(30)),
+    borderSide: BorderSide(
+      color: HexColor('#90A4AE'),
+      width: 1.0,
+    ),
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(30)),
+    borderSide: BorderSide(
+      color: HexColor('#01579B'),
+      width: 1.0,
+    ),
+  ),
+  errorBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(30)),
+    borderSide: BorderSide(
+      color: Colors.red,
+      width: 1.0,
+    ),
+  ),
+);
+
+class InputDescription extends StatelessWidget {
+  final String desc;
+
+  const InputDescription({
+    super.key,
+    required this.desc,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.sizeOf(context).width - 40,
+      child: Text(
+        desc,
+        style: TextStyle(
+          color: HexColor('#607D8B'),
+          fontFamily: 'Open Sans',
+        ),
       ),
     );
   }
@@ -133,34 +209,38 @@ class LoginMainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
-          SizedBox(height: 140),
+          SizedBox(height: 120),
           Image.asset(
             'images/pmha_logo.jpg',
             fit: BoxFit.fitWidth,
             height: 400,
           ),
+          SizedBox(height: 50),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 'WE ARE ',
                 style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 40,
+                    fontFamily: 'Proza Libre',
+                    fontSize: 50,
+                    fontWeight: FontWeight.w900,
                     color: Colors.deepPurple),
               ),
               Text(
                 'HERE',
                 style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 40,
+                    fontFamily: 'Proza Libre',
+                    fontSize: 50,
+                    fontWeight: FontWeight.w900,
                     color: Colors.lightGreen),
               ),
             ],
           ),
-          SizedBox(height: 80),
+          SizedBox(height: 50),
           FilledButton(
             onPressed: () {
               Navigator.push(context,
@@ -168,15 +248,18 @@ class LoginMainPage extends StatelessWidget {
             },
             style: ButtonStyle(
                 minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    const Color.fromARGB(255, 0, 74, 173))),
-            child: Text('LOGIN'),
+                backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
+            child: Text(
+              'LOGIN',
+              style: TextStyle(
+                  fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
+            ),
           ),
           TextButton(
             child: Text(
-              'Sign Up',
+              'SIGN UP',
               style: TextStyle(
-                  fontFamily: 'Roboto',
+                  fontFamily: 'Open Sans',
                   fontWeight: FontWeight.bold,
                   color: Colors.black),
             ),
@@ -203,7 +286,6 @@ class LoginPage extends StatefulWidget {
 
 class LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  SignupController signupController = Get.put(SignupController());
   LoginController loginController = Get.put(LoginController());
 
   var isLogin = false.obs;
@@ -211,6 +293,7 @@ class LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Form(
         key: _formKey,
         child: Column(
@@ -227,13 +310,11 @@ class LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Login',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.deepPurple),
+                    MainHeadingText(
+                      title: 'LOGIN',
+                      isHeavy: true,
+                      isOverflow: true,
+                      customColor: Colors.deepPurple,
                     ),
                   ],
                 ),
@@ -243,7 +324,7 @@ class LoginPageState extends State<LoginPage> {
                     Text(
                       'Sign in to Continue',
                       style: TextStyle(
-                          fontFamily: 'Roboto',
+                          fontFamily: 'Open Sans',
                           fontWeight: FontWeight.bold,
                           fontSize: 10,
                           color: Colors.deepPurple),
@@ -252,79 +333,68 @@ class LoginPageState extends State<LoginPage> {
                 ),
               ],
             ),
-            SizedBox(height: 30),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter email",
-                    style: TextStyle(
-                      color: Colors.grey,
+            SizedBox(height: 70),
+            Container(
+              width: MediaQuery.sizeOf(context).width - 20,
+              decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 240, 242, 243),
+                  borderRadius: BorderRadius.all(Radius.circular(20))),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'Email:'),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter email';
-                        } else if (!EmailValidator.validate(value)) {
-                          return 'Invalid email';
-                        }
-                        return null;
-                      },
-                      controller: loginController.emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        child: TextFormField(
+                          style: inputStyle,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter email';
+                            } else if (!EmailValidator.validate(value)) {
+                              return 'Invalid email';
+                            }
+                            return null;
+                          },
+                          controller: loginController.emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: decor,
                         ),
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter password",
-                    style: TextStyle(
-                      color: Colors.grey,
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'Password:'),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter password';
-                        }
-                        return null;
-                      },
-                      controller: loginController.passwordController,
-                      obscureText: true,
-                      initialValue: null,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(30))),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter password';
+                            }
+                            return null;
+                          },
+                          controller: loginController.passwordController,
+                          obscureText: true,
+                          initialValue: null,
+                          decoration: decor,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-            SizedBox(height: 70),
+            SizedBox(height: 90),
             FilledButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
@@ -333,8 +403,7 @@ class LoginPageState extends State<LoginPage> {
               },
               style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                      const Color.fromARGB(255, 0, 74, 173))),
+                  backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
               child: Text('LOGIN'),
             ),
             FilledButton(
@@ -351,24 +420,7 @@ class LoginPageState extends State<LoginPage> {
               child: Text(
                 'Forgot Password?',
                 style: TextStyle(
-                    fontFamily: 'Roboto', fontSize: 12, color: Colors.grey),
-              ),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all<Size>(Size(300, 50)),
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.white)),
-              child: Text(
-                'Go Back (DEBUG ONLY)',
-                style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 12,
-                    decoration: TextDecoration.underline,
-                    color: Colors.grey),
+                    fontFamily: 'Open Sans', fontSize: 12, color: Colors.black),
               ),
             ),
           ],
@@ -517,9 +569,12 @@ class SignupPage extends StatefulWidget {
 
 class SignupState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
+  SignupController signupController = Get.put(SignupController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Form(
         key: _formKey,
         child: Column(
@@ -536,153 +591,133 @@ class SignupState extends State<SignupPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'PHILIPPINE MENTAL',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.deepPurple),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'HEALTH ASSOCIATION',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.deepPurple),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'PALAWAN',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.lightGreen),
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: MainHeadingText(
+                        title: 'SIGNUP',
+                        isHeavy: true,
+                        isOverflow: true,
+                        customColor: Colors.deepPurple,
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
-            SizedBox(height: 40),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter your name",
-                    style: TextStyle(
-                      color: Colors.grey,
+            SizedBox(height: 20),
+            Container(
+              width: MediaQuery.sizeOf(context).width - 20,
+              decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 240, 242, 243),
+                  borderRadius: BorderRadius.all(Radius.circular(20))),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'First Name:'),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your name';
-                        }
-                        return null;
-                      },
-                      initialValue: null,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        height: 60,
+                        child: TextFormField(
+                            style: inputStyle,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your name';
+                              }
+                              return null;
+                            },
+                            controller: signupController.nameController,
+                            initialValue: null,
+                            decoration: decor),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'Last Name:'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        height: 60,
+                        child: TextFormField(
+                          style: inputStyle,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your last name';
+                            }
+                            return null;
+                          },
+                          //controller: signupController.nameController,
+                          initialValue: null,
+                          decoration: decor,
                         ),
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter your email",
-                    style: TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter email';
-                        } else if (!EmailValidator.validate(value)) {
-                          return 'Invalid email';
-                        }
-                        return null;
-                      },
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
-                        ),
+                    Padding(
+                        padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                        child: InputDescription(desc: 'Email:')),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        height: 60,
+                        child: TextFormField(
+                            style: inputStyle,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter email';
+                              } else if (!EmailValidator.validate(value)) {
+                                return 'Invalid email';
+                              }
+                              return null;
+                            },
+                            controller: signupController.emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: decor),
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter your password",
-                    style: TextStyle(
-                      color: Colors.grey,
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'Password:'),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter password';
-                        }
-                        return null;
-                      },
-                      obscureText: true,
-                      initialValue: null,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(30))),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        height: 60,
+                        child: TextFormField(
+                            style: inputStyle,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter password';
+                              }
+                              return null;
+                            },
+                            controller: signupController.passwordController,
+                            obscureText: true,
+                            initialValue: null,
+                            decoration: decor),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-            SizedBox(height: 50),
+            SizedBox(
+              height: 40,
+            ),
             FilledButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  // TODO: REST API
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => LoginMainPage())));
+                  signupController.registerWithEmail();
                 }
               },
               style: ButtonStyle(
@@ -700,79 +735,219 @@ class SignupState extends State<SignupPage> {
 }
 
 class WelcomePage extends StatelessWidget {
+  Future<String?> getUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? name = prefs.getString('first_name');
+    return name;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
           Navigator.push(context,
               MaterialPageRoute(builder: ((context) => MoodModalPage())));
         },
-        child: Container(
-          child: Column(
-            children: [
-              SizedBox(height: 100),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'WELCOME, USER!',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 30,
-                        color: Colors.deepPurple),
-                  ),
-                ],
-              ),
-              Image.asset(
-                'images/welcome_logo.png',
-                fit: BoxFit.fitWidth,
-                height: 400,
-              ),
-              SizedBox(height: 80),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'HERE FOR ',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 30,
-                        color: Colors.deepPurple),
-                  ),
-                  Text(
-                    'YOU',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 30,
-                        color: Colors.lightGreen),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'HERE TO ',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 30,
-                        color: Colors.deepPurple),
-                  ),
-                  Text(
-                    'STAY',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 30,
-                        color: Colors.lightGreen),
-                  ),
-                ],
-              ),
-            ],
+        child: SizedBox(
+          width: double.infinity,
+          child: Center(
+            child: FutureBuilder(
+              future: getUserName(),
+              initialData: null,
+              builder: (BuildContext context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.deepPurpleAccent,
+                    ),
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'An ${snapshot.error} occurred',
+                        style: const TextStyle(fontSize: 18, color: Colors.red),
+                      ),
+                    );
+                  } else if (snapshot.hasData) {
+                    final data = snapshot.data;
+                    print(data);
+                    return Column(
+                      children: [
+                        SizedBox(height: 100),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'WELCOME, $data',
+                              style: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  fontSize: 30,
+                                  color: Colors.deepPurple),
+                            ),
+                          ],
+                        ),
+                        Image.asset(
+                          'images/welcome_logo.png',
+                          fit: BoxFit.fitWidth,
+                          height: 400,
+                        ),
+                        SizedBox(height: 80),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'HERE FOR ',
+                              style: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  fontSize: 30,
+                                  color: Colors.deepPurple),
+                            ),
+                            Text(
+                              'YOU',
+                              style: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  fontSize: 30,
+                                  color: Colors.lightGreen),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'HERE TO ',
+                              style: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  fontSize: 30,
+                                  color: Colors.deepPurple),
+                            ),
+                            Text(
+                              'STAY',
+                              style: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  fontSize: 30,
+                                  color: Colors.lightGreen),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+                }
+
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            ),
           ),
         ),
       ),
-    );
+    ));
   }
 }
+
+// class WelcomePage extends StatefulWidget {
+//   const WelcomePage({super.key});
+
+//   @override
+//   _WelcomePageState createState() {
+//     return _WelcomePageState();
+//   }
+// }
+
+// class _WelcomePageState extends State<WelcomePage> {
+//   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+//   var username = 'USER';
+
+//   getUserName() async {
+//     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+//     String? name = prefs.getString('first_name');
+//     setState(() {
+//       username = name ?? "USER";
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: GestureDetector(
+//         behavior: HitTestBehavior.opaque,
+//         onTap: () {
+//           Navigator.push(context,
+//               MaterialPageRoute(builder: ((context) => MoodModalPage())));
+//         },
+//         child: Container(
+//           child: Column(
+//             children: [
+//               SizedBox(height: 100),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: [
+//                   Text(
+//                     'WELCOME, $username',
+//                     style: TextStyle(
+//                         fontFamily: 'Roboto',
+//                         fontSize: 30,
+//                         color: Colors.deepPurple),
+//                   ),
+//                 ],
+//               ),
+//               Image.asset(
+//                 'images/welcome_logo.png',
+//                 fit: BoxFit.fitWidth,
+//                 height: 400,
+//               ),
+//               SizedBox(height: 80),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: [
+//                   Text(
+//                     'HERE FOR ',
+//                     style: TextStyle(
+//                         fontFamily: 'Roboto',
+//                         fontSize: 30,
+//                         color: Colors.deepPurple),
+//                   ),
+//                   Text(
+//                     'YOU',
+//                     style: TextStyle(
+//                         fontFamily: 'Roboto',
+//                         fontSize: 30,
+//                         color: Colors.lightGreen),
+//                   ),
+//                 ],
+//               ),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: [
+//                   Text(
+//                     'HERE TO ',
+//                     style: TextStyle(
+//                         fontFamily: 'Roboto',
+//                         fontSize: 30,
+//                         color: Colors.deepPurple),
+//                   ),
+//                   Text(
+//                     'STAY',
+//                     style: TextStyle(
+//                         fontFamily: 'Roboto',
+//                         fontSize: 30,
+//                         color: Colors.lightGreen),
+//                   ),
+//                 ],
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

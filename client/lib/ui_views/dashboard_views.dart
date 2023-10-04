@@ -1,9 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/ui_views/book_appointment.dart';
+import 'package:flutter_intro/model/user.dart';
 import 'membership_views.dart';
+
+import 'dart:convert';
+
+// Third-party import
+import 'package:shared_preferences/shared_preferences.dart';
+
+class DashboardLoaderPage extends StatelessWidget {
+  Future<String?> getUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? name = prefs.getString('first_name');
+    return name;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.deepPurpleAccent,
+          title: const Text('Flutter FutureBuilder'),
+        ),
+        body: SizedBox(
+          width: double.infinity,
+          child: Center(
+            child: FutureBuilder(
+              future: getUserName(),
+              initialData: "Code sample",
+              builder: (BuildContext context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.deepPurpleAccent,
+                    ),
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'An ${snapshot.error} occurred',
+                        style: const TextStyle(fontSize: 18, color: Colors.red),
+                      ),
+                    );
+                  } else if (snapshot.hasData) {
+                    final data = snapshot.data;
+                    return Center(
+                      child: Text(
+                        data ?? "HELLO",
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    );
+                  }
+                }
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class DashboardPage extends StatelessWidget {
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  Future<String?> getUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? name = prefs.getString('first_name');
+    return name;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,17 +120,47 @@ class DashboardPage extends StatelessWidget {
             ),
             leadingWidth: 80,
             actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 20.0),
-                child: Text(
-                  'Hi, User!',
-                  textAlign: TextAlign.end,
-                  style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 30,
-                      color: Colors.white),
-                ),
+              FutureBuilder(
+                future: getUserName(),
+                initialData: null,
+                builder: (BuildContext context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.deepPurpleAccent,
+                      ),
+                    );
+                  }
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'An ${snapshot.error} occurred',
+                          style:
+                              const TextStyle(fontSize: 18, color: Colors.red),
+                        ),
+                      );
+                    } else if (snapshot.hasData) {
+                      final data = snapshot.data;
+                      print(data);
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 20.0),
+                        child: Text(
+                          'Hi, $data!',
+                          textAlign: TextAlign.end,
+                          style: TextStyle(
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30,
+                              color: Colors.white),
+                        ),
+                      );
+                    }
+                  }
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
               ),
             ],
           ),
@@ -328,6 +433,23 @@ class DashboardFeatureContext extends StatelessWidget {
 }
 
 class AccountsPage extends StatelessWidget {
+  User emptyUser = User(
+    id: 0,
+    email: "",
+    password_hash: "",
+    firstname: "",
+    lastname: "",
+    address: "",
+    age: 0,
+    occupation: "",
+  );
+
+  getUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    return prefs.getString('user_data') ?? jsonEncode(emptyUser).toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -351,48 +473,80 @@ class AccountsPage extends StatelessWidget {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          AccountSummaryCard(
-            name: "Katon, Benj",
-            image: 'images/sample_cover_image.png',
-            details: '',
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          AccountMenuTile(
-            menu: 'Profile',
-            menuIcon: Icons.account_circle_rounded,
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: ((context) => AccountProfilePage())));
-            },
-          ),
-          AccountMenuTile(
-            menu: 'Membership',
-            menuIcon: Icons.badge,
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: ((context) => MembershipIntroPage())));
-            },
-          ),
-          AccountMenuTile(
-            menu: 'Donate',
-            menuIcon: Icons.volunteer_activism,
-            onTap: () {},
-          ),
-          AccountMenuTile(
-            menu: 'About Us',
-            menuIcon: Icons.diversity_3,
-            onTap: () {},
-          ),
-        ],
-      ),
+      body: FutureBuilder(
+          future: getUserData(),
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.deepPurpleAccent,
+                ),
+              );
+            }
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'An ${snapshot.error} occurred',
+                    style: const TextStyle(fontSize: 18, color: Colors.red),
+                  ),
+                );
+              } else if (snapshot.hasData) {
+                final data = snapshot.data;
+                String mystring = data.toString();
+                //Map<String, dynamic> myjson = jsonDecode(mystring);
+                User userdata = User.fromJson(jsonDecode(mystring));
+                String firstname = userdata.lastname;
+                String lastname = userdata.firstname;
+
+                return Column(
+                  children: [
+                    AccountSummaryCard(
+                      name: "$lastname, $firstname",
+                      image: 'images/sample_cover_image.png',
+                      details: '',
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    AccountMenuTile(
+                      menu: 'Profile',
+                      menuIcon: Icons.account_circle_rounded,
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => AccountProfilePage())));
+                      },
+                    ),
+                    AccountMenuTile(
+                      menu: 'Membership',
+                      menuIcon: Icons.badge,
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => MembershipIntroPage())));
+                      },
+                    ),
+                    AccountMenuTile(
+                      menu: 'Donate',
+                      menuIcon: Icons.volunteer_activism,
+                      onTap: () {},
+                    ),
+                    AccountMenuTile(
+                      menu: 'About Us',
+                      menuIcon: Icons.diversity_3,
+                      onTap: () {},
+                    ),
+                  ],
+                );
+              }
+            }
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }),
     );
   }
 }
@@ -666,6 +820,23 @@ class AccountSubMenuTile extends StatelessWidget {
 }
 
 class AccountProfilePage extends StatelessWidget {
+  User emptyUser = User(
+    id: 0,
+    email: "",
+    password_hash: "",
+    firstname: "",
+    lastname: "",
+    address: "",
+    age: 0,
+    occupation: "",
+  );
+
+  getUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    return prefs.getString('user_data') ?? jsonEncode(emptyUser).toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     //Image img = Image.asset('images/sample_cover_image.png');
@@ -692,57 +863,92 @@ class AccountProfilePage extends StatelessWidget {
         ),
         title: Text('Profile'),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AccountSummaryCard(
-            name: "Katon, Benj",
-            image: "images/google_logo.png",
-            details: "Benj@yahoo.com",
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 50, right: 20, top: 15.0),
-            child: MenuTitleText(menuText: 'Information'),
-          ),
-          AccountSubMenuTile(
-            menu: 'Edit Profile',
-            menuIcon: Icons.edit_square,
-            onTap: () {},
-          ),
-          AccountSubMenuTile(
-            menu: 'Email',
-            menuIcon: Icons.mail_rounded,
-            onTap: () {},
-          ),
-          AccountSubMenuTile(
-            menu: 'Password',
-            menuIcon: Icons.lock,
-            onTap: () {},
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 50, right: 20, top: 15.0),
-            child: MenuTitleText(menuText: 'Account'),
-          ),
-          AccountSubMenuTile(
-            menu: 'Notifications',
-            menuIcon: Icons.notifications,
-            onTap: () {},
-          ),
-          AccountSubMenuTile(
-            menu: 'Switch Account',
-            menuIcon: Icons.sync_alt_outlined,
-            onTap: () {},
-          ),
-          AccountSubMenuTile(
-            menu: 'Logout',
-            menuIcon: Icons.logout,
-            onTap: () {},
-          ),
-        ],
-      ),
+      body: FutureBuilder(
+          future: getUserData(),
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.deepPurpleAccent,
+                ),
+              );
+            }
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'An ${snapshot.error} occurred',
+                    style: const TextStyle(fontSize: 18, color: Colors.red),
+                  ),
+                );
+              } else if (snapshot.hasData) {
+                final data = snapshot.data;
+                String mystring = data.toString();
+                //Map<String, dynamic> myjson = jsonDecode(mystring);
+                User userdata = User.fromJson(jsonDecode(mystring));
+                String firstname = userdata.lastname;
+                String lastname = userdata.firstname;
+                String email = userdata.email;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AccountSummaryCard(
+                      name: "$lastname, $firstname",
+                      image: "images/google_logo.png",
+                      details: "$email",
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 50, right: 20, top: 15.0),
+                      child: MenuTitleText(menuText: 'Information'),
+                    ),
+                    AccountSubMenuTile(
+                      menu: 'Edit Profile',
+                      menuIcon: Icons.edit_square,
+                      onTap: () {},
+                    ),
+                    AccountSubMenuTile(
+                      menu: 'Email',
+                      menuIcon: Icons.mail_rounded,
+                      onTap: () {},
+                    ),
+                    AccountSubMenuTile(
+                      menu: 'Password',
+                      menuIcon: Icons.lock,
+                      onTap: () {},
+                    ),
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 50, right: 20, top: 15.0),
+                      child: MenuTitleText(menuText: 'Account'),
+                    ),
+                    AccountSubMenuTile(
+                      menu: 'Notifications',
+                      menuIcon: Icons.notifications,
+                      onTap: () {},
+                    ),
+                    AccountSubMenuTile(
+                      menu: 'Switch Account',
+                      menuIcon: Icons.sync_alt_outlined,
+                      onTap: () {},
+                    ),
+                    AccountSubMenuTile(
+                      menu: 'Logout',
+                      menuIcon: Icons.logout,
+                      onTap: () {},
+                    ),
+                  ],
+                );
+              }
+            }
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }),
     );
   }
 }

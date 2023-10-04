@@ -20,6 +20,7 @@ dependencies:
   get: ^4.6.6
   shared_preferences: ^2.2.1
   table_calendar: ^3.0.9
+  hexcolor: ^3.0.1
 
 dev_dependencies:
   flutter_test:
@@ -37,5 +38,27 @@ flutter:
         - asset: fonts/Roboto/Roboto-BlackItalic.ttf
         - asset: fonts/Roboto/Roboto-Bold.ttf
         - asset: fonts/Roboto/Roboto-Medium.ttf
+    - family: 'Fjalla One'
+      fonts:
+        - asset: fonts/Fjalla_One/FjallaOne-Regular.ttf
+    - family: 'Asap'
+      fonts: 
+        - asset: fonts/Asap/Asap-Italic-VariableFont_wdth,wght.ttf
+        - asset: fonts/Asap/Asap-VariableFont_wdth,wght.ttf
+    - family: 'Open Sans'
+      fonts:
+        - asset: fonts/Open_Sans/OpenSans-Italic-VariableFont_wdth,wght.ttf
+        - asset: fonts/Open_Sans/OpenSans-VariableFont_wdth,wght.ttf
+    - family: 'Proza Libre'
+      fonts:
+        - asset: fonts/Proza_Libre/ProzaLibre-Bold.ttf
+        - asset: fonts/Proza_Libre/ProzaLibre-BoldItalic.ttf
+        - asset: fonts/Proza_Libre/ProzaLibre-ExtraBold.ttf
+        - asset: fonts/Proza_Libre/ProzaLibre-ExtraBoldItalic.ttf
+        - asset: fonts/Proza_Libre/ProzaLibre-Italic.ttf
+        - asset: fonts/Proza_Libre/ProzaLibre-Medium.ttf
+        - asset: fonts/Proza_Libre/ProzaLibre-MediumItalic.ttf
+        - asset: fonts/Proza_Libre/ProzaLibre-Regular.ttf
+        - asset: fonts/Proza_Libre/ProzaLibre-SemiBold.ttf
+        - asset: fonts/Proza_Libre/ProzaLibre-SemiBoldItalic.ttf
   uses-material-design: true
-  
