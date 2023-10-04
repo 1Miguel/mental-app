@@ -36,8 +36,78 @@ class MainHeadingText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double newSize = isOverflow ? 20 : 20;
+    double newSize = isOverflow ? 20 : 40;
+    //Overwrite size based on length
+    newSize = (title.length > 15) ? 25 : 30;
     FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Proza Libre',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
+class SubHeadingText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const SubHeadingText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 13 : 18;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Open Sans',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
+class WelcomeText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const WelcomeText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 25 : 30;
+    //Overwrite based on length as needed
+    newSize = (title.length > 25) ? 25 : 30;
+    FontWeight newWeight = isHeavy ? FontWeight.w700 : FontWeight.w900;
     return Text(
       title,
       textAlign: TextAlign.center,
@@ -228,7 +298,7 @@ class LoginMainPage extends StatelessWidget {
                     fontFamily: 'Proza Libre',
                     fontSize: 50,
                     fontWeight: FontWeight.w900,
-                    color: Colors.deepPurple),
+                    color: mainDeepPurple),
               ),
               Text(
                 'HERE',
@@ -236,7 +306,7 @@ class LoginMainPage extends StatelessWidget {
                     fontFamily: 'Proza Libre',
                     fontSize: 50,
                     fontWeight: FontWeight.w900,
-                    color: Colors.lightGreen),
+                    color: mainLightGreen),
               ),
             ],
           ),
@@ -292,6 +362,8 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    loginController.emailController.clear();
+    loginController.passwordController.clear();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Form(
@@ -313,22 +385,19 @@ class LoginPageState extends State<LoginPage> {
                     MainHeadingText(
                       title: 'LOGIN',
                       isHeavy: true,
-                      isOverflow: true,
-                      customColor: Colors.deepPurple,
+                      isOverflow: false,
+                      customColor: mainDeepPurple,
                     ),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Sign in to Continue',
-                      style: TextStyle(
-                          fontFamily: 'Open Sans',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          color: Colors.deepPurple),
-                    ),
+                    SubHeadingText(
+                        title: 'Sign in to Continue',
+                        isOverflow: false,
+                        isHeavy: true,
+                        customColor: mainDeepPurple),
                   ],
                 ),
               ],
@@ -394,7 +463,7 @@ class LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            SizedBox(height: 90),
+            SizedBox(height: 80),
             FilledButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
@@ -404,7 +473,12 @@ class LoginPageState extends State<LoginPage> {
               style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
                   backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
-              child: Text('LOGIN'),
+              child: Text(
+                'LOGIN',
+                style: TextStyle(
+                  fontFamily: 'Open Sans',
+                ),
+              ),
             ),
             FilledButton(
               onPressed: () {
@@ -461,81 +535,51 @@ class ForgotPasswordState extends State<ForgotPasswordPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Forgot',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 30,
-                          color: Colors.deepPurple),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Password',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 30,
-                          color: Colors.deepPurple),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'New Password',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.deepPurple),
-                    ),
+                    MainHeadingText(
+                        title: 'Forgot\nPassword',
+                        isOverflow: false,
+                        isHeavy: true,
+                        customColor: mainDeepPurple),
                   ],
                 ),
               ],
             ),
             SizedBox(height: 100),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter email",
-                    style: TextStyle(
-                      color: Colors.grey,
+            Container(
+              width: MediaQuery.sizeOf(context).width - 20,
+              decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 240, 242, 243),
+                  borderRadius: BorderRadius.all(Radius.circular(20))),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'Email:'),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter email';
-                        } else if (!EmailValidator.validate(value)) {
-                          return 'Invalid email';
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter email';
+                            } else if (!EmailValidator.validate(value)) {
+                              return 'Invalid email';
+                            }
+                            return null;
+                          },
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: decor,
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
             SizedBox(height: 70),
             FilledButton(
@@ -547,8 +591,7 @@ class ForgotPasswordState extends State<ForgotPasswordPage> {
               },
               style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                      const Color.fromARGB(255, 0, 74, 173))),
+                  backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
               child: Text('SEND'),
             ),
           ],
@@ -573,6 +616,9 @@ class SignupState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
+    signupController.nameController.clear();
+    signupController.passwordController.clear();
+    signupController.emailController.clear();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Form(
@@ -585,7 +631,7 @@ class SignupState extends State<SignupPage> {
               fit: BoxFit.fitWidth,
               height: 200,
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 15),
             Column(
               children: [
                 Row(
@@ -596,8 +642,22 @@ class SignupState extends State<SignupPage> {
                       child: MainHeadingText(
                         title: 'SIGNUP',
                         isHeavy: true,
+                        isOverflow: false,
+                        customColor: mainDeepPurple,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: SubHeadingText(
+                        title: 'Create an Account',
+                        isHeavy: true,
                         isOverflow: true,
-                        customColor: Colors.deepPurple,
+                        customColor: mainDeepPurple,
                       ),
                     ),
                   ],
@@ -738,7 +798,7 @@ class WelcomePage extends StatelessWidget {
   Future<String?> getUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String? name = prefs.getString('first_name');
+    String? name = prefs.getString('first_name')!.toUpperCase();
     return name;
   }
 
@@ -776,20 +836,21 @@ class WelcomePage extends StatelessWidget {
                     );
                   } else if (snapshot.hasData) {
                     final data = snapshot.data;
-                    print(data);
+                    String welcomeString = 'WELCOME   $data';
                     return Column(
                       children: [
                         SizedBox(height: 100),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              'WELCOME, $data',
-                              style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 30,
-                                  color: Colors.deepPurple),
-                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 15.0),
+                              child: MainHeadingText(
+                                  title: welcomeString,
+                                  isOverflow: false,
+                                  isHeavy: true,
+                                  customColor: mainDeepPurple),
+                            )
                           ],
                         ),
                         Image.asset(
@@ -801,39 +862,31 @@ class WelcomePage extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              'HERE FOR ',
-                              style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 30,
-                                  color: Colors.deepPurple),
-                            ),
-                            Text(
-                              'YOU',
-                              style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 30,
-                                  color: Colors.lightGreen),
-                            ),
+                            MainHeadingText(
+                                title: 'HERE FOR  ',
+                                isOverflow: false,
+                                isHeavy: true,
+                                customColor: mainDeepPurple),
+                            MainHeadingText(
+                                title: 'YOU',
+                                isOverflow: false,
+                                isHeavy: true,
+                                customColor: mainLightGreen),
                           ],
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              'HERE TO ',
-                              style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 30,
-                                  color: Colors.deepPurple),
-                            ),
-                            Text(
-                              'STAY',
-                              style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 30,
-                                  color: Colors.lightGreen),
-                            ),
+                            MainHeadingText(
+                                title: 'HERE TO  ',
+                                isOverflow: false,
+                                isHeavy: true,
+                                customColor: mainDeepPurple),
+                            MainHeadingText(
+                                title: 'STAY',
+                                isOverflow: false,
+                                isHeavy: true,
+                                customColor: mainLightGreen),
                           ],
                         ),
                       ],
@@ -852,102 +905,3 @@ class WelcomePage extends StatelessWidget {
     ));
   }
 }
-
-// class WelcomePage extends StatefulWidget {
-//   const WelcomePage({super.key});
-
-//   @override
-//   _WelcomePageState createState() {
-//     return _WelcomePageState();
-//   }
-// }
-
-// class _WelcomePageState extends State<WelcomePage> {
-//   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-//   var username = 'USER';
-
-//   getUserName() async {
-//     SharedPreferences prefs = await SharedPreferences.getInstance();
-
-//     String? name = prefs.getString('first_name');
-//     setState(() {
-//       username = name ?? "USER";
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: GestureDetector(
-//         behavior: HitTestBehavior.opaque,
-//         onTap: () {
-//           Navigator.push(context,
-//               MaterialPageRoute(builder: ((context) => MoodModalPage())));
-//         },
-//         child: Container(
-//           child: Column(
-//             children: [
-//               SizedBox(height: 100),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 children: [
-//                   Text(
-//                     'WELCOME, $username',
-//                     style: TextStyle(
-//                         fontFamily: 'Roboto',
-//                         fontSize: 30,
-//                         color: Colors.deepPurple),
-//                   ),
-//                 ],
-//               ),
-//               Image.asset(
-//                 'images/welcome_logo.png',
-//                 fit: BoxFit.fitWidth,
-//                 height: 400,
-//               ),
-//               SizedBox(height: 80),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 children: [
-//                   Text(
-//                     'HERE FOR ',
-//                     style: TextStyle(
-//                         fontFamily: 'Roboto',
-//                         fontSize: 30,
-//                         color: Colors.deepPurple),
-//                   ),
-//                   Text(
-//                     'YOU',
-//                     style: TextStyle(
-//                         fontFamily: 'Roboto',
-//                         fontSize: 30,
-//                         color: Colors.lightGreen),
-//                   ),
-//                 ],
-//               ),
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 children: [
-//                   Text(
-//                     'HERE TO ',
-//                     style: TextStyle(
-//                         fontFamily: 'Roboto',
-//                         fontSize: 30,
-//                         color: Colors.deepPurple),
-//                   ),
-//                   Text(
-//                     'STAY',
-//                     style: TextStyle(
-//                         fontFamily: 'Roboto',
-//                         fontSize: 30,
-//                         color: Colors.lightGreen),
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

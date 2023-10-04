@@ -21,6 +21,7 @@ dependencies:
   shared_preferences: ^2.2.1
   table_calendar: ^3.0.9
   hexcolor: ^3.0.1
+  flutter_image_slideshow: ^0.1.6
 
 dev_dependencies:
   flutter_test:
@@ -61,4 +62,13 @@ flutter:
         - asset: fonts/Proza_Libre/ProzaLibre-Regular.ttf
         - asset: fonts/Proza_Libre/ProzaLibre-SemiBold.ttf
         - asset: fonts/Proza_Libre/ProzaLibre-SemiBoldItalic.ttf
+    - family: 'Libre Baskerville'
+      fonts:
+        - asset: fonts/Libre_Baskerville/LibreBaskerville-Bold.ttf
+        - asset: fonts/Libre_Baskerville/LibreBaskerville-Italic.ttf
+        - asset: fonts/Libre_Baskerville/LibreBaskerville-Regular.ttf
+    - family: 'Raleway'
+      fonts:
+        - asset: fonts/Raleway/Raleway-Italic-VariableFont_wght.ttf
+        - asset: fonts/Raleway/Raleway-VariableFont_wght.ttf
   uses-material-design: true

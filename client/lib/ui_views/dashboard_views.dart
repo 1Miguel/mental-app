@@ -1,18 +1,57 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/ui_views/book_appointment.dart';
 import 'package:flutter_intro/model/user.dart';
+import 'package:flutter_intro/utils/colors_scheme.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'membership_views.dart';
 
 import 'dart:convert';
 
 // Third-party import
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
+
+class AccountNameHeadingText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const AccountNameHeadingText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    //Overwrite size based on length
+    double newSize = (title.length > 10) ? 25 : 30;
+    FontWeight newWeight = isHeavy ? FontWeight.w700 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Proza Libre',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
 
 class DashboardLoaderPage extends StatelessWidget {
   Future<String?> getUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String? name = prefs.getString('first_name');
+    String? name = prefs.getString('first_name')!.toUpperCase();
     return name;
   }
 
@@ -30,7 +69,7 @@ class DashboardLoaderPage extends StatelessWidget {
           child: Center(
             child: FutureBuilder(
               future: getUserName(),
-              initialData: "Code sample",
+              initialData: "User",
               builder: (BuildContext context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -146,10 +185,10 @@ class DashboardPage extends StatelessWidget {
                       return Padding(
                         padding: const EdgeInsets.only(right: 20.0),
                         child: Text(
-                          'Hi, $data!',
+                          'Hi, $data',
                           textAlign: TextAlign.end,
                           style: TextStyle(
-                              fontFamily: 'Roboto',
+                              fontFamily: 'Proza Libre',
                               fontWeight: FontWeight.bold,
                               fontSize: 30,
                               color: Colors.white),
@@ -175,7 +214,7 @@ class DashboardPage extends StatelessWidget {
                     ),
                     SizedBox(
                       height: 40,
-                      width: MediaQuery.sizeOf(context).width - 80,
+                      width: MediaQuery.sizeOf(context).width - 20,
                       child: TextFormField(
                         decoration: InputDecoration(
                             contentPadding: EdgeInsets.only(left: 30.0),
@@ -192,38 +231,37 @@ class DashboardPage extends StatelessWidget {
                     SizedBox(
                       width: 380,
                       child: Padding(
-                        padding: EdgeInsets.only(left: 10.0, top: 10.0),
+                        padding: EdgeInsets.only(top: 10.0),
                         child: Text(
                           'Featured',
                           textAlign: TextAlign.left,
                           style: TextStyle(
-                              fontFamily: 'Roboto',
-                              fontSize: 30,
-                              color: Colors.black),
+                              fontFamily: 'Raleways',
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                              color: mainDeepPurple),
                         ),
                       ),
                     ),
                     SizedBox(
                       width: 380,
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 10.0),
-                        child: Text(
-                          'Puerto Princesa, Palawan',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                              fontFamily: 'Roboto',
-                              fontSize: 15,
-                              color: Colors.black),
-                        ),
+                      child: Text(
+                        'Puerto Princesa, Palawan',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            fontFamily: 'Open Sans',
+                            fontSize: 12,
+                            color: mainDeepPurple),
                       ),
                     ),
                     SizedBox(height: 10, width: 380),
-                    DashboardFeatureContext(
-                        title:
-                            'SECOND MENTAL HEALTH SUMMIT: "INCLUSIVITY AMIDST DIVERSITY"',
-                        image: 'images/sample_cover_image.png',
-                        content:
-                            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',"),
+                    DashboardFeatureCarousel(),
+                    // DashboardFeatureContext(
+                    //     title:
+                    //         'SECOND MENTAL HEALTH SUMMIT: "INCLUSIVITY AMIDST DIVERSITY"',
+                    //     image: 'images/sample_cover_image.png',
+                    //     content:
+                    //         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',"),
                   ],
                 ),
               ),
@@ -243,7 +281,7 @@ class DashboardPage extends StatelessWidget {
                                 fontFamily: 'Roboto',
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black),
+                                color: mainDeepPurple),
                           ),
                         ),
                         Padding(
@@ -254,7 +292,7 @@ class DashboardPage extends StatelessWidget {
                             style: TextStyle(
                                 fontFamily: 'Roboto',
                                 fontSize: 15,
-                                color: Colors.black),
+                                color: mainDeepPurple),
                           ),
                         ),
                       ],
@@ -295,6 +333,38 @@ class DashboardPage extends StatelessWidget {
                 ),
               ),
             ]),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DashboardFeatureCarousel extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 380,
+      child: ImageSlideshow(
+        indicatorColor: Colors.blue,
+        onPageChanged: (value) {
+          debugPrint('Page changed: $value');
+        },
+        autoPlayInterval: 3000,
+        isLoop: true,
+        children: [
+          DashboardFeatureContext(
+            title:
+                'SECOND MENTAL HEALTH SUMMIT: "INCLUSIVITY AMIDST DIVERSITY"',
+            image: 'images/sample_cover_image.png',
+            content:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',",
+          ),
+          DashboardFeatureContext(
+            title: 'THIRD MENTAL HEALTH SUMMIT: "INCLUSIVITY AMIDST DIVERSITY"',
+            image: 'images/sample_cover_image.png',
+            content:
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',",
           ),
         ],
       ),
@@ -368,10 +438,10 @@ class DashboardFeatureContext extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
-        width: 380,
-        height: 380,
+        width: MediaQuery.sizeOf(context).width,
+        height: 500,
         child: Card(
-          surfaceTintColor: Colors.white,
+          surfaceTintColor: Colors.grey,
           child: Column(
             children: <Widget>[
               Padding(
@@ -381,10 +451,10 @@ class DashboardFeatureContext extends StatelessWidget {
                   title,
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    fontFamily: 'Roboto',
+                    fontFamily: 'Proza Libre',
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: HexColor('#424242'),
                   ),
                 ),
               ),
@@ -401,7 +471,9 @@ class DashboardFeatureContext extends StatelessWidget {
                   softWrap: true,
                   textAlign: TextAlign.justify,
                   style: TextStyle(
-                      fontFamily: 'Roboto', fontSize: 12, color: Colors.black),
+                      fontFamily: 'Open Sans',
+                      fontSize: 12,
+                      color: Colors.black),
                 ),
               ),
               Row(
@@ -414,7 +486,7 @@ class DashboardFeatureContext extends StatelessWidget {
                         'Read more',
                         textAlign: TextAlign.right,
                         style: TextStyle(
-                            fontFamily: 'Roboto',
+                            fontFamily: 'Open Sans',
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: Colors.black),
@@ -506,9 +578,6 @@ class AccountsPage extends StatelessWidget {
                       image: 'images/sample_cover_image.png',
                       details: '',
                     ),
-                    SizedBox(
-                      height: 20,
-                    ),
                     AccountMenuTile(
                       menu: 'Profile',
                       menuIcon: Icons.account_circle_rounded,
@@ -568,7 +637,7 @@ class AccountSummaryCard extends StatelessWidget {
     return Center(
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
-        height: 110,
+        height: 130,
         child: Card(
           elevation: 0,
           surfaceTintColor: Colors.white,
@@ -580,7 +649,7 @@ class AccountSummaryCard extends StatelessWidget {
                 children: [
                   SizedBox(
                     width: 80,
-                    height: 100,
+                    height: 120,
                     child: IconButton(
                       icon: Image.asset('images/google_logo.png'),
                       iconSize: 5.0,
@@ -589,21 +658,24 @@ class AccountSummaryCard extends StatelessWidget {
                   ),
                   SizedBox(
                     width: 250,
-                    height: 100,
+                    height: 120,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(
-                              left: 15.0, right: 15.0, top: 5.0),
+                              left: 10.0, right: 15.0, top: 15.0),
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                name,
-                                textAlign: TextAlign.left,
-                                style:
-                                    TextStyle(color: Colors.blue, fontSize: 40),
+                              SizedBox(
+                                width: 220,
+                                child: AccountNameHeadingText(
+                                  title: name,
+                                  isOverflow: true,
+                                  isHeavy: true,
+                                  customColor: mainDeepPurple,
+                                ),
                               ),
                             ],
                           ),
