@@ -1,6 +1,13 @@
+"""Database.py
+This module contains all database schema models.
+
+date: 10/07/2023
+"""
 from enum import IntEnum, auto
-from passlib.hash import bcrypt
+from datetime import datetime
 from typing_extensions import Self
+from passlib.hash import bcrypt
+from tortoise.models import Model
 from tortoise.fields import (
     DateField,
     IntEnumField,
@@ -10,10 +17,10 @@ from tortoise.fields import (
     ForeignKeyField,
     DecimalField,
 )
-from tortoise.models import Model
-from datetime import datetime
 
+# Constant date that represent forever.
 DATETIME_FOREVER = datetime(9999, 12, 1)
+
 
 class MoodId(IntEnum):
     """Mood Score Ids."""
@@ -57,6 +64,7 @@ class UserModel(Model):
     address = CharField(256)
     age = IntField()
     occupation = CharField(128)
+    birthday = DateField()
 
     @classmethod
     async def get_user(cls, email: str) -> Self:
@@ -72,6 +80,7 @@ class MembershipService(Model):
         1. Priviledge type
         2. Duration, could be a lifetime
         3. Price amount to avail the membership"""
+
     id = IntField(pk=True)
     membership_type = IntEnumField(MembershipType)
     year_duration = IntField()
@@ -82,7 +91,9 @@ class MembershipService(Model):
         """Initializes the database model."""
         memberships = [
             cls(membership_type=MembershipType.LIFE, year_duration=9999, price=3000),
-            cls(membership_type=MembershipType.CONTRIBUTING, year_duration=1, price=300),
+            cls(
+                membership_type=MembershipType.CONTRIBUTING, year_duration=1, price=300
+            ),
             cls(membership_type=MembershipType.CORPORATE, year_duration=1, price=10000),
             cls(membership_type=MembershipType.SUSTAINING, year_duration=1, price=3000),
             cls(membership_type=MembershipType.COLLEGE, year_duration=1, price=100),
@@ -94,6 +105,10 @@ class MembershipService(Model):
 
 
 class Membership(Model):
+    """Membership model. Contains information related to
+    a user membership which includes type of membership
+    and expiration date."""
+
     id = IntField(pk=True)
     user = ForeignKeyField("models.UserModel")
     type = IntEnumField(MembershipType)
@@ -102,6 +117,8 @@ class Membership(Model):
 
 
 class MoodModel(Model):
+    """Mood model."""
+
     id = IntField(pk=True)
     user = ForeignKeyField("models.UserModel")
     mood = IntEnumField(MoodId)
@@ -119,8 +136,9 @@ class HealthCenter(Model):
 
 class Doctor(Model):
     """Model that links user account(doctor) and health center."""
+
     id = IntField(pk=True)
-    user = ForeignKeyField("models.UserModel")
+    user_id = ForeignKeyField("models.UserModel")
     center = ForeignKeyField("models.HealthCenter")
 
 
@@ -129,6 +147,7 @@ class Appointment(Model):
 
     An appointment basically consists of a patient(user), doctor(user) and the
     scheduled duration of an appointment."""
+
     id = IntField(pk=True)
     time_created = DateField()
     patient = ForeignKeyField("models.UserModel")
@@ -136,3 +155,10 @@ class Appointment(Model):
     start_time = DateField()
     end_time = DateField()
     cancelled = BooleanField()
+
+
+class Admin(Model):
+    """Database model of an Admin."""
+
+    id = IntField(pk=True)
+    user_id = ForeignKeyField("models.UserModel")

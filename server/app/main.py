@@ -13,8 +13,8 @@ from tortoise.contrib.fastapi import register_tortoise
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 # internal modules
-from internal.database import UserModel, MoodModel, MoodId, MembershipService
-from internal.schema import MoodLog, UserApi
+from internal.database import *
+from internal.schema import *
 
 # logger module
 log = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 @app.post("/token", status_code=status.HTTP_200_OK)
 async def generate_token(
     form_data: OAuth2PasswordRequestForm = Depends(), response: Response = Response()
-):
+) -> Any:
     """Generates a session token."""
     try:
         user_model = await get_authenticated_user(
@@ -122,10 +122,10 @@ def login(user: UserSchema = Depends(get_current_user)) -> Any:
     return user
 
 
-@app.get("/users/mood", response_model=UserSchema)
+@app.get("/user/mood", response_model=UserSchema)
 async def mood_log(
     user: UserSchema = Depends(get_current_user), mood: Optional[MoodLog] = None
-):
+) -> Any:
     """Daily Mood Logging."""
     if mood is None:
         raise HTTPException(
@@ -170,6 +170,45 @@ async def users(user: UserApi) -> Any:
     else:
         return await UserSchema.from_tortoise_orm(user)
 
+
+@app.route("user/schedule")
+async def schedule_appointment(user: UserSchema = Depends(get_current_user)) -> Any:
+    """Route that requests an appointment schedule."""
+    pass
+
+
+@app.route("user/membership")
+async def membership(
+    membership_req: MembershipApi,
+    user: UserSchema = Depends(get_current_user)
+) -> Any:
+    """Membership route.
+    User posting membership will set the user's membership profile.
+    """
+    user_model = await UserModel.get(email=user.email)
+    new_membership = Membership(
+        
+    )
+
+@app.route("user/update")
+async def update_profile(
+    profile: UserProfileApi,
+    user: UserSchema = Depends(get_current_user),
+) -> Any:
+    """Update user profile route.
+    """
+    user_model = await UserModel.get(email=user.email)
+    # update only when field exist
+    # TODO: there must some way to do this efficiently
+    if profile.address:
+        user_model.address = profile.address
+    if profile.birthday:
+        user_model.birthday = profile.birthday
+    if profile.firstname:
+        user_model.firstname = profile.firstname
+    if profile.lastname:
+        user_model.lastname = profile.lastname
+    await user_model.save()
 
 def run() -> None:
     import uvicorn
