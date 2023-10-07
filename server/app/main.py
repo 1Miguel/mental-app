@@ -13,7 +13,7 @@ from tortoise.contrib.fastapi import register_tortoise
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 # internal modules
-from internal.database import UserModel, MoodModel, MoodId
+from internal.database import UserModel, MoodModel, MoodId, MembershipService
 from internal.schema import MoodLog, UserApi
 
 # logger module
@@ -51,8 +51,17 @@ UserSchemaReadOnly = pydantic_model_creator(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
+@app.on_event("startup")
+async def startup() -> None:
+    """Routine at application startup."""
+    await MembershipService.init()
+    log.info("Startup routine")
+
+
 @app.get("/")
 def index() -> Dict[str, str]:
+    """Index route.
+    TODO: Implement the right routine"""
     return {"message": "Hello World"}
 
 
@@ -161,9 +170,12 @@ async def users(user: UserApi) -> Any:
     else:
         return await UserSchema.from_tortoise_orm(user)
 
-def main() -> None:
+
+def run() -> None:
     import uvicorn
+
     uvicorn.run(app, host="127.0.0.1", port=8000)
 
+
 if __name__ == "__main__":
-    main()
+    run()

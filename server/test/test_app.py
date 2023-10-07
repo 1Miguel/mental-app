@@ -122,20 +122,21 @@ class TestServer(unittest.TestCase):
          When: Attempt to log mood
          Then: Server response must be ok
          When: Attempt to log mood again
-         Then: Server response must be 
+         Then: Server response must be
         """
         headers, user = self.login_routine()
         headers["accept"]: "application/json"
         user_id = user["id"]
-        new_mood = {
-            "user": user_id,
-            "mood": 0
-        }
+        new_mood = {"user": user_id, "mood": 0}
         # first time setting mood today
-        response = self.client.get(f"http://127.0.0.1:8000/users/mood", headers=headers, json=new_mood)
+        response = self.client.get(
+            f"http://127.0.0.1:8000/users/mood", headers=headers, json=new_mood
+        )
         self.assertTrue(response.ok)
         # try to add mood again, expect server to reject
-        response = self.client.get(f"http://127.0.0.1:8000/users/mood", headers=headers, json=new_mood)
+        response = self.client.get(
+            f"http://127.0.0.1:8000/users/mood", headers=headers, json=new_mood
+        )
         self.assertEqual(response.status_code, 409)
 
     def test_user_logout(self) -> None:
@@ -143,7 +144,7 @@ class TestServer(unittest.TestCase):
 
         Given: User is login and user has token
          When: User logout
-         Then: Serve must return unauthorize access to all API request. 
+         Then: Serve must return unauthorize access to all API request.
         """
 
 
