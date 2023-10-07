@@ -276,70 +276,124 @@ class ContentText extends StatelessWidget {
 }
 
 class LoginMainPage extends StatelessWidget {
+  Future<String?> getLoggedInState() async {
+    String? logged_in;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('islogged_in')) {
+      logged_in = prefs.getString('islogged_in')!.toUpperCase();
+    } else {
+      logged_in = "false";
+    }
+    return logged_in;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Column(
-        children: [
-          SizedBox(height: 120),
-          Image.asset(
-            'images/pmha_logo.jpg',
-            fit: BoxFit.fitWidth,
-            height: 400,
-          ),
-          SizedBox(height: 50),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'WE ARE ',
-                style: TextStyle(
-                    fontFamily: 'Proza Libre',
-                    fontSize: 50,
-                    fontWeight: FontWeight.w900,
-                    color: mainDeepPurple),
+      body: FutureBuilder(
+        future: getLoggedInState(),
+        initialData: "false",
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.deepPurpleAccent,
               ),
-              Text(
-                'HERE',
-                style: TextStyle(
-                    fontFamily: 'Proza Libre',
-                    fontSize: 50,
-                    fontWeight: FontWeight.w900,
-                    color: mainLightGreen),
-              ),
-            ],
-          ),
-          SizedBox(height: 50),
-          FilledButton(
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: ((context) => LoginPage())));
-            },
-            style: ButtonStyle(
-                minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
-            child: Text(
-              'LOGIN',
-              style: TextStyle(
-                  fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
-            ),
-          ),
-          TextButton(
-            child: Text(
-              'SIGN UP',
-              style: TextStyle(
-                  fontFamily: 'Open Sans',
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black),
-            ),
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: ((context) => SignupPage())));
-            },
-          ),
-        ],
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'An ${snapshot.error} occurred',
+                  style: const TextStyle(fontSize: 18, color: Colors.red),
+                ),
+              );
+            } else if (snapshot.hasData) {
+              final data = snapshot.data;
+              if (data == 'false') {
+                return LoginMainView();
+              } else {
+                return DashboardPage();
+              }
+            }
+          }
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
       ),
+    );
+  }
+}
+
+class LoginMainView extends StatelessWidget {
+  const LoginMainView({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(height: 120),
+        Image.asset(
+          'images/pmha_logo.jpg',
+          fit: BoxFit.fitWidth,
+          height: 400,
+        ),
+        SizedBox(height: 50),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'WE ARE ',
+              style: TextStyle(
+                  fontFamily: 'Proza Libre',
+                  fontSize: 50,
+                  fontWeight: FontWeight.w900,
+                  color: mainDeepPurple),
+            ),
+            Text(
+              'HERE',
+              style: TextStyle(
+                  fontFamily: 'Proza Libre',
+                  fontSize: 50,
+                  fontWeight: FontWeight.w900,
+                  color: mainLightGreen),
+            ),
+          ],
+        ),
+        SizedBox(height: 50),
+        FilledButton(
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: ((context) => LoginPage())));
+          },
+          style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+              backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
+          child: Text(
+            'LOGIN',
+            style:
+                TextStyle(fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
+          ),
+        ),
+        TextButton(
+          child: Text(
+            'SIGN UP',
+            style: TextStyle(
+                fontFamily: 'Open Sans',
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: ((context) => SignupPage())));
+          },
+        ),
+      ],
     );
   }
 }

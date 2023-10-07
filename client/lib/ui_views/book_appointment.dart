@@ -1,9 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dashboard_views.dart';
+import 'dart:convert';
+
+// Loacl import
+import 'package:flutter_intro/model/user.dart';
+
+// Third-party import
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Const
 enum ConsulationServices { consultation, therapy, counseling, assessment }
+
+class AccountNameHeadingText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const AccountNameHeadingText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    //Overwrite size based on length
+    double newSize = (title.length > 20) ? 25 : 30;
+    FontWeight newWeight = isHeavy ? FontWeight.w700 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Proza Libre',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
 
 class TimeBox extends StatelessWidget {
   final String time;
@@ -95,6 +137,23 @@ class BookAppointmentIntroPage extends StatelessWidget {
 }
 
 class BookAppointmentPage extends StatelessWidget {
+  User emptyUser = User(
+    id: 0,
+    email: "",
+    password_hash: "",
+    firstname: "",
+    lastname: "",
+    address: "",
+    age: 0,
+    occupation: "",
+  );
+
+  getUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    return prefs.getString('user_data') ?? jsonEncode(emptyUser).toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,123 +189,167 @@ class BookAppointmentPage extends StatelessWidget {
           ),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BookAccountSummaryCard(
-            name: "Katon, Benj",
-            address: "San Pedro, Puerto Princesa City",
-            occupation: "Student",
-            age: "29 yo",
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 30.0, top: 30.0),
-            child: Text(
-              "SERVICES",
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                color: const Color.fromARGB(255, 0, 74, 173),
-                fontSize: 30,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 30.0),
-            child: Row(
-              children: [
-                BookIcon(
-                  membershipTitle: "Psychiatric Consultation",
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) => GenericConsultationPage(
-                                  service: ConsulationServices.consultation,
-                                  name: "Benj, Katon",
-                                  address: "San Pedro, Puerto Princesa",
-                                  occupation: "Student",
-                                  age: "29 yo",
-                                ))));
-                  },
+      body: FutureBuilder(
+          future: getUserData(),
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.deepPurpleAccent,
                 ),
-                BookIcon(
-                  membershipTitle: "Occupational Therapy",
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) => GenericConsultationPage(
-                                  service: ConsulationServices.therapy,
-                                  name: "Benj, Katon",
-                                  address: "San Pedro, Puerto Princesa",
-                                  occupation: "Student",
-                                  age: "29 yo",
-                                ))));
-                  },
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 30.0),
-            child: Row(
-              children: [
-                BookIcon(
-                  membershipTitle: "Counseling",
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) => GenericConsultationPage(
-                                  service: ConsulationServices.counseling,
-                                  name: "Benj, Katon",
-                                  address: "San Pedro, Puerto Princesa",
-                                  occupation: "Student",
-                                  age: "29 yo",
-                                ))));
-                  },
-                ),
-                BookIcon(
-                  membershipTitle: "Psychological Assesment",
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) => GenericConsultationPage(
-                                  service: ConsulationServices.assessment,
-                                  name: "Benj, Katon",
-                                  address: "San Pedro, Puerto Princesa",
-                                  occupation: "Student",
-                                  age: "29 yo",
-                                ))));
-                  },
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 40.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FilledButton(
-                  onPressed: () {},
-                  style: ButtonStyle(
-                      minimumSize:
-                          MaterialStateProperty.all<Size>(Size(200, 50)),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          Color.fromARGB(255, 0, 74, 173))),
-                  child: Text('SELECT'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+              );
+            }
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'An ${snapshot.error} occurred',
+                    style: const TextStyle(fontSize: 18, color: Colors.red),
+                  ),
+                );
+              } else if (snapshot.hasData) {
+                final data = snapshot.data;
+                String mystring = data.toString();
+                //Map<String, dynamic> myjson = jsonDecode(mystring);
+                User userdata = User.fromJson(jsonDecode(mystring));
+                String firstname = userdata.firstname;
+                String lastname = userdata.lastname;
+                String address = userdata.address;
+                String occupation = userdata.occupation;
+                int age = userdata.age;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BookAccountSummaryCard(
+                      name: "$lastname, $firstname",
+                      address: address,
+                      occupation: occupation,
+                      age: "$age yo",
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 30.0, top: 30.0),
+                      child: Text(
+                        "SERVICES",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: mainDeepPurple,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 30.0),
+                      child: Row(
+                        children: [
+                          BookIcon(
+                            membershipTitle: "Psychiatric Consultation",
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          GenericConsultationPage(
+                                            service: ConsulationServices
+                                                .consultation,
+                                            name: "$firstname, $lastname",
+                                            address: address,
+                                            occupation: occupation,
+                                            age: "$age yo",
+                                          ))));
+                            },
+                          ),
+                          BookIcon(
+                            membershipTitle: "Occupational Therapy",
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          GenericConsultationPage(
+                                            service:
+                                                ConsulationServices.therapy,
+                                            name: "$firstname, $lastname",
+                                            address: address,
+                                            occupation: occupation,
+                                            age: "$age yo",
+                                          ))));
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 30.0),
+                      child: Row(
+                        children: [
+                          BookIcon(
+                            membershipTitle: "Counseling",
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          GenericConsultationPage(
+                                            service:
+                                                ConsulationServices.counseling,
+                                            name: "$firstname, $lastname",
+                                            address: address,
+                                            occupation: occupation,
+                                            age: "$age yo",
+                                          ))));
+                            },
+                          ),
+                          BookIcon(
+                            membershipTitle: "Psychological Assesment",
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          GenericConsultationPage(
+                                            service:
+                                                ConsulationServices.assessment,
+                                            name: "$firstname, $lastname",
+                                            address: address,
+                                            occupation: occupation,
+                                            age: "$age yo",
+                                          ))));
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 40.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FilledButton(
+                            onPressed: () {},
+                            style: ButtonStyle(
+                                minimumSize: MaterialStateProperty.all<Size>(
+                                    Size(200, 50)),
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Color.fromARGB(255, 0, 74, 173))),
+                            child: Text('SELECT'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }
+            }
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }),
     );
   }
 }
@@ -267,76 +370,64 @@ class BookAccountSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String details = '$address $occupation $age';
-    var nameOverflow = (name.length > 20) ? true : false;
+    String details = "$address · $occupation · $age";
     return Center(
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
-        height: 110,
+        height: 130,
         child: Card(
           elevation: 0,
           surfaceTintColor: Colors.white,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
                     width: 80,
-                    height: 100,
+                    height: 120,
                     child: IconButton(
-                      icon: Image.asset('images/google_logo.png'),
+                      icon: Image.asset('images/generic_user.png'),
                       iconSize: 5.0,
                       onPressed: () {},
                     ),
                   ),
                   SizedBox(
-                    width: 250,
+                    width: MediaQuery.sizeOf(context).width - 100,
                     height: 100,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 15.0, right: 15.0, top: 5.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 220,
-                                child: Text(
-                                  name,
-                                  textAlign: TextAlign.left,
-                                  softWrap: true,
-                                  maxLines: 3,
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontSize: nameOverflow ? 15 : 40,
-                                  ),
-                                ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10.0),
+                              child: AccountNameHeadingText(
+                                title: name,
+                                isOverflow: true,
+                                isHeavy: true,
+                                customColor: mainBlue,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 15.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 200,
-                                child: Text(
-                                  details,
-                                  softWrap: true,
-                                  maxLines: 3,
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      color: Colors.deepPurple, fontSize: 12),
-                                ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10.0),
+                              child: Text(
+                                details,
+                                softWrap: true,
+                                maxLines: 3,
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    color: Colors.deepPurple, fontSize: 12),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -395,8 +486,9 @@ class BookIcon extends StatelessWidget {
               softWrap: true,
               maxLines: 2,
               style: TextStyle(
-                color: Color.fromARGB(255, 0, 74, 173),
+                color: mainDeepPurple,
                 fontWeight: FontWeight.bold,
+                fontFamily: 'Roboto',
                 fontSize: 20,
               ),
             ),

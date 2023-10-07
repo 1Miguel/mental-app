@@ -1,17 +1,20 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/ui_views/book_appointment.dart';
 import 'package:flutter_intro/model/user.dart';
+import 'package:flutter_intro/ui_views/login_views.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'membership_views.dart';
 
 import 'dart:convert';
 
+// Local import
+import 'package:flutter_intro/ui_views/login_views.dart';
+
 // Third-party import
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
+import 'package:get/get.dart';
 
 class AccountNameHeadingText extends StatelessWidget {
   final String title;
@@ -30,7 +33,7 @@ class AccountNameHeadingText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //Overwrite size based on length
-    double newSize = (title.length > 10) ? 25 : 30;
+    double newSize = (title.length > 20) ? 25 : 30;
     FontWeight newWeight = isHeavy ? FontWeight.w700 : FontWeight.bold;
     return Text(
       title,
@@ -243,18 +246,18 @@ class DashboardPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      width: 380,
-                      child: Text(
-                        'Puerto Princesa, Palawan',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            fontFamily: 'Open Sans',
-                            fontSize: 12,
-                            color: mainDeepPurple),
-                      ),
-                    ),
-                    SizedBox(height: 10, width: 380),
+                    // SizedBox(
+                    //   width: 380,
+                    //   child: Text(
+                    //     'Puerto Princesa, Palawan',
+                    //     textAlign: TextAlign.left,
+                    //     style: TextStyle(
+                    //         fontFamily: 'Open Sans',
+                    //         fontSize: 12,
+                    //         color: mainDeepPurple),
+                    //   ),
+                    // ),
+                    //SizedBox(height: 10, width: 380),
                     DashboardFeatureCarousel(),
                     // DashboardFeatureContext(
                     //     title:
@@ -355,13 +358,14 @@ class DashboardFeatureCarousel extends StatelessWidget {
         children: [
           DashboardFeatureContext(
             title:
-                'SECOND MENTAL HEALTH SUMMIT: "INCLUSIVITY AMIDST DIVERSITY"',
+                'SECOND MENTAL HEALTH SUMMIT:\n"INCLUSIVITY AMIDST DIVERSITY"',
             image: 'images/sample_cover_image.png',
             content:
                 "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',",
           ),
           DashboardFeatureContext(
-            title: 'THIRD MENTAL HEALTH SUMMIT: "INCLUSIVITY AMIDST DIVERSITY"',
+            title:
+                'THIRD MENTAL HEALTH SUMMIT:\n"INCLUSIVITY AMIDST DIVERSITY"',
             image: 'images/sample_cover_image.png',
             content:
                 "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',",
@@ -444,17 +448,19 @@ class DashboardFeatureContext extends StatelessWidget {
           surfaceTintColor: Colors.grey,
           child: Column(
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(
-                    top: 10.0, left: 10.0, right: 10.0, bottom: 5.0),
-                child: Text(
-                  title,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    fontFamily: 'Proza Libre',
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: HexColor('#424242'),
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width,
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontFamily: 'Asap',
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: HexColor('#424242'),
+                    ),
                   ),
                 ),
               ),
@@ -471,9 +477,9 @@ class DashboardFeatureContext extends StatelessWidget {
                   softWrap: true,
                   textAlign: TextAlign.justify,
                   style: TextStyle(
-                      fontFamily: 'Open Sans',
+                      fontFamily: 'Asap',
                       fontSize: 12,
-                      color: Colors.black),
+                      color: HexColor('#424242')),
                 ),
               ),
               Row(
@@ -568,14 +574,14 @@ class AccountsPage extends StatelessWidget {
                 String mystring = data.toString();
                 //Map<String, dynamic> myjson = jsonDecode(mystring);
                 User userdata = User.fromJson(jsonDecode(mystring));
-                String firstname = userdata.lastname;
-                String lastname = userdata.firstname;
+                String firstname = userdata.firstname;
+                String lastname = userdata.lastname;
 
                 return Column(
                   children: [
                     AccountSummaryCard(
                       name: "$lastname, $firstname",
-                      image: 'images/sample_cover_image.png',
+                      image: 'images/generic_user.png',
                       details: '',
                     ),
                     AccountMenuTile(
@@ -642,62 +648,110 @@ class AccountSummaryCard extends StatelessWidget {
           elevation: 0,
           surfaceTintColor: Colors.white,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
                     width: 80,
                     height: 120,
                     child: IconButton(
-                      icon: Image.asset('images/google_logo.png'),
+                      icon: Image.asset(image),
                       iconSize: 5.0,
                       onPressed: () {},
                     ),
                   ),
                   SizedBox(
-                    width: 250,
+                    width: MediaQuery.sizeOf(context).width - 100,
                     height: 120,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 10.0, right: 15.0, top: 15.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: 220,
-                                child: AccountNameHeadingText(
-                                  title: name,
-                                  isOverflow: true,
-                                  isHeavy: true,
-                                  customColor: mainDeepPurple,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(left: 15.0, right: 15.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                details,
-                                textAlign: TextAlign.left,
-                                style:
-                                    TextStyle(color: Colors.blue, fontSize: 20),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    child: Center(
+                      child: AccountNameHeadingText(
+                        title: name,
+                        isOverflow: true,
+                        isHeavy: true,
+                        customColor: mainBlue,
+                      ),
                     ),
                   )
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AccountDetaiiledSummaryCard extends StatelessWidget {
+  final String name;
+  final String image;
+  final String details;
+
+  const AccountDetaiiledSummaryCard({
+    super.key,
+    required this.name,
+    required this.image,
+    required this.details,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: 130,
+        child: Card(
+          elevation: 0,
+          surfaceTintColor: Colors.white,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Row(
+                children: [
+                  SizedBox(
+                    width: 80,
+                    height: 120,
+                    child: IconButton(
+                      icon: Image.asset(image),
+                      iconSize: 5.0,
+                      onPressed: () {},
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 100,
+                        height: 60,
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              top: 20,
+                            ),
+                            child: AccountNameHeadingText(
+                              title: name,
+                              isOverflow: true,
+                              isHeavy: true,
+                              customColor: mainDeepPurple,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 100,
+                        height: 60,
+                        child: Center(
+                          child: Text(
+                            details,
+                            textAlign: TextAlign.left,
+                            style: TextStyle(color: Colors.blue, fontSize: 20),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ],
@@ -803,10 +857,10 @@ class MenuTitleText extends StatelessWidget {
     return Text(
       menuText,
       style: TextStyle(
-        color: const Color.fromARGB(255, 0, 74, 173),
+        color: mainDeepPurple,
         fontFamily: 'Roboto',
-        fontWeight: FontWeight.w700,
-        fontSize: 28,
+        fontWeight: FontWeight.w900,
+        fontSize: 25,
       ),
     );
   }
@@ -909,6 +963,13 @@ class AccountProfilePage extends StatelessWidget {
     return prefs.getString('user_data') ?? jsonEncode(emptyUser).toString();
   }
 
+  Future<String?> getLogOutState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? name = prefs.getString('first_name')!.toUpperCase();
+    prefs.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     //Image img = Image.asset('images/sample_cover_image.png');
@@ -933,7 +994,14 @@ class AccountProfilePage extends StatelessWidget {
             ),
           ),
         ),
-        title: Text('Profile'),
+        title: Text(
+          'Profile',
+          style: const TextStyle(
+            fontSize: 18,
+            fontFamily: 'Roboto',
+            color: Colors.deepPurple,
+          ),
+        ),
       ),
       body: FutureBuilder(
           future: getUserData(),
@@ -958,16 +1026,16 @@ class AccountProfilePage extends StatelessWidget {
                 String mystring = data.toString();
                 //Map<String, dynamic> myjson = jsonDecode(mystring);
                 User userdata = User.fromJson(jsonDecode(mystring));
-                String firstname = userdata.lastname;
-                String lastname = userdata.firstname;
+                String firstname = userdata.firstname;
+                String lastname = userdata.lastname;
                 String email = userdata.email;
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AccountSummaryCard(
+                    AccountDetaiiledSummaryCard(
                       name: "$lastname, $firstname",
-                      image: "images/google_logo.png",
+                      image: "images/generic_user.png",
                       details: "$email",
                     ),
                     SizedBox(
@@ -1011,7 +1079,13 @@ class AccountProfilePage extends StatelessWidget {
                     AccountSubMenuTile(
                       menu: 'Logout',
                       menuIcon: Icons.logout,
-                      onTap: () {},
+                      onTap: () {
+                        getLogOutState();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => LoginMainPage())));
+                      },
                     ),
                   ],
                 );
