@@ -19,9 +19,6 @@ class SignupController extends GetxController {
   String loginUrl = ApiEndPoints.checkPlatform();
 
   Future<void> registerWithEmail() async {
-    print(emailController.text);
-    print(passwordController.text);
-    print(nameController.text);
     try {
       final response = await http.post(
         Uri.parse('$loginUrl/signup'),

@@ -20,8 +20,6 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    print("UserData");
-    print(json['id']);
     int id = json['id'];
     String email = json['email'];
     String password_hash = "password";

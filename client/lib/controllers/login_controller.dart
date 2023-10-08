@@ -19,9 +19,6 @@ class LoginController extends GetxController {
 
   Future<void> loginWithEmail() async {
     try {
-      print(loginUrl);
-      print(emailController.text);
-      print(passwordController.text);
       final response = await http.post(
         Uri.parse('$loginUrl/token'),
         headers: <String, String>{
@@ -48,13 +45,6 @@ class LoginController extends GetxController {
 
         if (loginResponse.statusCode == 200) {
           final Map<String, dynamic> userdata = jsonDecode(loginResponse.body);
-          print(userdata);
-          print('encode');
-          print(userdata);
-
-          // User userData = User.fromJson(jsonDecode(loginResponse.body));
-          // print('userData here');
-          // print(userData);
 
           final SharedPreferences? prefs = await _prefs;
 
