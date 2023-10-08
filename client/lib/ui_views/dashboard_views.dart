@@ -184,7 +184,6 @@ class DashboardPage extends StatelessWidget {
                       );
                     } else if (snapshot.hasData) {
                       final data = snapshot.data;
-                      print(data);
                       return Padding(
                         padding: const EdgeInsets.only(right: 20.0),
                         child: Text(
