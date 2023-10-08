@@ -16,6 +16,7 @@ from tortoise.fields import (
     BooleanField,
     ForeignKeyField,
     DecimalField,
+    DatetimeField,
 )
 
 # Constant date that represent forever.
@@ -35,7 +36,8 @@ class MoodId(IntEnum):
 class MembershipType(IntEnum):
     """Member Subscription Type Ids."""
 
-    LIFE = 0
+    NONE = 0
+    LIFE = auto()
     CONTRIBUTING = auto()
     SUSTAINING = auto()
     CORPORATE = auto()
@@ -64,7 +66,7 @@ class UserModel(Model):
     address = CharField(256)
     age = IntField()
     occupation = CharField(128)
-    birthday = DateField()
+    birthday = CharField(128)
 
     @classmethod
     async def get_user(cls, email: str) -> Self:
@@ -90,7 +92,7 @@ class MembershipService(Model):
     async def init(cls) -> None:
         """Initializes the database model."""
         memberships = [
-            cls(membership_type=MembershipType.LIFE, year_duration=9999, price=3000),
+            cls(membership_type=MembershipType.LIFE, year_duration=999, price=3000),
             cls(
                 membership_type=MembershipType.CONTRIBUTING, year_duration=1, price=300
             ),
@@ -149,12 +151,17 @@ class Appointment(Model):
     scheduled duration of an appointment."""
 
     id = IntField(pk=True)
-    time_created = DateField()
-    patient = ForeignKeyField("models.UserModel")
-    center = ForeignKeyField("models.HealthCenter")
-    start_time = DateField()
-    end_time = DateField()
+    time_created = DatetimeField()
+    # patient = ForeignKeyField("models.UserModel")
+    # center = ForeignKeyField("models.HealthCenter")
+    start_time = DatetimeField()
+    end_time = DatetimeField()
     cancelled = BooleanField()
+
+    @classmethod
+    async def get_by_month(cls, date: datetime) -> None:
+        """Get appointment by day."""
+        return await cls.filter(start_time__startswith=date.date().isoformat()).all()
 
 
 class Admin(Model):
@@ -162,3 +169,30 @@ class Admin(Model):
 
     id = IntField(pk=True)
     user_id = ForeignKeyField("models.UserModel")
+
+
+if __name__ == "__main__":
+    from tortoise import Tortoise, run_async
+
+    async def main():
+        await Tortoise.init(
+            db_url="sqlite://db.sqlite3", modules={"models": ["__main__"]}
+        )
+        await Tortoise.generate_schemas()
+
+        for i in range(3):
+            date = datetime(year=2023, month=10, day=8, hour=2 + i)
+
+            app = Appointment(
+                time_created=datetime.now(),
+                # patient = 0,
+                start_time=date,
+                end_time=date,
+                cancelled=False,
+            )
+            print("creating ....")
+            await app.save()
+
+        print(await Appointment.get_by_month(datetime.now()))
+
+    run_async(main())

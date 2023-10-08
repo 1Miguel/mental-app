@@ -112,39 +112,51 @@ async def generate_token(
             return {"error": "invalid credentials"}
 
 
-@app.get("/login", response_model=UserSchema)
-def login(user: UserSchema = Depends(get_current_user)) -> Any:
+@app.get("/login", response_model=UserProfileApi)
+async def login(user: UserSchema = Depends(get_current_user)) -> Any:
     """login route called when user wants to login. This depends on the user
     if the user has a token. If the user does not have a valid token, reject
     the login request.
     """
-    log.info("logging in...")
-    return user
+    # get membership status if there is any for this user
+    membership_type = await Membership.get(user=user.id)
+    # return the profile at login success
+    return UserProfileApi(
+        id=user.id,
+        email=user.email,
+        firstname=user.firstname,
+        lastname=user.lastname,
+        address=user.address,
+        age=user.age,
+        occupation=user.occupation,
+        birthday=user.birthday,
+        membership_type=MembershipType.NONE
+        if membership_type is None
+        else membership_type,
+    )
 
 
 @app.get("/user/mood", response_model=UserSchema)
 async def mood_log(
     user: UserSchema = Depends(get_current_user), mood: Optional[MoodLog] = None
 ) -> Any:
-    """Daily Mood Logging."""
+    """Daily Mood Logging. if mood score has been log for today, dont lot anymore
+    and return an HTTP_409_CONFLICT error."""
     if mood is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Data."
         )
-    today = datetime.datetime.today().date()
+    today = datetime.today().date()
     if MoodModel.get(date=today):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Mood already set for today."
         )
-    log.debug("Create new mood for %s", user)
-    # log new mood today
     new_mood = MoodModel(user=user, mood=MoodId(mood.mood), date=today)
     await new_mood.save()
-    return await UserSchema.from_tortoise_orm(user)
 
 
-@app.post("/signup", response_model=UserSchema)
-async def users(user: UserApi) -> Any:
+@app.post("/signup")
+async def signup_route(user: UserApi) -> Any:
     """Route to call when user wishes to create a new account.
     This requires unique credential. if email or email is already used,
     reject the signup request.
@@ -154,12 +166,13 @@ async def users(user: UserApi) -> Any:
     try:
         user = UserModel(
             email=user.email,
-            password_hash=bcrypt.hash(user.password_hash),
+            password_hash=bcrypt.hash(user.password),
             firstname=user.firstname,
             lastname=user.lastname,
-            address=user.address,
-            age=user.age,
-            occupation=user.occupation,
+            address="",
+            age=0,
+            occupation="",
+            birthday=datetime(year=1900, month=1, day=1).isoformat(),
         )
         await user.save()
     except IntegrityError as err:
@@ -167,36 +180,52 @@ async def users(user: UserApi) -> Any:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="email is already used."
         ) from err
-    else:
-        return await UserSchema.from_tortoise_orm(user)
 
 
-@app.route("user/schedule")
+@app.post("/user/schedule")
 async def schedule_appointment(user: UserSchema = Depends(get_current_user)) -> Any:
     """Route that requests an appointment schedule."""
+
+
+@app.get("user/schedule_avail")
+async def schedule_appointment(user: UserSchema = Depends(get_current_user)) -> Any:
     pass
 
 
-@app.route("user/membership")
+@app.post("/user/membership")
 async def membership(
-    membership_req: MembershipApi,
-    user: UserSchema = Depends(get_current_user)
+    membership_api: MembershipApi, user: UserSchema = Depends(get_current_user)
 ) -> Any:
     """Membership route.
     User posting membership will set the user's membership profile.
     """
     user_model = await UserModel.get(email=user.email)
-    new_membership = Membership(
-        
-    )
+    # check if there is an existing membership already
+    # if none update the membership
+    membership = await Membership.get(user=user_model.id)
+    if membership is None:
+        membership_service = await MembershipService.get(
+            membership_type=membership_api.membership_type
+        )
+        date_today = datetime.today()
+        membership = Membership(
+            user=user_model,
+            type=membership_api.membership_type,
+            start_time=date_today,
+            end_time=datetime(
+                year=date_today.year,
+                day=date_today.day,
+                year=date_today.year + membership_service.year_duration,
+            ),
+        )
 
-@app.route("user/update")
+
+@app.post("/user/update")
 async def update_profile(
     profile: UserProfileApi,
     user: UserSchema = Depends(get_current_user),
 ) -> Any:
-    """Update user profile route.
-    """
+    """Update user profile route."""
     user_model = await UserModel.get(email=user.email)
     # update only when field exist
     # TODO: there must some way to do this efficiently
@@ -208,7 +237,10 @@ async def update_profile(
         user_model.firstname = profile.firstname
     if profile.lastname:
         user_model.lastname = profile.lastname
+    if profile.occupation:
+        user_model.occupation = profile.occupation
     await user_model.save()
+
 
 def run() -> None:
     import uvicorn
