@@ -315,6 +315,9 @@ class LoginMainPage extends StatelessWidget {
               if (data == 'false') {
                 return LoginMainView();
               } else {
+                // TODO: check one day interval for moods
+                // expirationDay = lastDailyCheck.add(oneDayDuration);
+                // isOneDayAfter = DateTime.now().isAfter(expirationDay);
                 return DashboardPage();
               }
             }

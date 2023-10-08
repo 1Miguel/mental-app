@@ -1,7 +1,12 @@
+// Standard import
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+
+// Local import
 import 'package:flutter_intro/ui_views/login_views.dart';
+import 'package:flutter_intro/utils/api_endpoints.dart';
+
+// Third-party import
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -10,8 +15,8 @@ class SignupController extends GetxController {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  String loginUrl = ApiEndPoints.checkPlatform();
 
   Future<void> registerWithEmail() async {
     print(emailController.text);
@@ -19,7 +24,7 @@ class SignupController extends GetxController {
     print(nameController.text);
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/signup'),
+        Uri.parse('$loginUrl/signup'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Content-Type': 'application/json',

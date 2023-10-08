@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
+import 'package:flutter_intro/utils/colors_scheme.dart';
 
 class TitleText extends StatelessWidget {
   final String title;
@@ -20,7 +21,8 @@ class TitleText extends StatelessWidget {
       softWrap: true,
       maxLines: 2,
       style: TextStyle(
-        color: Color.fromARGB(255, 0, 74, 173),
+        color: mainDarkBlue,
+        fontFamily: 'Proza Libre',
         fontWeight: FontWeight.w900,
         fontSize: newSize,
       ),
@@ -94,6 +96,83 @@ class FormSubHeadingText extends StatelessWidget {
   }
 }
 
+class IconTitleBox extends StatelessWidget {
+  final String title;
+  final bool overwriteSize;
+  double? fontSize;
+
+  IconTitleBox({
+    super.key,
+    required this.title,
+    required this.overwriteSize,
+    dynamic fontSize = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double textSize = 20;
+    if (title.length < 10) {
+      textSize = 25;
+    } else if (title.length > 20) {
+      textSize = 15;
+    }
+
+    if (overwriteSize) {
+      textSize = fontSize ?? 20.0;
+    }
+    return SizedBox(
+      width: 170,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: Text(
+          title,
+          textAlign: TextAlign.center,
+          softWrap: true,
+          maxLines: 2,
+          style: TextStyle(
+            color: secondaryBlue,
+            fontWeight: FontWeight.w900,
+            fontFamily: 'Roboto',
+            fontSize: textSize,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class IconSubheadingBox extends StatelessWidget {
+  final String title;
+
+  const IconSubheadingBox({
+    super.key,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double textSize = 13;
+    if (title.length < 10) {
+      textSize = 15;
+    } else if (title.length > 20) {
+      textSize = 11;
+    }
+    return SizedBox(
+      width: 170,
+      child: Text(
+        title,
+        textAlign: TextAlign.center,
+        softWrap: true,
+        maxLines: 2,
+        style: TextStyle(
+          color: mainLightBlue,
+          fontSize: textSize,
+        ),
+      ),
+    );
+  }
+}
+
 class MembershipView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -133,36 +212,143 @@ class MembershipView extends StatelessWidget {
             ),
           ),
           SizedBox(
-            height: 100,
+            height: 80,
           ),
+          RegisterMemberIcons(),
+        ],
+      ),
+    );
+  }
+}
+
+enum MembershipActions { register, cancel }
+
+class RegisterMemberIcons extends StatefulWidget {
+  const RegisterMemberIcons({super.key});
+
+  @override
+  State<RegisterMemberIcons> createState() => _RegisterMemberIconsState();
+}
+
+class _RegisterMemberIconsState extends State<RegisterMemberIcons> {
+  bool membershipSelected = false;
+  bool registerMemberSelected = false;
+  bool cancelMemberSelected = false;
+
+  resetStates() {
+    if (registerMemberSelected) {
+      setState(() {
+        registerMemberSelected = false;
+      });
+    } else if (cancelMemberSelected) {
+      setState(() {
+        cancelMemberSelected = false;
+      });
+    }
+  }
+
+  setStateValue(MembershipActions action, bool actionState, bool memberState) {
+    if (action == MembershipActions.register) {
+      setState(() {
+        registerMemberSelected = actionState;
+        membershipSelected = memberState;
+      });
+    } else if (action == MembershipActions.cancel) {
+      setState(() {
+        cancelMemberSelected = actionState;
+        membershipSelected = memberState;
+      });
+    }
+  }
+
+  setMembershipActionState(MembershipActions action, bool selectedValue) {
+    print(action);
+    printStates();
+
+    if (selectedValue == true && membershipSelected == true) {
+      setStateValue(action, false, false);
+    } else if (selectedValue == false && membershipSelected == false) {
+      setStateValue(action, true, true);
+    } else if (selectedValue == false && membershipSelected == true) {
+      resetStates();
+      setStateValue(action, true, true);
+    }
+  }
+
+  printStates() {
+    print('registerMemberSelected $registerMemberSelected');
+    print('cancelMemberSelected: $cancelMemberSelected');
+    print('membershipSelected: $membershipSelected');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.sizeOf(context).width,
+      child: Column(
+        children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              MemberIconLarge(
-                membershipTitle: 'BECOME A MEMBER',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => MembershipSelectionView()),
-                    ),
-                  );
-                },
-              ),
-              MemberIconLarge(
-                  membershipTitle: 'CANCEL MEMBERSHIP',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: ((context) => CancelMembershipView()),
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor:
+                        registerMemberSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.group_add,
+                        size: 70,
+                        color: registerMemberSelected
+                            ? Colors.white
+                            : Colors.black54,
                       ),
-                    );
-                  }),
+                      onPressed: () {
+                        print('registerMemberSelected');
+                        printStates();
+                        setMembershipActionState(
+                          MembershipActions.register,
+                          registerMemberSelected,
+                        );
+                      },
+                    ),
+                  ),
+                  IconTitleBox(title: "BECOME A MEMBER", overwriteSize: false),
+                ],
+              ),
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor:
+                        cancelMemberSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.group_off,
+                        size: 70,
+                        color: cancelMemberSelected
+                            ? Colors.white
+                            : Colors.black54,
+                      ),
+                      onPressed: () {
+                        print('cancelMemberSelected');
+                        printStates();
+                        setMembershipActionState(
+                          MembershipActions.cancel,
+                          cancelMemberSelected,
+                        );
+                      },
+                    ),
+                  ),
+                  IconTitleBox(
+                      title: "CANCEL MEMBERSHIP", overwriteSize: false),
+                ],
+              ),
             ],
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 30.0),
+            padding: const EdgeInsets.only(top: 40.0),
             child: SizedBox(
               width: 300,
               child: Text(
@@ -171,21 +357,221 @@ class MembershipView extends StatelessWidget {
                 softWrap: true,
                 maxLines: 2,
                 style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 20,
+                  fontFamily: 'Asap',
+                  color: Colors.black54,
+                  fontSize: 18,
                 ),
               ),
             ),
           ),
           SizedBox(
-            height: 100,
+            height: 90,
           ),
           FilledButton(
-            onPressed: () {},
+            onPressed: () {
+              if (membershipSelected == false) {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return SimpleDialog(
+                        title: Text('Error'),
+                        contentPadding: EdgeInsets.all(20),
+                        children: [
+                          Text('Please select one of the options to proceed')
+                        ],
+                      );
+                    });
+              } else if (registerMemberSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => MembershipSelectionView())));
+              } else if (cancelMemberSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => CancelMembershipView())));
+              }
+            },
             style: ButtonStyle(
                 minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    Color.fromARGB(255, 0, 74, 173))),
+                backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
+            child: Text('CONFIRM'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+enum MembershipType { regular, student }
+
+class MembershipTypeIcons extends StatefulWidget {
+  const MembershipTypeIcons({super.key});
+
+  @override
+  State<MembershipTypeIcons> createState() => _MembershipTypeIconsState();
+}
+
+class _MembershipTypeIconsState extends State<MembershipTypeIcons> {
+  bool memberTypeSelected = false;
+  bool regularSelected = false;
+  bool studentSelected = false;
+
+  resetStates() {
+    if (regularSelected) {
+      setState(() {
+        regularSelected = false;
+      });
+    } else if (studentSelected) {
+      setState(() {
+        studentSelected = false;
+      });
+    }
+  }
+
+  setTypeValue(MembershipType type, bool typeState, bool mainSelectState) {
+    if (type == MembershipType.regular) {
+      setState(() {
+        regularSelected = typeState;
+        memberTypeSelected = mainSelectState;
+      });
+    } else if (type == MembershipType.student) {
+      setState(() {
+        studentSelected = typeState;
+        memberTypeSelected = mainSelectState;
+      });
+    }
+  }
+
+  setMembershipTypeState(MembershipType type, bool selectedValue) {
+    print(type);
+    printStates();
+
+    if (selectedValue == true && memberTypeSelected == true) {
+      setTypeValue(type, false, false);
+    } else if (selectedValue == false && memberTypeSelected == false) {
+      setTypeValue(type, true, true);
+    } else if (selectedValue == false && memberTypeSelected == true) {
+      resetStates();
+      setTypeValue(type, true, true);
+    }
+  }
+
+  printStates() {
+    print('regularSelected $regularSelected');
+    print('studentSelected: $studentSelected');
+    print('memberTypeSelected: $memberTypeSelected');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.sizeOf(context).width,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor:
+                        regularSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.groups,
+                        size: 90,
+                        color: regularSelected ? Colors.white : Colors.black54,
+                      ),
+                      onPressed: () {
+                        print('registerMemberSelected');
+                        printStates();
+                        setMembershipTypeState(
+                            MembershipType.regular, regularSelected);
+                      },
+                    ),
+                  ),
+                  IconTitleBox(title: "REGULAR", overwriteSize: false),
+                ],
+              ),
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor:
+                        studentSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.groups,
+                        size: 90,
+                        color: studentSelected ? Colors.white : Colors.black54,
+                      ),
+                      onPressed: () {
+                        print('studentSelected');
+                        printStates();
+                        setMembershipTypeState(
+                            MembershipType.student, studentSelected);
+                      },
+                    ),
+                  ),
+                  IconTitleBox(title: "STUDENT", overwriteSize: false),
+                ],
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 40.0),
+            child: SizedBox(
+              width: 300,
+              child: Text(
+                'Please select the type of membership',
+                textAlign: TextAlign.center,
+                softWrap: true,
+                maxLines: 2,
+                style: TextStyle(
+                  fontFamily: 'Asap',
+                  color: Colors.black54,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 90,
+          ),
+          FilledButton(
+            onPressed: () {
+              if (memberTypeSelected == false) {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return SimpleDialog(
+                        title: Text('Error'),
+                        contentPadding: EdgeInsets.all(20),
+                        children: [
+                          Text('Please select one of the membership types')
+                        ],
+                      );
+                    });
+              } else if (regularSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) =>
+                            RegularMembershipSelectionView())));
+              } else if (studentSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) =>
+                            StudentMembershipSelectionView())));
+              }
+            },
+            style: ButtonStyle(
+                minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
             child: Text('CONFIRM'),
           ),
         ],
@@ -625,8 +1011,7 @@ class MemberCancellationState extends State<MemberCancellationForm> {
               },
               style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                      Color.fromARGB(255, 0, 74, 173))),
+                  backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
               child: Text('CONFIRM'),
             ),
           ],
@@ -676,60 +1061,7 @@ class MembershipSelectionView extends StatelessWidget {
           SizedBox(
             height: 100,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              MemberIconLarge(
-                membershipTitle: 'REGULAR',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => RegularMembershipSelectionView()),
-                    ),
-                  );
-                },
-              ),
-              MemberIconLarge(
-                  membershipTitle: 'STUDENT',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: ((context) =>
-                            StudentMembershipSelectionView()),
-                      ),
-                    );
-                  }),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 30.0),
-            child: SizedBox(
-              width: 300,
-              child: Text(
-                'Please select the type of Membership',
-                textAlign: TextAlign.center,
-                softWrap: true,
-                maxLines: 2,
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 100,
-          ),
-          FilledButton(
-            onPressed: () {},
-            style: ButtonStyle(
-                minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    Color.fromARGB(255, 0, 74, 173))),
-            child: Text('CONFIRM'),
-          ),
+          MembershipTypeIcons(),
         ],
       ),
     );
@@ -776,73 +1108,269 @@ class RegularMembershipSelectionView extends StatelessWidget {
           SizedBox(
             height: 50,
           ),
+          RegularMembershipIcons(),
+        ],
+      ),
+    );
+  }
+}
+
+enum RegularMembershipType { contributing, life, sustaining, corporate }
+
+class RegularMembershipIcons extends StatefulWidget {
+  const RegularMembershipIcons({super.key});
+
+  @override
+  State<RegularMembershipIcons> createState() => _RegularMembershipIconsState();
+}
+
+class _RegularMembershipIconsState extends State<RegularMembershipIcons> {
+  bool regMemSelected = false;
+  bool contMemSelected = false;
+  bool lifeMemSelected = false;
+  bool susMemSelected = false;
+  bool corpMemSelected = false;
+
+  resetStates() {
+    if (contMemSelected) {
+      setState(() {
+        contMemSelected = false;
+      });
+    } else if (lifeMemSelected) {
+      setState(() {
+        lifeMemSelected = false;
+      });
+    } else if (susMemSelected) {
+      setState(() {
+        susMemSelected = false;
+      });
+    } else if (corpMemSelected) {
+      setState(() {
+        corpMemSelected = false;
+      });
+    }
+  }
+
+  setStateValue(RegularMembershipType type, bool typeState, bool memberState) {
+    if (type == RegularMembershipType.contributing) {
+      setState(() {
+        contMemSelected = typeState;
+        regMemSelected = memberState;
+      });
+    } else if (type == RegularMembershipType.life) {
+      setState(() {
+        lifeMemSelected = typeState;
+        regMemSelected = memberState;
+      });
+    } else if (type == RegularMembershipType.sustaining) {
+      setState(() {
+        susMemSelected = typeState;
+        regMemSelected = memberState;
+      });
+    } else if (type == RegularMembershipType.corporate) {
+      setState(() {
+        corpMemSelected = typeState;
+        regMemSelected = memberState;
+      });
+    }
+  }
+
+  setRegMemTypeState(RegularMembershipType type, bool selectedValue) {
+    print(type);
+    printStates();
+
+    if (selectedValue == true && regMemSelected == true) {
+      setStateValue(type, false, false);
+    } else if (selectedValue == false && regMemSelected == false) {
+      setStateValue(type, true, true);
+    } else if (selectedValue == false && regMemSelected == true) {
+      resetStates();
+      setStateValue(type, true, true);
+    }
+  }
+
+  printStates() {
+    print('regMemSelected $regMemSelected');
+    print('contMemSelected: $contMemSelected');
+    print('lifeMemSelected: $lifeMemSelected');
+    print('susMemSelected: $susMemSelected');
+    print('corpMemSelected: $corpMemSelected');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.sizeOf(context).width,
+      child: Column(
+        children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              MemberIconSmall(
-                membershipTitle: 'CONTRIBUTING',
-                membershipSubHeading: 'Professional',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => ContributingMembershipForm()),
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor:
+                        contMemSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.groups,
+                        size: 90,
+                        color: contMemSelected ? Colors.white : Colors.black54,
+                      ),
+                      onPressed: () {
+                        print('contMemSelected');
+                        printStates();
+                        setRegMemTypeState(RegularMembershipType.contributing,
+                            contMemSelected);
+                      },
                     ),
-                  );
-                },
+                  ),
+                  IconTitleBox(
+                    title: "CONTRIBUTING",
+                    overwriteSize: true,
+                    fontSize: 20.0,
+                  ),
+                  IconSubheadingBox(title: "Professional"),
+                ],
               ),
-              MemberIconSmall(
-                membershipTitle: 'LIFE',
-                membershipSubHeading: 'Individual',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => LifeMembershipForm()),
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor:
+                        lifeMemSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.groups,
+                        size: 90,
+                        color: lifeMemSelected ? Colors.white : Colors.black54,
+                      ),
+                      onPressed: () {
+                        print('lifeMemSelected');
+                        printStates();
+                        setRegMemTypeState(
+                            RegularMembershipType.life, lifeMemSelected);
+                      },
                     ),
-                  );
-                },
+                  ),
+                  IconTitleBox(
+                    title: "LIFE",
+                    overwriteSize: true,
+                    fontSize: 20.0,
+                  ),
+                  IconSubheadingBox(title: "Individual"),
+                ],
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              MemberIconSmall(
-                membershipTitle: 'SUSTAINING',
-                membershipSubHeading: 'Government and Non-Government',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => SustainingMembershipForm()),
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 70,
+                      backgroundColor:
+                          susMemSelected ? mainBlue : unselectedGray,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.groups,
+                          size: 90,
+                          color: susMemSelected ? Colors.white : Colors.black54,
+                        ),
+                        onPressed: () {
+                          print('susMemSelected');
+                          printStates();
+                          setRegMemTypeState(
+                              RegularMembershipType.sustaining, susMemSelected);
+                        },
+                      ),
                     ),
-                  );
-                },
-              ),
-              MemberIconSmall(
-                membershipTitle: 'CORPORATE',
-                membershipSubHeading: 'Corporation and Big Companies',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => CorporateMembershipForm()),
+                    IconTitleBox(
+                      title: "SUSTAINING",
+                      overwriteSize: true,
+                      fontSize: 20.0,
                     ),
-                  );
-                },
-              ),
-            ],
+                    IconSubheadingBox(title: "Government and Non-Government"),
+                  ],
+                ),
+                Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 70,
+                      backgroundColor:
+                          corpMemSelected ? mainBlue : unselectedGray,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.groups,
+                          size: 90,
+                          color:
+                              corpMemSelected ? Colors.white : Colors.black54,
+                        ),
+                        onPressed: () {
+                          print('corpMemSelected');
+                          printStates();
+                          setRegMemTypeState(
+                              RegularMembershipType.corporate, corpMemSelected);
+                        },
+                      ),
+                    ),
+                    IconTitleBox(
+                      title: "CORPORATE",
+                      overwriteSize: true,
+                      fontSize: 20.0,
+                    ),
+                    IconSubheadingBox(title: "Corporation and Big Companies"),
+                  ],
+                ),
+              ],
+            ),
           ),
           SizedBox(
-            height: 80,
+            height: 90,
           ),
           FilledButton(
-            onPressed: () {},
+            onPressed: () {
+              if (regMemSelected == false) {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return SimpleDialog(
+                        title: Text('Error'),
+                        contentPadding: EdgeInsets.all(20),
+                        children: [
+                          Text('Please select one of the membership types')
+                        ],
+                      );
+                    });
+              } else if (contMemSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => ContributingMembershipForm())));
+              } else if (lifeMemSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => LifeMembershipForm())));
+              } else if (susMemSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => SustainingMembershipForm())));
+              } else if (corpMemSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => CorporateMembershipForm())));
+              }
+            },
             style: ButtonStyle(
                 minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    Color.fromARGB(255, 0, 74, 173))),
+                backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
             child: Text('SELECT'),
           ),
         ],
@@ -891,61 +1419,214 @@ class StudentMembershipSelectionView extends StatelessWidget {
           SizedBox(
             height: 50,
           ),
+          StudentMembershipIcons(),
+        ],
+      ),
+    );
+  }
+}
+
+enum StudentMembershipType { junior, senior, college }
+
+class StudentMembershipIcons extends StatefulWidget {
+  const StudentMembershipIcons({super.key});
+
+  @override
+  State<StudentMembershipIcons> createState() => _StudentMembershipIconsState();
+}
+
+class _StudentMembershipIconsState extends State<StudentMembershipIcons> {
+  bool studMemSelected = false;
+  bool junHighSelected = false;
+  bool senHighSelected = false;
+  bool collegeSelected = false;
+
+  resetStates() {
+    if (junHighSelected) {
+      setState(() {
+        junHighSelected = false;
+      });
+    } else if (senHighSelected) {
+      setState(() {
+        senHighSelected = false;
+      });
+    } else if (collegeSelected) {
+      setState(() {
+        collegeSelected = false;
+      });
+    }
+  }
+
+  setStateValue(StudentMembershipType type, bool typeState, bool memberState) {
+    if (type == StudentMembershipType.junior) {
+      setState(() {
+        junHighSelected = typeState;
+        studMemSelected = memberState;
+      });
+    } else if (type == StudentMembershipType.senior) {
+      setState(() {
+        senHighSelected = typeState;
+        studMemSelected = memberState;
+      });
+    } else if (type == StudentMembershipType.college) {
+      setState(() {
+        collegeSelected = typeState;
+        studMemSelected = memberState;
+      });
+    }
+  }
+
+  setStudentMemTypeState(StudentMembershipType type, bool selectedValue) {
+    print(type);
+    printStates();
+
+    if (selectedValue == true && studMemSelected == true) {
+      setStateValue(type, false, false);
+    } else if (selectedValue == false && studMemSelected == false) {
+      setStateValue(type, true, true);
+    } else if (selectedValue == false && studMemSelected == true) {
+      resetStates();
+      setStateValue(type, true, true);
+    }
+  }
+
+  printStates() {
+    print('studMemSelected $studMemSelected');
+    print('junHighSelected: $junHighSelected');
+    print('senHighSelected: $senHighSelected');
+    print('collegeSelected: $collegeSelected');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.sizeOf(context).width,
+      child: Column(
+        children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              MemberIconSmall(
-                membershipTitle: 'JUNIOR HIGH SCHOOL',
-                membershipSubHeading: '',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => JuniorHighSchoolMembershipForm()),
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor:
+                        junHighSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.groups,
+                        size: 90,
+                        color: junHighSelected ? Colors.white : Colors.black54,
+                      ),
+                      onPressed: () {
+                        print('junHighSelected');
+                        printStates();
+                        setStudentMemTypeState(
+                            StudentMembershipType.junior, junHighSelected);
+                      },
                     ),
-                  );
-                },
+                  ),
+                  IconTitleBox(
+                      title: "JUNIOR HIGH SCHOOL", overwriteSize: false),
+                ],
               ),
-              MemberIconSmall(
-                membershipTitle: 'SENIOR HIGH SCHOOL',
-                membershipSubHeading: '',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => SeniorHighSchoolMembershipForm()),
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor:
+                        senHighSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.groups,
+                        size: 90,
+                        color: senHighSelected ? Colors.white : Colors.black54,
+                      ),
+                      onPressed: () {
+                        print('senHighSelected');
+                        printStates();
+                        setStudentMemTypeState(
+                            StudentMembershipType.senior, senHighSelected);
+                      },
                     ),
-                  );
-                },
+                  ),
+                  IconTitleBox(
+                      title: "SENIOR HIGH SCHOOL", overwriteSize: false),
+                ],
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              MemberIconSmall(
-                membershipTitle: 'COLLEGE',
-                membershipSubHeading: '',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: ((context) => CollegeMembershipForm()),
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 70,
+                      backgroundColor:
+                          collegeSelected ? mainBlue : unselectedGray,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.groups,
+                          size: 90,
+                          color:
+                              collegeSelected ? Colors.white : Colors.black54,
+                        ),
+                        onPressed: () {
+                          print('collegeSelected');
+                          printStates();
+                          setStudentMemTypeState(
+                              StudentMembershipType.college, collegeSelected);
+                        },
+                      ),
                     ),
-                  );
-                },
-              ),
-            ],
+                    IconTitleBox(title: "COLLEGE", overwriteSize: false),
+                  ],
+                ),
+              ],
+            ),
           ),
           SizedBox(
-            height: 80,
+            height: 90,
           ),
           FilledButton(
-            onPressed: () {},
+            onPressed: () {
+              if (studMemSelected == false) {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return SimpleDialog(
+                        title: Text('Error'),
+                        contentPadding: EdgeInsets.all(20),
+                        children: [
+                          Text('Please select one of the membership types')
+                        ],
+                      );
+                    });
+              } else if (junHighSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) =>
+                            JuniorHighSchoolMembershipForm())));
+              } else if (senHighSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) =>
+                            SeniorHighSchoolMembershipForm())));
+              } else if (collegeSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => CollegeMembershipForm())));
+              }
+            },
             style: ButtonStyle(
                 minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    Color.fromARGB(255, 0, 74, 173))),
+                backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
             child: Text('SELECT'),
           ),
         ],

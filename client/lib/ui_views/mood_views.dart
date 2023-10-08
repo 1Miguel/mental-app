@@ -149,12 +149,6 @@ class MoodCardWidget extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Pressed Follow on $moodName button"),
-            duration: const Duration(seconds: 1),
-          ),
-        );
         onTap();
       },
       child: SizedBox(

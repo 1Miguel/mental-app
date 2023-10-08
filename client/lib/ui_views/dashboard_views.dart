@@ -306,17 +306,20 @@ class DashboardPage extends StatelessWidget {
                         DashboardCategoryButtons(
                           title: 'Library',
                           imageIcon: 'images/dashboard_category_library.png',
+                          icon: Icons.library_books,
                           onPressed: () {},
                         ),
                         DashboardCategoryButtons(
                           title: 'Mental Health Care',
                           imageIcon:
                               'images/dashboard_category_mental_health_care.png',
+                          icon: Icons.psychology,
                           onPressed: () {},
                         ),
                         DashboardCategoryButtons(
                           title: 'Book Appointment',
                           imageIcon: 'images/dashboard_category_book.png',
+                          icon: Icons.calendar_month,
                           onPressed: () {
                             Navigator.push(
                                 context,
@@ -328,6 +331,7 @@ class DashboardPage extends StatelessWidget {
                         DashboardCategoryButtons(
                           title: 'Talk To Us',
                           imageIcon: 'images/dashboard_category_talk.png',
+                          icon: Icons.groups_2,
                           onPressed: () {},
                         ),
                       ],
@@ -380,31 +384,31 @@ class DashboardCategoryButtons extends StatelessWidget {
   final String imageIcon;
   final String title;
   final VoidCallback onPressed;
+  final IconData icon;
   const DashboardCategoryButtons(
       {super.key,
       required this.title,
       required this.imageIcon,
+      required this.icon,
       required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(5.0),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            width: 80,
-            height: 100,
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: unselectedGray,
             child: IconButton(
-              icon: Image.asset(imageIcon),
+              icon: Icon(
+                icon,
+                size: 30,
+                color: Colors.black54,
+              ),
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Pressed Follow on $title button"),
-                    duration: const Duration(seconds: 1),
-                  ),
-                );
                 onPressed();
               },
             ),
@@ -417,7 +421,7 @@ class DashboardCategoryButtons extends StatelessWidget {
               maxLines: 2,
               softWrap: true,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.blue, fontSize: 12),
+              style: TextStyle(color: Colors.black54, fontSize: 12),
             ),
           )
         ],
@@ -817,13 +821,6 @@ class AccountActionsCard extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 20.0),
                     child: FilledButton(
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                                Text("Pressed Follow on $actionTitle button"),
-                            duration: const Duration(seconds: 1),
-                          ),
-                        );
                         onPressed();
                       },
                       style: ButtonStyle(

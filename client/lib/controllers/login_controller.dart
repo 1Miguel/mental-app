@@ -1,8 +1,12 @@
+// Standard import
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_intro/model/user.dart';
+
+// Local import
 import 'package:flutter_intro/ui_views/login_views.dart';
+import 'package:flutter_intro/utils/api_endpoints.dart';
+
+// Third-party import
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -11,13 +15,15 @@ class LoginController extends GetxController {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  String loginUrl = ApiEndPoints.checkPlatform();
 
   Future<void> loginWithEmail() async {
     try {
+      print(loginUrl);
       print(emailController.text);
       print(passwordController.text);
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/token'),
+        Uri.parse('$loginUrl/token'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
@@ -35,8 +41,7 @@ class LoginController extends GetxController {
         var accessToken = data['access_token'];
         var tokenType = data['token_type'];
 
-        final loginResponse = await http.get(
-            Uri.parse('http://10.0.2.2:8000/login'),
+        final loginResponse = await http.get(Uri.parse('$loginUrl/login'),
             headers: <String, String>{
               'Authorization': '$tokenType $accessToken'
             });
