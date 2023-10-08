@@ -220,15 +220,22 @@ class DashboardPage extends StatelessWidget {
                       width: MediaQuery.sizeOf(context).width - 20,
                       child: TextFormField(
                         decoration: InputDecoration(
-                            contentPadding: EdgeInsets.only(left: 30.0),
-                            hintText: 'Enter Keyword',
-                            suffixIcon: Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(30)),
+                          contentPadding: EdgeInsets.only(left: 30.0),
+                          hintText: 'Enter Keyword',
+                          suffixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(30)),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(30)),
+                            borderSide: BorderSide(
+                              color: unselectedGray,
+                              width: 1.0,
                             ),
-                            filled: true,
-                            fillColor: Colors.white),
+                          ),
+                        ),
                       ),
                     ),
                     SizedBox(
@@ -300,41 +307,44 @@ class DashboardPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        DashboardCategoryButtons(
-                          title: 'Library',
-                          imageIcon: 'images/dashboard_category_library.png',
-                          icon: Icons.library_books,
-                          onPressed: () {},
-                        ),
-                        DashboardCategoryButtons(
-                          title: 'Mental Health Care',
-                          imageIcon:
-                              'images/dashboard_category_mental_health_care.png',
-                          icon: Icons.psychology,
-                          onPressed: () {},
-                        ),
-                        DashboardCategoryButtons(
-                          title: 'Book Appointment',
-                          imageIcon: 'images/dashboard_category_book.png',
-                          icon: Icons.calendar_month,
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: ((context) =>
-                                        BookAppointmentIntroPage())));
-                          },
-                        ),
-                        DashboardCategoryButtons(
-                          title: 'Talk To Us',
-                          imageIcon: 'images/dashboard_category_talk.png',
-                          icon: Icons.groups_2,
-                          onPressed: () {},
-                        ),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          DashboardCategoryButtons(
+                            title: 'Library',
+                            imageIcon: 'images/dashboard_category_library.png',
+                            icon: Icons.library_books,
+                            onPressed: () {},
+                          ),
+                          DashboardCategoryButtons(
+                            title: 'Mental Health Care',
+                            imageIcon:
+                                'images/dashboard_category_mental_health_care.png',
+                            icon: Icons.psychology,
+                            onPressed: () {},
+                          ),
+                          DashboardCategoryButtons(
+                            title: 'Book Appointment',
+                            imageIcon: 'images/dashboard_category_book.png',
+                            icon: Icons.calendar_month,
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          BookAppointmentIntroPage())));
+                            },
+                          ),
+                          DashboardCategoryButtons(
+                            title: 'Talk To Us',
+                            imageIcon: 'images/dashboard_category_talk.png',
+                            icon: Icons.groups_2,
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -362,14 +372,14 @@ class DashboardFeatureCarousel extends StatelessWidget {
         children: [
           DashboardFeatureContext(
             title:
-                'SECOND MENTAL HEALTH SUMMIT:\n"INCLUSIVITY AMIDST DIVERSITY"',
+                'SECOND MENTAL HEALTH SUMMIT: "INCLUSIVITY\nAMIDST DIVERSITY"',
             image: 'images/sample_cover_image.png',
             content:
                 "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',",
           ),
           DashboardFeatureContext(
             title:
-                'THIRD MENTAL HEALTH SUMMIT:\n"INCLUSIVITY AMIDST DIVERSITY"',
+                'THIRD MENTAL HEALTH SUMMIT: "INCLUSIVITY\nAMIDST DIVERSITY"',
             image: 'images/sample_cover_image.png',
             content:
                 "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',",
@@ -460,7 +470,7 @@ class DashboardFeatureContext extends StatelessWidget {
                     title,
                     textAlign: TextAlign.left,
                     style: TextStyle(
-                      fontFamily: 'Asap',
+                      fontFamily: 'Open Sans',
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: HexColor('#424242'),
@@ -468,10 +478,13 @@ class DashboardFeatureContext extends StatelessWidget {
                   ),
                 ),
               ),
-              Image.asset(
-                image,
-                fit: BoxFit.fitHeight,
-                height: 200,
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width - 30,
+                child: Image.asset(
+                  image,
+                  fit: BoxFit.fitHeight,
+                  height: 200,
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(10.0),
@@ -537,6 +550,7 @@ class AccountsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
+        backgroundColor: mainDeepPurple,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -546,7 +560,7 @@ class AccountsPage extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -580,13 +594,14 @@ class AccountsPage extends StatelessWidget {
                 User userdata = User.fromJson(jsonDecode(mystring));
                 String firstname = userdata.firstname;
                 String lastname = userdata.lastname;
+                String email = userdata.email;
 
                 return Column(
                   children: [
-                    AccountSummaryCard(
+                    AccountDetaiiledSummaryCard(
                       name: "$lastname, $firstname",
                       image: 'images/generic_user.png',
-                      details: '',
+                      details: email,
                     ),
                     AccountMenuTile(
                       menu: 'Profile',
@@ -649,8 +664,13 @@ class AccountSummaryCard extends StatelessWidget {
         width: MediaQuery.of(context).size.width,
         height: 130,
         child: Card(
-          elevation: 0,
-          surfaceTintColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Colors.white,
+            ),
+          ),
+          elevation: 1,
+          surfaceTintColor: Colors.grey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -674,7 +694,7 @@ class AccountSummaryCard extends StatelessWidget {
                         title: name,
                         isOverflow: true,
                         isHeavy: true,
-                        customColor: mainBlue,
+                        customColor: mainDarkBlue,
                       ),
                     ),
                   )
@@ -707,8 +727,13 @@ class AccountDetaiiledSummaryCard extends StatelessWidget {
         width: MediaQuery.of(context).size.width,
         height: 130,
         child: Card(
-          elevation: 0,
-          surfaceTintColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Colors.white,
+            ),
+          ),
+          elevation: 1,
+          surfaceTintColor: Colors.grey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -716,7 +741,7 @@ class AccountDetaiiledSummaryCard extends StatelessWidget {
               Row(
                 children: [
                   SizedBox(
-                    width: 80,
+                    width: 90,
                     height: 120,
                     child: IconButton(
                       icon: Image.asset(image),
@@ -728,29 +753,33 @@ class AccountDetaiiledSummaryCard extends StatelessWidget {
                     children: [
                       SizedBox(
                         width: MediaQuery.sizeOf(context).width - 100,
-                        height: 60,
+                        height: 70,
                         child: Center(
                           child: Padding(
                             padding: const EdgeInsets.only(
-                              top: 20,
+                              top: 30,
                             ),
                             child: AccountNameHeadingText(
                               title: name,
                               isOverflow: true,
                               isHeavy: true,
-                              customColor: mainDeepPurple,
+                              customColor: mainDarkBlue,
                             ),
                           ),
                         ),
                       ),
                       SizedBox(
                         width: MediaQuery.sizeOf(context).width - 100,
-                        height: 60,
+                        height: 50,
                         child: Center(
-                          child: Text(
-                            details,
-                            textAlign: TextAlign.left,
-                            style: TextStyle(color: Colors.blue, fontSize: 20),
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: Text(
+                              details,
+                              textAlign: TextAlign.left,
+                              style:
+                                  TextStyle(color: Colors.blue, fontSize: 20),
+                            ),
                           ),
                         ),
                       ),
@@ -854,10 +883,32 @@ class MenuTitleText extends StatelessWidget {
     return Text(
       menuText,
       style: TextStyle(
-        color: mainDeepPurple,
+        color: mainLightPurple,
         fontFamily: 'Roboto',
         fontWeight: FontWeight.w900,
-        fontSize: 25,
+        fontSize: 20,
+      ),
+    );
+  }
+}
+
+class ProfileHeadingText extends StatelessWidget {
+  final String menuText;
+
+  const ProfileHeadingText({
+    super.key,
+    required this.menuText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      menuText,
+      style: TextStyle(
+        color: mainDarkBlue,
+        fontFamily: 'Roboto',
+        fontWeight: FontWeight.w900,
+        fontSize: 22,
       ),
     );
   }
@@ -876,10 +927,10 @@ class MenuSubTitleText extends StatelessWidget {
     return Text(
       menuText,
       style: TextStyle(
-        color: Colors.deepPurple,
+        color: mainLightPurple,
         fontFamily: 'Roboto',
-        fontWeight: FontWeight.w500,
-        fontSize: 24,
+        fontWeight: FontWeight.w900,
+        fontSize: 18,
       ),
     );
   }
@@ -899,15 +950,22 @@ class AccountMenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding:
-          EdgeInsets.only(left: 50.0, right: 50.0, top: 10.0, bottom: 10.0),
-      leading: Icon(menuIcon, size: 50.0),
-      horizontalTitleGap: 30.0,
-      title: MenuTitleText(menuText: menu),
-      onTap: () {
-        onTap();
-      },
+    return Container(
+      decoration: BoxDecoration(
+          border: Border(
+              bottom: BorderSide(
+        color: unselectedGray,
+      ))),
+      child: ListTile(
+        contentPadding:
+            EdgeInsets.only(left: 50.0, right: 50.0, top: 10.0, bottom: 10.0),
+        leading: Icon(menuIcon, size: 50),
+        horizontalTitleGap: 30.0,
+        title: MenuTitleText(menuText: menu),
+        onTap: () {
+          onTap();
+        },
+      ),
     );
   }
 }
@@ -926,18 +984,25 @@ class AccountSubMenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.only(
-        left: 50.0,
-        right: 50.0,
-        top: 5.0,
+    return Container(
+      decoration: BoxDecoration(
+          border: Border(
+              bottom: BorderSide(
+        color: unselectedGray,
+      ))),
+      child: ListTile(
+        contentPadding: EdgeInsets.only(
+          left: 50.0,
+          right: 50.0,
+          top: 5.0,
+        ),
+        leading: Icon(menuIcon, size: 40.0),
+        horizontalTitleGap: 30.0,
+        title: MenuSubTitleText(menuText: menu),
+        onTap: () {
+          onTap();
+        },
       ),
-      leading: Icon(menuIcon, size: 40.0),
-      horizontalTitleGap: 30.0,
-      title: MenuSubTitleText(menuText: menu),
-      onTap: () {
-        onTap();
-      },
     );
   }
 }
@@ -974,6 +1039,7 @@ class AccountProfilePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
+        backgroundColor: mainDeepPurple,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -983,7 +1049,7 @@ class AccountProfilePage extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -995,8 +1061,9 @@ class AccountProfilePage extends StatelessWidget {
           'Profile',
           style: const TextStyle(
             fontSize: 18,
-            fontFamily: 'Roboto',
-            color: Colors.deepPurple,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Proza Libre',
+            color: Colors.white,
           ),
         ),
       ),
@@ -1041,7 +1108,7 @@ class AccountProfilePage extends StatelessWidget {
                     Padding(
                       padding:
                           const EdgeInsets.only(left: 50, right: 20, top: 15.0),
-                      child: MenuTitleText(menuText: 'Information'),
+                      child: ProfileHeadingText(menuText: 'Information'),
                     ),
                     AccountSubMenuTile(
                       menu: 'Edit Profile',
@@ -1061,7 +1128,7 @@ class AccountProfilePage extends StatelessWidget {
                     Padding(
                       padding:
                           const EdgeInsets.only(left: 50, right: 20, top: 15.0),
-                      child: MenuTitleText(menuText: 'Account'),
+                      child: ProfileHeadingText(menuText: 'Account'),
                     ),
                     AccountSubMenuTile(
                       menu: 'Notifications',

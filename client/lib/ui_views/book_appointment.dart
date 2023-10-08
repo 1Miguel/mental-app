@@ -75,6 +75,37 @@ class TimeBox extends StatelessWidget {
   }
 }
 
+class BookIconBox extends StatelessWidget {
+  final String title;
+
+  const BookIconBox({
+    super.key,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 170,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          title,
+          textAlign: TextAlign.center,
+          softWrap: true,
+          maxLines: 2,
+          style: TextStyle(
+            color: mainDeepPurple,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Roboto',
+            fontSize: 20,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class BookAppointmentIntroPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -101,11 +132,11 @@ class BookAppointmentIntroPage extends StatelessWidget {
                       fontFamily: 'Roboto',
                       fontSize: 40,
                       fontWeight: FontWeight.w800,
-                      color: const Color.fromARGB(255, 0, 74, 173)),
+                      color: mainDarkBlue),
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -115,13 +146,13 @@ class BookAppointmentIntroPage extends StatelessWidget {
                   maxLines: 3,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontFamily: 'Roboto',
+                      fontFamily: 'Open Sans',
                       fontSize: 18,
-                      color: const Color.fromARGB(255, 0, 74, 173)),
+                      color: mainLightPurple),
                 ),
               ],
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 50),
             FilledButton(
               onPressed: () {
                 Navigator.push(
@@ -131,8 +162,7 @@ class BookAppointmentIntroPage extends StatelessWidget {
               },
               style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                      const Color.fromARGB(255, 0, 74, 173))),
+                  backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
               child: Text('GET STARTED'),
             ),
           ],
@@ -164,7 +194,8 @@ class BookAppointmentPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        backgroundColor: mainDeepPurple,
+        toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -174,7 +205,7 @@ class BookAppointmentPage extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.push(context,
@@ -188,10 +219,10 @@ class BookAppointmentPage extends StatelessWidget {
           child: Text(
             'BOOK APPOINTMENT',
             style: TextStyle(
-                fontFamily: 'Roboto',
+                fontFamily: 'ProzaLibre',
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: const Color.fromARGB(255, 0, 74, 173)),
+                color: Colors.white),
           ),
         ),
       ),
@@ -296,6 +327,44 @@ class _ServiceIconsState extends State<ServiceIcons> {
     }
   }
 
+  setStateValue(ConsulationServices service, bool typeState, bool memberState) {
+    if (service == ConsulationServices.consultation) {
+      setState(() {
+        psychSelected = typeState;
+        mainButtonSelected = memberState;
+      });
+    } else if (service == ConsulationServices.therapy) {
+      setState(() {
+        occTherapySelected = typeState;
+        mainButtonSelected = memberState;
+      });
+    } else if (service == ConsulationServices.counseling) {
+      setState(() {
+        counselingSelected = typeState;
+        mainButtonSelected = memberState;
+      });
+    } else if (service == ConsulationServices.assessment) {
+      setState(() {
+        assesmentSelected = typeState;
+        mainButtonSelected = memberState;
+      });
+    }
+  }
+
+  setServiceState(ConsulationServices service, bool selectedValue) {
+    print(service);
+    printStates();
+
+    if (selectedValue == true && mainButtonSelected == true) {
+      setStateValue(service, false, false);
+    } else if (selectedValue == false && mainButtonSelected == false) {
+      setStateValue(service, true, true);
+    } else if (selectedValue == false && mainButtonSelected == true) {
+      resetStates();
+      setStateValue(service, true, true);
+    }
+  }
+
   printStates() {
     print('Psychselected $psychSelected');
     print('occTherapySelected: $occTherapySelected');
@@ -333,46 +402,12 @@ class _ServiceIconsState extends State<ServiceIcons> {
                             onPressed: () {
                               print('PsychSelected');
                               printStates();
-                              if (psychSelected == true &&
-                                  mainButtonSelected == true) {
-                                setState(() {
-                                  psychSelected = false;
-                                  mainButtonSelected = false;
-                                });
-                              } else if (psychSelected == false &&
-                                  mainButtonSelected == false) {
-                                setState(() {
-                                  psychSelected = true;
-                                  mainButtonSelected = true;
-                                });
-                              } else if (psychSelected == false &&
-                                  mainButtonSelected == true) {
-                                resetStates();
-                                setState(() {
-                                  psychSelected = true;
-                                });
-                              }
+                              setServiceState(ConsulationServices.consultation,
+                                  psychSelected);
                             },
                           ),
                         ),
-                        SizedBox(
-                          width: 170,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Psychiatric Consultation",
-                              textAlign: TextAlign.center,
-                              softWrap: true,
-                              maxLines: 2,
-                              style: TextStyle(
-                                color: mainDeepPurple,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Roboto',
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                        ),
+                        BookIconBox(title: "Psychiatric Consultation"),
                       ],
                     ),
                   ),
@@ -395,43 +430,12 @@ class _ServiceIconsState extends State<ServiceIcons> {
                           onPressed: () {
                             print('OccTherapySelected');
                             printStates();
-                            if (occTherapySelected == true &&
-                                mainButtonSelected == true) {
-                              setState(() {
-                                occTherapySelected = false;
-                                mainButtonSelected = false;
-                              });
-                            } else if (occTherapySelected == false &&
-                                mainButtonSelected == false) {
-                              setState(() {
-                                occTherapySelected = true;
-                                mainButtonSelected = true;
-                              });
-                            } else if (occTherapySelected == false &&
-                                mainButtonSelected == true) {
-                              resetStates();
-                              setState(() {
-                                occTherapySelected = true;
-                              });
-                            }
+                            setServiceState(ConsulationServices.therapy,
+                                occTherapySelected);
                           },
                         ),
                       ),
-                      SizedBox(
-                        width: 170,
-                        child: Text(
-                          "Occupational Therapy",
-                          textAlign: TextAlign.center,
-                          softWrap: true,
-                          maxLines: 2,
-                          style: TextStyle(
-                            color: mainDeepPurple,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Roboto',
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
+                      BookIconBox(title: "Occupational Therapy"),
                     ],
                   ),
                 ),
@@ -462,46 +466,12 @@ class _ServiceIconsState extends State<ServiceIcons> {
                             onPressed: () {
                               print('counselingSelected');
                               printStates();
-                              if (counselingSelected == true &&
-                                  mainButtonSelected == true) {
-                                setState(() {
-                                  counselingSelected = false;
-                                  mainButtonSelected = false;
-                                });
-                              } else if (counselingSelected == false &&
-                                  mainButtonSelected == false) {
-                                setState(() {
-                                  counselingSelected = true;
-                                  mainButtonSelected = true;
-                                });
-                              } else if (counselingSelected == false &&
-                                  mainButtonSelected == true) {
-                                resetStates();
-                                setState(() {
-                                  counselingSelected = true;
-                                });
-                              }
+                              setServiceState(ConsulationServices.counseling,
+                                  counselingSelected);
                             },
                           ),
                         ),
-                        SizedBox(
-                          width: 170,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Counseling",
-                              textAlign: TextAlign.center,
-                              softWrap: true,
-                              maxLines: 2,
-                              style: TextStyle(
-                                color: mainDeepPurple,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Roboto',
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                        ),
+                        BookIconBox(title: "Counseling\n"),
                       ],
                     ),
                   ),
@@ -524,43 +494,12 @@ class _ServiceIconsState extends State<ServiceIcons> {
                           onPressed: () {
                             print('assesmentSelected');
                             printStates();
-                            if (assesmentSelected == true &&
-                                mainButtonSelected == true) {
-                              setState(() {
-                                assesmentSelected = false;
-                                mainButtonSelected = false;
-                              });
-                            } else if (assesmentSelected == false &&
-                                mainButtonSelected == false) {
-                              setState(() {
-                                assesmentSelected = true;
-                                mainButtonSelected = true;
-                              });
-                            } else if (assesmentSelected == false &&
-                                mainButtonSelected == true) {
-                              resetStates();
-                              setState(() {
-                                assesmentSelected = true;
-                              });
-                            }
+                            setServiceState(ConsulationServices.assessment,
+                                assesmentSelected);
                           },
                         ),
                       ),
-                      SizedBox(
-                        width: 170,
-                        child: Text(
-                          "Psychological Assessment",
-                          textAlign: TextAlign.center,
-                          softWrap: true,
-                          maxLines: 2,
-                          style: TextStyle(
-                            color: mainDeepPurple,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Roboto',
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
+                      BookIconBox(title: "Psychological Assessment"),
                     ],
                   ),
                 ),
@@ -863,7 +802,8 @@ class GenericConsultationPage extends StatelessWidget {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          toolbarHeight: 40,
+          backgroundColor: mainDeepPurple,
+          toolbarHeight: 60,
           leading: SizedBox(
             width: 20,
             height: 20,
@@ -873,7 +813,7 @@ class GenericConsultationPage extends StatelessWidget {
                 icon: const Icon(
                   Icons.arrow_back,
                   size: 30,
-                  color: Colors.grey,
+                  color: Colors.white,
                 ),
                 onPressed: () {
                   Navigator.pop(context);
@@ -886,10 +826,10 @@ class GenericConsultationPage extends StatelessWidget {
             child: Text(
               'BOOK APPOINTMENT',
               style: TextStyle(
-                  fontFamily: 'Roboto',
+                  fontFamily: 'Proza Libre',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: const Color.fromARGB(255, 0, 74, 173)),
+                  color: Colors.white),
             ),
           ),
         ),
@@ -1067,7 +1007,8 @@ class BookSchedulePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        backgroundColor: mainDeepPurple,
+        toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1077,7 +1018,7 @@ class BookSchedulePage extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1090,10 +1031,10 @@ class BookSchedulePage extends StatelessWidget {
           child: Text(
             'BOOK APPOINTMENT',
             style: TextStyle(
-                fontFamily: 'Roboto',
+                fontFamily: 'Proza Libre',
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: const Color.fromARGB(255, 0, 74, 173)),
+                color: Colors.white),
           ),
         ),
       ),

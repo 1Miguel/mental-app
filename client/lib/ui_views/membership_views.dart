@@ -178,7 +178,8 @@ class MembershipView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        toolbarHeight: 60,
+        backgroundColor: mainDeepPurple,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -188,7 +189,7 @@ class MembershipView extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.push(context,
@@ -870,7 +871,8 @@ class CancelMembershipView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        toolbarHeight: 60,
+        backgroundColor: mainDeepPurple,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -880,7 +882,7 @@ class CancelMembershipView extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1026,7 +1028,8 @@ class MembershipSelectionView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        backgroundColor: mainDeepPurple,
+        toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1036,7 +1039,7 @@ class MembershipSelectionView extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1073,7 +1076,8 @@ class RegularMembershipSelectionView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        toolbarHeight: 60,
+        backgroundColor: mainDeepPurple,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1083,7 +1087,7 @@ class RegularMembershipSelectionView extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1277,7 +1281,7 @@ class _RegularMembershipIconsState extends State<RegularMembershipIcons> {
                           susMemSelected ? mainBlue : unselectedGray,
                       child: IconButton(
                         icon: Icon(
-                          Icons.groups,
+                          Icons.account_balance,
                           size: 90,
                           color: susMemSelected ? Colors.white : Colors.black54,
                         ),
@@ -1305,7 +1309,7 @@ class _RegularMembershipIconsState extends State<RegularMembershipIcons> {
                           corpMemSelected ? mainBlue : unselectedGray,
                       child: IconButton(
                         icon: Icon(
-                          Icons.groups,
+                          Icons.corporate_fare,
                           size: 90,
                           color:
                               corpMemSelected ? Colors.white : Colors.black54,
@@ -1384,7 +1388,8 @@ class StudentMembershipSelectionView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        backgroundColor: mainDeepPurple,
+        toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1394,7 +1399,7 @@ class StudentMembershipSelectionView extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1640,7 +1645,8 @@ class ContributingMembershipForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        backgroundColor: mainDeepPurple,
+        toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1650,7 +1656,7 @@ class ContributingMembershipForm extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1677,7 +1683,8 @@ class LifeMembershipForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        backgroundColor: mainDeepPurple,
+        toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1687,7 +1694,7 @@ class LifeMembershipForm extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1714,7 +1721,8 @@ class SustainingMembershipForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        backgroundColor: mainDeepPurple,
+        toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1724,7 +1732,7 @@ class SustainingMembershipForm extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1751,7 +1759,8 @@ class CorporateMembershipForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        backgroundColor: mainDeepPurple,
+        toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1761,7 +1770,7 @@ class CorporateMembershipForm extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1788,7 +1797,8 @@ class JuniorHighSchoolMembershipForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        backgroundColor: mainDeepPurple,
+        toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1798,7 +1808,7 @@ class JuniorHighSchoolMembershipForm extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1825,7 +1835,8 @@ class SeniorHighSchoolMembershipForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        backgroundColor: mainDeepPurple,
+        toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1835,7 +1846,7 @@ class SeniorHighSchoolMembershipForm extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -1862,7 +1873,8 @@ class CollegeMembershipForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 40,
+        toolbarHeight: 60,
+        backgroundColor: mainDeepPurple,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1872,7 +1884,7 @@ class CollegeMembershipForm extends StatelessWidget {
               icon: const Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: Colors.grey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -2139,27 +2151,27 @@ class MembershipIntroPage extends StatelessWidget {
                       fontFamily: 'Roboto',
                       fontSize: 40,
                       fontWeight: FontWeight.w800,
-                      color: const Color.fromARGB(255, 0, 74, 173)),
+                      color: mainDarkBlue),
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Join us and be a mental health\nadvocate',
+                  'Join us and be a mental health\nadvocate!',
                   softWrap: true,
                   maxLines: 2,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontFamily: 'Roboto',
+                      fontFamily: 'Open Sans',
                       fontSize: 20,
-                      color: Colors.deepPurple),
+                      color: mainLightPurple),
                 ),
               ],
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 70),
             FilledButton(
               onPressed: () {
                 Navigator.push(
@@ -2169,8 +2181,7 @@ class MembershipIntroPage extends StatelessWidget {
               },
               style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                      const Color.fromARGB(255, 0, 74, 173))),
+                  backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
               child: Text('GET STARTED'),
             ),
           ],
