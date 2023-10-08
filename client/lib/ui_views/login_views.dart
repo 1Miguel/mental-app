@@ -4,31 +4,41 @@ import 'package:flutter/material.dart';
 // Local import
 import 'package:flutter_intro/controllers/signup_controller.dart';
 import 'package:flutter_intro/controllers/login_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dashboard_views.dart';
 import 'mood_views.dart';
+import 'package:flutter_intro/utils/colors_scheme.dart';
 
 // External import
 import 'package:get/get.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:hexcolor/hexcolor.dart';
+
 // Common
 // MainHeadingText
 // SubHeading
+
+// Constants
 
 class MainHeadingText extends StatelessWidget {
   final String title;
   final bool isOverflow;
   final bool isHeavy;
+  final Color customColor;
 
   const MainHeadingText({
     super.key,
     required this.title,
     required this.isOverflow,
     required this.isHeavy,
+    required this.customColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    double newSize = isOverflow ? 25 : 40;
+    double newSize = isOverflow ? 20 : 40;
+    //Overwrite size based on length
+    newSize = (title.length > 15) ? 25 : 30;
     FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
     return Text(
       title,
@@ -36,10 +46,146 @@ class MainHeadingText extends StatelessWidget {
       softWrap: true,
       maxLines: 2,
       style: TextStyle(
-        color: Colors.deepPurple,
-        fontFamily: 'Roboto',
+        color: customColor,
+        fontFamily: 'Proza Libre',
         fontWeight: newWeight,
         fontSize: newSize,
+      ),
+    );
+  }
+}
+
+class SubHeadingText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const SubHeadingText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 13 : 18;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Open Sans',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
+class WelcomeText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const WelcomeText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 25 : 30;
+    //Overwrite based on length as needed
+    newSize = (title.length > 25) ? 25 : 30;
+    FontWeight newWeight = isHeavy ? FontWeight.w700 : FontWeight.w900;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Proza Libre',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
+final TextStyle inputStyle = TextStyle(
+  fontFamily: 'Open Sans',
+  color: Colors.black87,
+  fontSize: 13,
+);
+
+final InputDecoration decor = InputDecoration(
+  filled: true,
+  fillColor: Colors.white,
+  contentPadding: EdgeInsets.only(left: 30.0),
+  errorStyle: TextStyle(
+    fontFamily: 'Open Sans',
+    color: Colors.red,
+    fontSize: 10,
+  ),
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(30)),
+    borderSide: BorderSide(
+      color: Colors.grey,
+      width: 1.0,
+    ),
+  ),
+  enabledBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(30)),
+    borderSide: BorderSide(
+      color: HexColor('#90A4AE'),
+      width: 1.0,
+    ),
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(30)),
+    borderSide: BorderSide(
+      color: HexColor('#01579B'),
+      width: 1.0,
+    ),
+  ),
+  errorBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(30)),
+    borderSide: BorderSide(
+      color: Colors.red,
+      width: 1.0,
+    ),
+  ),
+);
+
+class InputDescription extends StatelessWidget {
+  final String desc;
+
+  const InputDescription({
+    super.key,
+    required this.desc,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.sizeOf(context).width - 40,
+      child: Text(
+        desc,
+        style: TextStyle(
+          color: HexColor('#607D8B'),
+          fontFamily: 'Open Sans',
+        ),
       ),
     );
   }
@@ -130,63 +276,127 @@ class ContentText extends StatelessWidget {
 }
 
 class LoginMainPage extends StatelessWidget {
+  Future<String?> getLoggedInState() async {
+    String? logged_in;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('islogged_in')) {
+      logged_in = prefs.getString('islogged_in')!.toUpperCase();
+    } else {
+      logged_in = "false";
+    }
+    return logged_in;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          SizedBox(height: 140),
-          Image.asset(
-            'images/pmha_logo.jpg',
-            fit: BoxFit.fitWidth,
-            height: 400,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'WE ARE ',
-                style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 40,
-                    color: Colors.deepPurple),
+      resizeToAvoidBottomInset: false,
+      body: FutureBuilder(
+        future: getLoggedInState(),
+        initialData: "false",
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.deepPurpleAccent,
               ),
-              Text(
-                'HERE',
-                style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 40,
-                    color: Colors.lightGreen),
-              ),
-            ],
-          ),
-          SizedBox(height: 80),
-          FilledButton(
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: ((context) => LoginPage())));
-            },
-            style: ButtonStyle(
-                minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    const Color.fromARGB(255, 0, 74, 173))),
-            child: Text('LOGIN'),
-          ),
-          TextButton(
-            child: Text(
-              'Sign Up',
-              style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black),
-            ),
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: ((context) => SignupPage())));
-            },
-          ),
-        ],
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'An ${snapshot.error} occurred',
+                  style: const TextStyle(fontSize: 18, color: Colors.red),
+                ),
+              );
+            } else if (snapshot.hasData) {
+              final data = snapshot.data;
+              if (data == 'false') {
+                return LoginMainView();
+              } else {
+                // TODO: check one day interval for moods
+                // expirationDay = lastDailyCheck.add(oneDayDuration);
+                // isOneDayAfter = DateTime.now().isAfter(expirationDay);
+                return DashboardPage();
+              }
+            }
+          }
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
       ),
+    );
+  }
+}
+
+class LoginMainView extends StatelessWidget {
+  const LoginMainView({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(height: 120),
+        Image.asset(
+          'images/pmha_logo.jpg',
+          fit: BoxFit.fitWidth,
+          height: 400,
+        ),
+        SizedBox(height: 50),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'WE ARE ',
+              style: TextStyle(
+                  fontFamily: 'Proza Libre',
+                  fontSize: 50,
+                  fontWeight: FontWeight.w900,
+                  color: mainDeepPurple),
+            ),
+            Text(
+              'HERE',
+              style: TextStyle(
+                  fontFamily: 'Proza Libre',
+                  fontSize: 50,
+                  fontWeight: FontWeight.w900,
+                  color: mainLightGreen),
+            ),
+          ],
+        ),
+        SizedBox(height: 50),
+        FilledButton(
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: ((context) => LoginPage())));
+          },
+          style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+              backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
+          child: Text(
+            'LOGIN',
+            style:
+                TextStyle(fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
+          ),
+        ),
+        TextButton(
+          child: Text(
+            'SIGN UP',
+            style: TextStyle(
+                fontFamily: 'Open Sans',
+                fontWeight: FontWeight.bold,
+                color: Colors.black),
+          ),
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: ((context) => SignupPage())));
+          },
+        ),
+      ],
     );
   }
 }
@@ -203,14 +413,16 @@ class LoginPage extends StatefulWidget {
 
 class LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  SignupController signupController = Get.put(SignupController());
   LoginController loginController = Get.put(LoginController());
 
   var isLogin = false.obs;
 
   @override
   Widget build(BuildContext context) {
+    loginController.emailController.clear();
+    loginController.passwordController.clear();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Form(
         key: _formKey,
         child: Column(
@@ -227,104 +439,88 @@ class LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Login',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.deepPurple),
+                    MainHeadingText(
+                      title: 'LOGIN',
+                      isHeavy: true,
+                      isOverflow: false,
+                      customColor: mainDeepPurple,
                     ),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Sign in to Continue',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          color: Colors.deepPurple),
-                    ),
+                    SubHeadingText(
+                        title: 'Sign in to Continue',
+                        isOverflow: false,
+                        isHeavy: true,
+                        customColor: mainDeepPurple),
                   ],
                 ),
               ],
             ),
-            SizedBox(height: 30),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter email",
-                    style: TextStyle(
-                      color: Colors.grey,
+            SizedBox(height: 70),
+            Container(
+              width: MediaQuery.sizeOf(context).width - 20,
+              decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 240, 242, 243),
+                  borderRadius: BorderRadius.all(Radius.circular(20))),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'Email:'),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter email';
-                        } else if (!EmailValidator.validate(value)) {
-                          return 'Invalid email';
-                        }
-                        return null;
-                      },
-                      controller: loginController.emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        child: TextFormField(
+                          style: inputStyle,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter email';
+                            } else if (!EmailValidator.validate(value)) {
+                              return 'Invalid email';
+                            }
+                            return null;
+                          },
+                          controller: loginController.emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: decor,
                         ),
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter password",
-                    style: TextStyle(
-                      color: Colors.grey,
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'Password:'),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter password';
-                        }
-                        return null;
-                      },
-                      controller: loginController.passwordController,
-                      obscureText: true,
-                      initialValue: null,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(30))),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter password';
+                            }
+                            return null;
+                          },
+                          controller: loginController.passwordController,
+                          obscureText: true,
+                          initialValue: null,
+                          decoration: decor,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-            SizedBox(height: 70),
+            SizedBox(height: 80),
             FilledButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
@@ -333,9 +529,13 @@ class LoginPageState extends State<LoginPage> {
               },
               style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                      const Color.fromARGB(255, 0, 74, 173))),
-              child: Text('LOGIN'),
+                  backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
+              child: Text(
+                'LOGIN',
+                style: TextStyle(
+                  fontFamily: 'Open Sans',
+                ),
+              ),
             ),
             FilledButton(
               onPressed: () {
@@ -351,24 +551,7 @@ class LoginPageState extends State<LoginPage> {
               child: Text(
                 'Forgot Password?',
                 style: TextStyle(
-                    fontFamily: 'Roboto', fontSize: 12, color: Colors.grey),
-              ),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all<Size>(Size(300, 50)),
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.white)),
-              child: Text(
-                'Go Back (DEBUG ONLY)',
-                style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 12,
-                    decoration: TextDecoration.underline,
-                    color: Colors.grey),
+                    fontFamily: 'Open Sans', fontSize: 12, color: Colors.black),
               ),
             ),
           ],
@@ -409,81 +592,51 @@ class ForgotPasswordState extends State<ForgotPasswordPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Forgot',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 30,
-                          color: Colors.deepPurple),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Password',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 30,
-                          color: Colors.deepPurple),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'New Password',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.deepPurple),
-                    ),
+                    MainHeadingText(
+                        title: 'Forgot\nPassword',
+                        isOverflow: false,
+                        isHeavy: true,
+                        customColor: mainDeepPurple),
                   ],
                 ),
               ],
             ),
             SizedBox(height: 100),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter email",
-                    style: TextStyle(
-                      color: Colors.grey,
+            Container(
+              width: MediaQuery.sizeOf(context).width - 20,
+              decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 240, 242, 243),
+                  borderRadius: BorderRadius.all(Radius.circular(20))),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'Email:'),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter email';
-                        } else if (!EmailValidator.validate(value)) {
-                          return 'Invalid email';
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter email';
+                            } else if (!EmailValidator.validate(value)) {
+                              return 'Invalid email';
+                            }
+                            return null;
+                          },
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: decor,
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
             SizedBox(height: 70),
             FilledButton(
@@ -495,8 +648,7 @@ class ForgotPasswordState extends State<ForgotPasswordPage> {
               },
               style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                      const Color.fromARGB(255, 0, 74, 173))),
+                  backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
               child: Text('SEND'),
             ),
           ],
@@ -517,9 +669,15 @@ class SignupPage extends StatefulWidget {
 
 class SignupState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
+  SignupController signupController = Get.put(SignupController());
+
   @override
   Widget build(BuildContext context) {
+    signupController.nameController.clear();
+    signupController.passwordController.clear();
+    signupController.emailController.clear();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Form(
         key: _formKey,
         child: Column(
@@ -530,159 +688,153 @@ class SignupState extends State<SignupPage> {
               fit: BoxFit.fitWidth,
               height: 200,
             ),
+            SizedBox(height: 15),
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: MainHeadingText(
+                        title: 'SIGNUP',
+                        isHeavy: true,
+                        isOverflow: false,
+                        customColor: mainDeepPurple,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: SubHeadingText(
+                        title: 'Create an Account',
+                        isHeavy: true,
+                        isOverflow: true,
+                        customColor: mainDeepPurple,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
             SizedBox(height: 20),
-            Column(
-              children: [
-                Row(
+            Container(
+              width: MediaQuery.sizeOf(context).width - 20,
+              decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 240, 242, 243),
+                  borderRadius: BorderRadius.all(Radius.circular(20))),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'PHILIPPINE MENTAL',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.deepPurple),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'First Name:'),
                     ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'HEALTH ASSOCIATION',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.deepPurple),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        height: 60,
+                        child: TextFormField(
+                            style: inputStyle,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your name';
+                              }
+                              return null;
+                            },
+                            controller: signupController.nameController,
+                            initialValue: null,
+                            decoration: decor),
+                      ),
                     ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'PALAWAN',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.lightGreen),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'Last Name:'),
                     ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 40),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter your name",
-                    style: TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your name';
-                        }
-                        return null;
-                      },
-                      initialValue: null,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        height: 60,
+                        child: TextFormField(
+                          style: inputStyle,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your last name';
+                            }
+                            return null;
+                          },
+                          //controller: signupController.nameController,
+                          initialValue: null,
+                          decoration: decor,
                         ),
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter your email",
-                    style: TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter email';
-                        } else if (!EmailValidator.validate(value)) {
-                          return 'Invalid email';
-                        }
-                        return null;
-                      },
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
-                        ),
+                    Padding(
+                        padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                        child: InputDescription(desc: 'Email:')),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        height: 60,
+                        child: TextFormField(
+                            style: inputStyle,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter email';
+                              } else if (!EmailValidator.validate(value)) {
+                                return 'Invalid email';
+                              }
+                              return null;
+                            },
+                            controller: signupController.emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: decor),
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                  child: Text(
-                    "Please enter your password",
-                    style: TextStyle(
-                      color: Colors.grey,
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: InputDescription(desc: 'Password:'),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: SizedBox(
-                    width: 315,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter password';
-                        }
-                        return null;
-                      },
-                      obscureText: true,
-                      initialValue: null,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 30.0),
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(30))),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5.0),
+                      child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 40,
+                        height: 60,
+                        child: TextFormField(
+                            style: inputStyle,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter password';
+                              }
+                              return null;
+                            },
+                            controller: signupController.passwordController,
+                            obscureText: true,
+                            initialValue: null,
+                            decoration: decor),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-            SizedBox(height: 50),
+            SizedBox(
+              height: 40,
+            ),
             FilledButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  // TODO: REST API
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => LoginMainPage())));
+                  signupController.registerWithEmail();
                 }
               },
               style: ButtonStyle(
@@ -700,79 +852,113 @@ class SignupState extends State<SignupPage> {
 }
 
 class WelcomePage extends StatelessWidget {
+  Future<String?> getUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? name = prefs.getString('first_name')!.toUpperCase();
+    return name;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
           Navigator.push(context,
               MaterialPageRoute(builder: ((context) => MoodModalPage())));
         },
-        child: Container(
-          child: Column(
-            children: [
-              SizedBox(height: 100),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'WELCOME, USER!',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 30,
-                        color: Colors.deepPurple),
-                  ),
-                ],
-              ),
-              Image.asset(
-                'images/welcome_logo.png',
-                fit: BoxFit.fitWidth,
-                height: 400,
-              ),
-              SizedBox(height: 80),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'HERE FOR ',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 30,
-                        color: Colors.deepPurple),
-                  ),
-                  Text(
-                    'YOU',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 30,
-                        color: Colors.lightGreen),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'HERE TO ',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 30,
-                        color: Colors.deepPurple),
-                  ),
-                  Text(
-                    'STAY',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 30,
-                        color: Colors.lightGreen),
-                  ),
-                ],
-              ),
-            ],
+        child: SizedBox(
+          width: double.infinity,
+          child: Center(
+            child: FutureBuilder(
+              future: getUserName(),
+              initialData: null,
+              builder: (BuildContext context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.deepPurpleAccent,
+                    ),
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'An ${snapshot.error} occurred',
+                        style: const TextStyle(fontSize: 18, color: Colors.red),
+                      ),
+                    );
+                  } else if (snapshot.hasData) {
+                    final data = snapshot.data;
+                    String welcomeString = 'WELCOME   $data';
+                    return Column(
+                      children: [
+                        SizedBox(height: 100),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 15.0),
+                              child: MainHeadingText(
+                                  title: welcomeString,
+                                  isOverflow: false,
+                                  isHeavy: true,
+                                  customColor: mainDeepPurple),
+                            )
+                          ],
+                        ),
+                        Image.asset(
+                          'images/welcome_logo.png',
+                          fit: BoxFit.fitWidth,
+                          height: 400,
+                        ),
+                        SizedBox(height: 80),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            MainHeadingText(
+                                title: 'HERE FOR  ',
+                                isOverflow: false,
+                                isHeavy: true,
+                                customColor: mainDeepPurple),
+                            MainHeadingText(
+                                title: 'YOU',
+                                isOverflow: false,
+                                isHeavy: true,
+                                customColor: mainLightGreen),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            MainHeadingText(
+                                title: 'HERE TO  ',
+                                isOverflow: false,
+                                isHeavy: true,
+                                customColor: mainDeepPurple),
+                            MainHeadingText(
+                                title: 'STAY',
+                                isOverflow: false,
+                                isHeavy: true,
+                                customColor: mainLightGreen),
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+                }
+
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            ),
           ),
         ),
       ),
-    );
+    ));
   }
 }

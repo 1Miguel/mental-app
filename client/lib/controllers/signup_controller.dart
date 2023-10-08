@@ -1,6 +1,12 @@
+// Standard import
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+
+// Local import
+import 'package:flutter_intro/ui_views/login_views.dart';
+import 'package:flutter_intro/utils/api_endpoints.dart';
+
+// Third-party import
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -9,42 +15,41 @@ class SignupController extends GetxController {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  String loginUrl = ApiEndPoints.checkPlatform();
 
   Future<void> registerWithEmail() async {
     try {
-      var headers = <String, String>{
-        'Accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      };
-      var url = Uri.parse('http://127.0.0.1:8000/signup');
-      Map body = {
-        "id": 0,
-        "email": emailController.text,
-        "password_hash": passwordController.text,
-        "firstname": nameController.text,
-      };
-
-      http.Response response =
-          await http.post(url, body: jsonEncode(body), headers: headers);
+      final response = await http.post(
+        Uri.parse('$loginUrl/signup'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'email': emailController.text,
+          'password_hash': passwordController.text,
+          'firstname': nameController.text,
+          'lastname': 'test',
+          'address': 'Alabang, Muntinlupa',
+          'age': 30,
+          'occupation': 'Software Engineer',
+        }),
+      );
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
-        if (json['code'] == 0) {
-          var token = json['data']['token'];
-          print(token);
-          final SharedPreferences? prefs = await _prefs;
+        print(json);
+        // final SharedPreferences? prefs = await _prefs;
 
-          await prefs?.setString('token', token);
-          nameController.clear();
-          emailController.clear();
-          passwordController.clear();
-          //go to home
-        } else {
-          throw jsonDecode(response.body)['Message'] ??
-              "Unknown Error Occurred";
-        }
+        // await prefs?.setString('token', token);
+        nameController.clear();
+        emailController.clear();
+        passwordController.clear();
+        //go to home
+        Get.off(() => LoginMainPage());
+      } else if (response.statusCode == 409) {
+        throw jsonDecode(response.body)['Message'] ?? "Account already exists";
       } else {
         throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
       }
