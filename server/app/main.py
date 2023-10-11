@@ -1,17 +1,19 @@
 import sys
 import logging
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Annotated
 
 # third-party imports
 import jwt
 from passlib.hash import bcrypt
-from fastapi import FastAPI, HTTPException, Response, status, Depends
+from fastapi import FastAPI, HTTPException, Response, status, Depends, File, Form, UploadFile
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
 from tortoise.exceptions import DoesNotExist, IntegrityError
 from tortoise.contrib.fastapi import register_tortoise
 from tortoise.contrib.pydantic import pydantic_model_creator
-from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 
 # internal modules
 from internal.database import *
@@ -179,6 +181,24 @@ async def mood_get(month: str, user: UserSchema = Depends(get_current_user)) -> 
         ) from exc
 
 
+@app.post("/user/membership/register")
+async def membership_register_route(
+    membership_api: str = Form(...), files: List[UploadFile] = File(...),
+) -> None:
+    try:
+        membership_api = MembershipRegisterApi.model_validate_json(membership_api)
+    except ValidationError as exc:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY, detail=jsonable_encoder(exc.errors())
+        ) from exc
+
+
+@app.post("/user/membership/cancel")
+async def membership_cancel_route(
+    membership: MembershipCancelApi, user: UserSchema = Depends(get_current_user)
+) -> None:
+    pass
+
 @app.post("/signup")
 async def signup_route(user: UserApi) -> Any:
     """Route to call when user wishes to create a new account.
@@ -203,7 +223,6 @@ async def signup_route(user: UserApi) -> Any:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="email is already used."
         ) from err
-
 
 def run() -> None:
     import uvicorn

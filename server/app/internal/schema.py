@@ -5,9 +5,9 @@ uses pydantic base model.
 
 date: 10/07/2023
 """
-from typing import List, Optional
-from pydantic import BaseModel, Field
-from internal.database import MembershipType
+from typing import List
+from pydantic import BaseModel
+from internal.database import MembershipType, MembershipStatus
 
 
 class MoodLog(BaseModel):
@@ -58,3 +58,21 @@ class UserProfileApi(BaseModel):
     occupation: str = ""
     mobile_number: str = ""
     membership_type: MembershipType = MembershipType.NONE
+    membership_status: MembershipStatus = MembershipStatus.NULL
+
+class MembershipRegisterApi(BaseModel):
+    """API model of a user membership.
+    
+    Supported Method: POST
+    """
+
+    membership_type: MembershipType
+
+class MembershipCancelApi(BaseModel):
+    """API model of a user membership cancellation.
+    
+    Supported Method: POST
+    """
+
+    reason: str
+    suggestion: str

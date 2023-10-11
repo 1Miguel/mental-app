@@ -3,7 +3,7 @@ This module contains all database schema models.
 
 date: 10/07/2023
 """
-from enum import IntEnum, auto
+from enum import IntEnum, Enum, auto
 from datetime import datetime
 from typing import List
 from typing_extensions import Self
@@ -15,6 +15,8 @@ from tortoise.fields import (
     IntField,
     CharField,
     ForeignKeyField,
+    CharEnumField,
+    FileField
 )
 
 
@@ -28,15 +30,23 @@ class MoodId(IntEnum):
     ANGRY = auto()
 
 
+class MembershipStatus(str, Enum):
+    """Membership Status."""
+
+    NULL = "NULL"
+    PENDING = "PENDING"
+    ACTIVE = "ACTIVE"
+    EXPIRED = "EXPIRED"
+    CANCELLED = "CANCELLED"
+
 class MembershipType(IntEnum):
     """Member Subscription Type Ids."""
 
     NONE = 0
-    LIFE = auto()
-    CONTRIBUTING = auto()
     SUSTAINING = auto()
     CORPORATE = auto()
-    COLLEGE = auto()
+    CONTRIBUTING = auto()
+    ASSOCIATE = auto()
     SENIOR_HS = auto()
     JUNIOR_HS = auto()
 
@@ -88,19 +98,26 @@ class MoodModel(Model):
         ).all()
 
 
-if __name__ == "__main__":
-    from tortoise import Tortoise, run_async
+class MembershipModel(Model):
+    """Membership model. Contains information related to
+    a user membership which includes type of membership
+    and expiration date.
+    
+    The status field indicatest the membership status
+        - ACTIVE: membership is active and can be cancelled
+        - EXPIRED: membership is at past expiration date,
+                membership could be renewed, which will change status
+                back to ACTIVE.
+        - CANCELLED: membership was cancelled. When membership is cancelled
+                cancel_reason and cancel_suggestion might contain some data.
+                Will only get to this status from ACTIVE.
+    """
 
-    async def main():
-        await Tortoise.init(db_url="sqlite://db.sqlite3", modules={"models": ["__main__"]})
-        await Tortoise.generate_schemas()
-
-        user = await UserModel.get(email="johndoe@gmail.com")
-        for day in range(1, 15, 1):
-            today = datetime(year=2023, month=10, day=day)
-            await MoodModel(user=user, mood=MoodId.GOOD, date=today, note="I feel good!").save()
-
-        for d in await MoodModel.get_all_by_month(user.email, datetime.now()):
-            print(d)
-
-    run_async(main())
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    type = IntEnumField(MembershipType)
+    start_time = DateField()
+    end_time = DateField()
+    status = CharEnumField(MembershipStatus, max_length=64)
+    cancel_reason = CharField(max_length=160)
+    cancel_suggestion = CharField(max_length=160)
