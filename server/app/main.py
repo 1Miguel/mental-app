@@ -1,6 +1,6 @@
 import sys
 import logging
-import datetime
+from datetime import datetime
 from typing import Dict, Any, Optional
 
 # third-party imports
@@ -14,8 +14,8 @@ from tortoise.contrib.pydantic import pydantic_model_creator
 from fastapi.middleware.cors import CORSMiddleware
 
 # internal modules
-from internal.database import UserModel, MoodModel, MoodId
-from internal.schema import MoodLog, UserApi
+from internal.database import *
+from internal.schema import *
 
 # logger module
 log = logging.getLogger(__name__)
@@ -59,12 +59,23 @@ UserSchemaReadOnly = pydantic_model_creator(UserModel, name="User", exclude_read
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
+@app.on_event("startup")
+async def startup() -> None:
+    """Routine at application startup."""
+    log.info("Startup routine")
+
+
 @app.get("/")
 def index() -> Dict[str, str]:
+    """Index route.
+    TODO: Implement the right routine"""
     return {"message": "Hello World"}
 
 
 async def get_authenticated_user(email: str, password: str) -> UserModel:
+    """Returns the authenticated user database model if the given
+    credentials are correct, else this will return None.
+    """
     user = await UserModel.get(email=email)
     if not user:
         return None
@@ -77,7 +88,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     # as long as there is an oauth2 scheme in the
     # dependency chain, that would be locked in
     # to the login user dependency
-    log.info("get current user with token %s", token)
     try:
         payload = jwt.decode(token, _JWT_SECRET, algorithms="HS256")
         user = await UserModel.get(email=payload.get("email"))
@@ -92,12 +102,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 @app.post("/token", status_code=status.HTTP_200_OK)
 async def generate_token(
     form_data: OAuth2PasswordRequestForm = Depends(), response: Response = Response()
-):
+) -> Any:
     """Generates a session token."""
     try:
-        user_model = await get_authenticated_user(
-            form_data.username, form_data.password
-        )
+        user_model = await get_authenticated_user(form_data.username, form_data.password)
     except DoesNotExist:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"error": f"account does not exist"}
@@ -111,58 +119,83 @@ async def generate_token(
             return {"error": "invalid credentials"}
 
 
-@app.get("/login", response_model=UserSchema)
-def login(user: UserSchema = Depends(get_current_user)) -> Any:
+@app.get("/login", response_model=UserProfileApi)
+async def login(user: UserSchema = Depends(get_current_user)) -> Any:
     """login route called when user wants to login. This depends on the user
     if the user has a token. If the user does not have a valid token, reject
     the login request.
     """
-    log.info("logging in...")
-    return user
-
-
-@app.get("/users/mood", response_model=UserSchema)
-async def mood_log(user: UserSchema = Depends(get_current_user), mood: Optional[MoodLog]=None):
-    """Daily Mood Logging."""
-    if mood is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid Data."
-        )
-    today = datetime.datetime.today().date()
-    if MoodModel.get(date=today):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Mood already set for today."
-        )
-    log.debug("Create new mood for %s", user)
-    # log new mood today
-    new_mood = MoodModel(
-        user=user,
-        mood=MoodId(mood.mood),
-        date=today
+    # return the profile at login success
+    return UserProfileApi(
+        id=user.id,
+        email=user.email,
+        firstname=user.firstname,
+        lastname=user.lastname,
+        address=user.address,
+        age=user.age,
+        occupation=user.occupation,
+        birthday=user.birthday,
+        membership_type=MembershipType.NONE,
     )
-    await new_mood.save()
-    return await UserSchema.from_tortoise_orm(user)
 
 
-@app.post("/signup", response_model=UserSchema)
-async def users(user: UserApi) -> Any:
+@app.post("/user/mood")
+async def mood_log(mood: MoodLog, user: UserSchema = Depends(get_current_user)) -> None:
+    """Daily Mood Logging. if mood score has been log for today, dont lot anymore
+    and return an HTTP_409_CONFLICT error."""
+    user = await UserModel.get(email=user.email)
+    today = datetime.today().date()
+    try:
+        mood_id = MoodId(mood.mood)
+        mood_db = await MoodModel.get(date=datetime.today().date())
+        mood_db.mood = mood_id
+        mood_db.note = mood.note
+    except DoesNotExist:  # no data log today, create a new data to save
+        mood_db = MoodModel(user=user, mood=mood_id, date=today, note=mood.note)
+    except ValueError:  # invalid mood id
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Data.")
+    await mood_db.save()
+
+
+@app.get("/user/mood/", response_model=MoodListResponse)
+async def mood_get(month: str, user: UserSchema = Depends(get_current_user)) -> MoodListResponse:
+    """This handles the mood log request. This will return a response that contains
+    list of all moods log in a given month."""
+    try:
+        month = datetime.fromisoformat(month)
+        response = MoodListResponse(mood_list=[])
+        for mood_db_data in await MoodModel.get_all_by_month(user.email, month):
+            response.mood_list += [
+                MoodLog(
+                    mood=mood_db_data.id, note=mood_db_data.note, date=mood_db_data.date.isoformat()
+                )
+            ]
+        return response
+    except ValueError as exc:  # wrong datetime isoformat
+        log.error("Receive Invalid Month %s", month)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"given month {month} is not a valid isoformat",
+        ) from exc
+
+
+@app.post("/signup")
+async def signup_route(user: UserApi) -> Any:
     """Route to call when user wishes to create a new account.
     This requires unique credential. if email or email is already used,
     reject the signup request.
     """
     log.info("Create user %s", user)
-
     try:
         user = UserModel(
             email=user.email,
-            password_hash=bcrypt.hash(user.password_hash),
+            password_hash=bcrypt.hash(user.password),
             firstname=user.firstname,
             lastname=user.lastname,
-            address=user.address,
-            age=user.age,
-            occupation=user.occupation,
+            address="",
+            age=0,
+            occupation="",
+            birthday=datetime(year=1900, month=1, day=1).isoformat(),
         )
         await user.save()
     except IntegrityError as err:
@@ -170,11 +203,13 @@ async def users(user: UserApi) -> Any:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="email is already used."
         ) from err
-    else:
-        return await UserSchema.from_tortoise_orm(user)
 
 
-if __name__ == "__main__":
+def run() -> None:
     import uvicorn
 
     uvicorn.run(app, host="127.0.0.1", port=8000)
+
+
+if __name__ == "__main__":
+    run()

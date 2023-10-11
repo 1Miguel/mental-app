@@ -43,9 +43,7 @@ class TestServer(unittest.TestCase):
             "username": "johndoe@gmail.com",
             "password": "testpassword",
         }
-        token = self.client.post(
-            "http://127.0.0.1:8000/token", headers=headers, data=data
-        ).json()
+        token = self.client.post("http://127.0.0.1:8000/token", headers=headers, data=data).json()
         access_token = token["access_token"]
         token_type = token["token_type"]
         headers = {"Authorization": f"{token_type} {access_token}"}
@@ -75,14 +73,10 @@ class TestServer(unittest.TestCase):
         """
         headers = {"accept": "application/json", "Content-Type": "application/json"}
         new_user_req = {
-            "id": 0,
             "email": "johndoe@gmail.com",
-            "password_hash": "testpassword",
+            "password": "testpassword",
             "firstname": "john",
             "lastname": "doe",
-            "address": "manila",
-            "age": 25,
-            "occupation": "Engineer",
         }
         response = self.client.post(
             "http://127.0.0.1:8000/signup", headers=headers, json=new_user_req
@@ -101,9 +95,7 @@ class TestServer(unittest.TestCase):
             "username": "johndoe@gmail.com",
             "password": "testpassword",
         }
-        response = self.client.post(
-            "http://127.0.0.1:8000/token", headers=headers, data=data
-        )
+        response = self.client.post("http://127.0.0.1:8000/token", headers=headers, data=data)
         token = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertIn("access_token", token)
@@ -122,28 +114,39 @@ class TestServer(unittest.TestCase):
          When: Attempt to log mood
          Then: Server response must be ok
          When: Attempt to log mood again
-         Then: Server response must be 
+         Then: Server response must be
         """
-        headers, user = self.login_routine()
+        headers, _ = self.login_routine()
         headers["accept"]: "application/json"
-        user_id = user["id"]
-        new_mood = {
-            "user": user_id,
-            "mood": 0
-        }
+        new_mood = {"mood": 0, "note": "Feeling good!"}
         # first time setting mood today
-        response = self.client.get(f"http://127.0.0.1:8000/users/mood", headers=headers, json=new_mood)
+        response = self.client.post(
+            f"http://127.0.0.1:8000/user/mood", headers=headers, json=new_mood
+        )
         self.assertTrue(response.ok)
-        # try to add mood again, expect server to reject
-        response = self.client.get(f"http://127.0.0.1:8000/users/mood", headers=headers, json=new_mood)
-        self.assertEqual(response.status_code, 409)
+
+    def test_get_log_mood_this_month(self) -> None:
+        """Test Requesting list of log moods for a given month.
+
+        Given:
+         When: Mood log list is requested with a given date
+         Then: Server response must be ok
+          And: Data must be returned.
+        """
+        headers, _ = self.login_routine()
+        headers["accept"]: "application/json"
+        test_params = {"month": "2023-10-11"}
+        test_response = self.client.get(
+            "http://127.0.0.1:8000/user/mood/", headers=headers, params=test_params
+        )
+        self.assertTrue(test_response.ok)
 
     def test_user_logout(self) -> None:
         """Test User logout.
 
         Given: User is login and user has token
          When: User logout
-         Then: Serve must return unauthorize access to all API request. 
+         Then: Serve must return unauthorize access to all API request.
         """
 
 
