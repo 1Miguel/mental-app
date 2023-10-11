@@ -16,8 +16,8 @@ class MoodLog(BaseModel):
     """
 
     mood: int
-    note: str
-    date: Optional[str] = ""  # date in isoformat
+    note: str = ""
+    date: str = ""  # date in isoformat
 
 
 class MoodListResponse(BaseModel):

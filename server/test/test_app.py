@@ -118,7 +118,7 @@ class TestServer(unittest.TestCase):
         """
         headers, _ = self.login_routine()
         headers["accept"]: "application/json"
-        new_mood = {"mood": 0, "note": "Feeling good!"}
+        new_mood = {"mood": 0, "note": "Feeling happy!"}
         # first time setting mood today
         response = self.client.post(
             f"http://127.0.0.1:8000/user/mood", headers=headers, json=new_mood
@@ -128,7 +128,7 @@ class TestServer(unittest.TestCase):
     def test_get_log_mood_this_month(self) -> None:
         """Test Requesting list of log moods for a given month.
 
-        Given:
+        Given: Logged in
          When: Mood log list is requested with a given date
          Then: Server response must be ok
           And: Data must be returned.
@@ -140,6 +140,7 @@ class TestServer(unittest.TestCase):
             "http://127.0.0.1:8000/user/mood/", headers=headers, params=test_params
         )
         self.assertTrue(test_response.ok)
+        print(test_response.json())
 
     def test_user_logout(self) -> None:
         """Test User logout.

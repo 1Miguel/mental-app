@@ -21,11 +21,11 @@ from tortoise.fields import (
 class MoodId(IntEnum):
     """Mood Score Ids."""
 
-    AWFUL = 0
-    BAD = auto()
-    UNSURE = auto()
-    GOOD = auto()
-    GREAT = auto()
+    HAPPY = 0
+    SAD = auto()
+    CONFUSED = auto()
+    SCARED = auto()
+    ANGRY = auto()
 
 
 class MembershipType(IntEnum):
