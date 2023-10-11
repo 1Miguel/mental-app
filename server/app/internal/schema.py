@@ -38,8 +38,8 @@ class UserApi(BaseModel):
 
     email: str
     password: str
-    firstname: str = ""
-    lastname: str = ""
+    firstname: str
+    lastname: str
 
 
 class UserProfileApi(BaseModel):
@@ -56,4 +56,5 @@ class UserProfileApi(BaseModel):
     address: str = ""
     age: int = 0
     occupation: str = ""
+    mobile_number: str = ""
     membership_type: MembershipType = MembershipType.NONE
