@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:hexcolor/hexcolor.dart';
+import 'package:checkbox_formfield/checkbox_formfield.dart';
 
 class TitleText extends StatelessWidget {
   final String title;
@@ -21,7 +25,7 @@ class TitleText extends StatelessWidget {
       softWrap: true,
       maxLines: 2,
       style: TextStyle(
-        color: mainDarkBlue,
+        color: primaryBlue,
         fontFamily: 'Proza Libre',
         fontWeight: FontWeight.w900,
         fontSize: newSize,
@@ -44,7 +48,7 @@ class TitleSubHeadingText extends StatelessWidget {
       title,
       textAlign: TextAlign.center,
       style: TextStyle(
-        color: Color.fromARGB(255, 0, 74, 173),
+        color: primaryBlue,
         fontWeight: FontWeight.w900,
         fontSize: 30,
       ),
@@ -131,7 +135,7 @@ class IconTitleBox extends StatelessWidget {
           maxLines: 2,
           style: TextStyle(
             color: secondaryBlue,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w400,
             fontFamily: 'Roboto',
             fontSize: textSize,
           ),
@@ -173,13 +177,161 @@ class IconSubheadingBox extends StatelessWidget {
   }
 }
 
+final TextStyle inputStyle = TextStyle(
+  fontFamily: 'Open Sans',
+  color: Colors.black87,
+  fontSize: 13,
+);
+
+class InputDescription extends StatelessWidget {
+  final String desc;
+
+  const InputDescription({
+    super.key,
+    required this.desc,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: MediaQuery.sizeOf(context).width - 40,
+      child: Text(
+        desc,
+        style: TextStyle(
+          color: primaryGrey,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Open Sans',
+        ),
+      ),
+    );
+  }
+}
+
+InputDecoration getDecor(IconData icon) {
+  return InputDecoration(
+    suffixIcon: Icon(icon),
+    filled: true,
+    fillColor: Colors.white,
+    contentPadding: EdgeInsets.only(left: 30.0),
+    errorStyle: TextStyle(
+      fontFamily: 'Open Sans',
+      color: Colors.red,
+      fontSize: 10,
+    ),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(30)),
+      borderSide: BorderSide(
+        color: Colors.grey,
+        width: 1.0,
+      ),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(30)),
+      borderSide: BorderSide(
+        color: HexColor('#90A4AE'),
+        width: 1.0,
+      ),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(30)),
+      borderSide: BorderSide(
+        color: primaryLightBlue,
+        width: 1.0,
+      ),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(30)),
+      borderSide: BorderSide(
+        color: Colors.red,
+        width: 1.0,
+      ),
+    ),
+  );
+}
+
+class MainHeadingText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const MainHeadingText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 20 : 40;
+    //Overwrite size based on length
+    newSize = (title.length > 15) ? 25 : 30;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Proza Libre',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
+class HeaderContentText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const HeaderContentText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 18 : 22;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 5,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Open Sans',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
 class MembershipView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 60,
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -342,8 +494,7 @@ class _RegisterMemberIconsState extends State<RegisterMemberIcons> {
                       },
                     ),
                   ),
-                  IconTitleBox(
-                      title: "CANCEL MEMBERSHIP", overwriteSize: false),
+                  IconTitleBox(title: "REST \nA WHILE", overwriteSize: false),
                 ],
               ),
             ],
@@ -405,7 +556,7 @@ class _RegisterMemberIconsState extends State<RegisterMemberIcons> {
   }
 }
 
-enum MembershipType { regular, student }
+enum MembershipType { individual, group }
 
 class MembershipTypeIcons extends StatefulWidget {
   const MembershipTypeIcons({super.key});
@@ -416,30 +567,30 @@ class MembershipTypeIcons extends StatefulWidget {
 
 class _MembershipTypeIconsState extends State<MembershipTypeIcons> {
   bool memberTypeSelected = false;
-  bool regularSelected = false;
-  bool studentSelected = false;
+  bool individualSelected = false;
+  bool groupSelected = false;
 
   resetStates() {
-    if (regularSelected) {
+    if (individualSelected) {
       setState(() {
-        regularSelected = false;
+        individualSelected = false;
       });
-    } else if (studentSelected) {
+    } else if (groupSelected) {
       setState(() {
-        studentSelected = false;
+        groupSelected = false;
       });
     }
   }
 
   setTypeValue(MembershipType type, bool typeState, bool mainSelectState) {
-    if (type == MembershipType.regular) {
+    if (type == MembershipType.individual) {
       setState(() {
-        regularSelected = typeState;
+        individualSelected = typeState;
         memberTypeSelected = mainSelectState;
       });
-    } else if (type == MembershipType.student) {
+    } else if (type == MembershipType.group) {
       setState(() {
-        studentSelected = typeState;
+        groupSelected = typeState;
         memberTypeSelected = mainSelectState;
       });
     }
@@ -460,8 +611,8 @@ class _MembershipTypeIconsState extends State<MembershipTypeIcons> {
   }
 
   printStates() {
-    print('regularSelected $regularSelected');
-    print('studentSelected: $studentSelected');
+    print('regularSelected $individualSelected');
+    print('studentSelected: $groupSelected');
     print('memberTypeSelected: $memberTypeSelected');
   }
 
@@ -479,45 +630,45 @@ class _MembershipTypeIconsState extends State<MembershipTypeIcons> {
                   CircleAvatar(
                     radius: 70,
                     backgroundColor:
-                        regularSelected ? mainBlue : unselectedGray,
+                        individualSelected ? mainBlue : unselectedGray,
                     child: IconButton(
                       icon: Icon(
-                        Icons.groups,
+                        Icons.person,
                         size: 90,
-                        color: regularSelected ? Colors.white : Colors.black54,
+                        color:
+                            individualSelected ? Colors.white : Colors.black54,
                       ),
                       onPressed: () {
-                        print('registerMemberSelected');
+                        print('individualSelected');
                         printStates();
                         setMembershipTypeState(
-                            MembershipType.regular, regularSelected);
+                            MembershipType.individual, individualSelected);
                       },
                     ),
                   ),
-                  IconTitleBox(title: "REGULAR", overwriteSize: false),
+                  IconTitleBox(title: "Individual", overwriteSize: false),
                 ],
               ),
               Column(
                 children: [
                   CircleAvatar(
                     radius: 70,
-                    backgroundColor:
-                        studentSelected ? mainBlue : unselectedGray,
+                    backgroundColor: groupSelected ? mainBlue : unselectedGray,
                     child: IconButton(
                       icon: Icon(
                         Icons.groups,
                         size: 90,
-                        color: studentSelected ? Colors.white : Colors.black54,
+                        color: groupSelected ? Colors.white : Colors.black54,
                       ),
                       onPressed: () {
-                        print('studentSelected');
+                        print('groupSelected');
                         printStates();
                         setMembershipTypeState(
-                            MembershipType.student, studentSelected);
+                            MembershipType.group, groupSelected);
                       },
                     ),
                   ),
-                  IconTitleBox(title: "STUDENT", overwriteSize: false),
+                  IconTitleBox(title: "Group", overwriteSize: false),
                 ],
               ),
             ],
@@ -556,18 +707,18 @@ class _MembershipTypeIconsState extends State<MembershipTypeIcons> {
                         ],
                       );
                     });
-              } else if (regularSelected) {
+              } else if (individualSelected) {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: ((context) =>
-                            RegularMembershipSelectionView())));
-              } else if (studentSelected) {
+                            IndividualMembershipSelectionView())));
+              } else if (groupSelected) {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: ((context) =>
-                            StudentMembershipSelectionView())));
+                            GroupMembershipSelectionView())));
               }
             },
             style: ButtonStyle(
@@ -870,9 +1021,17 @@ class CancelMembershipView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 60,
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1027,8 +1186,16 @@ class MembershipSelectionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -1071,581 +1238,20 @@ class MembershipSelectionView extends StatelessWidget {
   }
 }
 
-class RegularMembershipSelectionView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 60,
-        backgroundColor: mainDeepPurple,
-        leading: SizedBox(
-          width: 20,
-          height: 20,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-            child: IconButton(
-              icon: const Icon(
-                Icons.arrow_back,
-                size: 30,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ),
-        ),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            height: 50,
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: TitleText(
-              title: 'REGULAR',
-              isOverflow: false,
-            ),
-          ),
-          SizedBox(
-            height: 50,
-          ),
-          RegularMembershipIcons(),
-        ],
-      ),
-    );
-  }
-}
-
-enum RegularMembershipType { contributing, life, sustaining, corporate }
-
-class RegularMembershipIcons extends StatefulWidget {
-  const RegularMembershipIcons({super.key});
-
-  @override
-  State<RegularMembershipIcons> createState() => _RegularMembershipIconsState();
-}
-
-class _RegularMembershipIconsState extends State<RegularMembershipIcons> {
-  bool regMemSelected = false;
-  bool contMemSelected = false;
-  bool lifeMemSelected = false;
-  bool susMemSelected = false;
-  bool corpMemSelected = false;
-
-  resetStates() {
-    if (contMemSelected) {
-      setState(() {
-        contMemSelected = false;
-      });
-    } else if (lifeMemSelected) {
-      setState(() {
-        lifeMemSelected = false;
-      });
-    } else if (susMemSelected) {
-      setState(() {
-        susMemSelected = false;
-      });
-    } else if (corpMemSelected) {
-      setState(() {
-        corpMemSelected = false;
-      });
-    }
-  }
-
-  setStateValue(RegularMembershipType type, bool typeState, bool memberState) {
-    if (type == RegularMembershipType.contributing) {
-      setState(() {
-        contMemSelected = typeState;
-        regMemSelected = memberState;
-      });
-    } else if (type == RegularMembershipType.life) {
-      setState(() {
-        lifeMemSelected = typeState;
-        regMemSelected = memberState;
-      });
-    } else if (type == RegularMembershipType.sustaining) {
-      setState(() {
-        susMemSelected = typeState;
-        regMemSelected = memberState;
-      });
-    } else if (type == RegularMembershipType.corporate) {
-      setState(() {
-        corpMemSelected = typeState;
-        regMemSelected = memberState;
-      });
-    }
-  }
-
-  setRegMemTypeState(RegularMembershipType type, bool selectedValue) {
-    print(type);
-    printStates();
-
-    if (selectedValue == true && regMemSelected == true) {
-      setStateValue(type, false, false);
-    } else if (selectedValue == false && regMemSelected == false) {
-      setStateValue(type, true, true);
-    } else if (selectedValue == false && regMemSelected == true) {
-      resetStates();
-      setStateValue(type, true, true);
-    }
-  }
-
-  printStates() {
-    print('regMemSelected $regMemSelected');
-    print('contMemSelected: $contMemSelected');
-    print('lifeMemSelected: $lifeMemSelected');
-    print('susMemSelected: $susMemSelected');
-    print('corpMemSelected: $corpMemSelected');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.sizeOf(context).width,
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                children: [
-                  CircleAvatar(
-                    radius: 70,
-                    backgroundColor:
-                        contMemSelected ? mainBlue : unselectedGray,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.groups,
-                        size: 90,
-                        color: contMemSelected ? Colors.white : Colors.black54,
-                      ),
-                      onPressed: () {
-                        print('contMemSelected');
-                        printStates();
-                        setRegMemTypeState(RegularMembershipType.contributing,
-                            contMemSelected);
-                      },
-                    ),
-                  ),
-                  IconTitleBox(
-                    title: "CONTRIBUTING",
-                    overwriteSize: true,
-                    fontSize: 20.0,
-                  ),
-                  IconSubheadingBox(title: "Professional"),
-                ],
-              ),
-              Column(
-                children: [
-                  CircleAvatar(
-                    radius: 70,
-                    backgroundColor:
-                        lifeMemSelected ? mainBlue : unselectedGray,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.groups,
-                        size: 90,
-                        color: lifeMemSelected ? Colors.white : Colors.black54,
-                      ),
-                      onPressed: () {
-                        print('lifeMemSelected');
-                        printStates();
-                        setRegMemTypeState(
-                            RegularMembershipType.life, lifeMemSelected);
-                      },
-                    ),
-                  ),
-                  IconTitleBox(
-                    title: "LIFE",
-                    overwriteSize: true,
-                    fontSize: 20.0,
-                  ),
-                  IconSubheadingBox(title: "Individual"),
-                ],
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 70,
-                      backgroundColor:
-                          susMemSelected ? mainBlue : unselectedGray,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.account_balance,
-                          size: 90,
-                          color: susMemSelected ? Colors.white : Colors.black54,
-                        ),
-                        onPressed: () {
-                          print('susMemSelected');
-                          printStates();
-                          setRegMemTypeState(
-                              RegularMembershipType.sustaining, susMemSelected);
-                        },
-                      ),
-                    ),
-                    IconTitleBox(
-                      title: "SUSTAINING",
-                      overwriteSize: true,
-                      fontSize: 20.0,
-                    ),
-                    IconSubheadingBox(title: "Government and Non-Government"),
-                  ],
-                ),
-                Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 70,
-                      backgroundColor:
-                          corpMemSelected ? mainBlue : unselectedGray,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.corporate_fare,
-                          size: 90,
-                          color:
-                              corpMemSelected ? Colors.white : Colors.black54,
-                        ),
-                        onPressed: () {
-                          print('corpMemSelected');
-                          printStates();
-                          setRegMemTypeState(
-                              RegularMembershipType.corporate, corpMemSelected);
-                        },
-                      ),
-                    ),
-                    IconTitleBox(
-                      title: "CORPORATE",
-                      overwriteSize: true,
-                      fontSize: 20.0,
-                    ),
-                    IconSubheadingBox(title: "Corporation and Big Companies"),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 90,
-          ),
-          FilledButton(
-            onPressed: () {
-              if (regMemSelected == false) {
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return SimpleDialog(
-                        title: Text('Error'),
-                        contentPadding: EdgeInsets.all(20),
-                        children: [
-                          Text('Please select one of the membership types')
-                        ],
-                      );
-                    });
-              } else if (contMemSelected) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: ((context) => ContributingMembershipForm())));
-              } else if (lifeMemSelected) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: ((context) => LifeMembershipForm())));
-              } else if (susMemSelected) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: ((context) => SustainingMembershipForm())));
-              } else if (corpMemSelected) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: ((context) => CorporateMembershipForm())));
-              }
-            },
-            style: ButtonStyle(
-                minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
-            child: Text('SELECT'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class StudentMembershipSelectionView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: mainDeepPurple,
-        toolbarHeight: 60,
-        leading: SizedBox(
-          width: 20,
-          height: 20,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-            child: IconButton(
-              icon: const Icon(
-                Icons.arrow_back,
-                size: 30,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ),
-        ),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            height: 50,
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: TitleText(
-              title: 'STUDENT',
-              isOverflow: false,
-            ),
-          ),
-          SizedBox(
-            height: 50,
-          ),
-          StudentMembershipIcons(),
-        ],
-      ),
-    );
-  }
-}
-
-enum StudentMembershipType { junior, senior, college }
-
-class StudentMembershipIcons extends StatefulWidget {
-  const StudentMembershipIcons({super.key});
-
-  @override
-  State<StudentMembershipIcons> createState() => _StudentMembershipIconsState();
-}
-
-class _StudentMembershipIconsState extends State<StudentMembershipIcons> {
-  bool studMemSelected = false;
-  bool junHighSelected = false;
-  bool senHighSelected = false;
-  bool collegeSelected = false;
-
-  resetStates() {
-    if (junHighSelected) {
-      setState(() {
-        junHighSelected = false;
-      });
-    } else if (senHighSelected) {
-      setState(() {
-        senHighSelected = false;
-      });
-    } else if (collegeSelected) {
-      setState(() {
-        collegeSelected = false;
-      });
-    }
-  }
-
-  setStateValue(StudentMembershipType type, bool typeState, bool memberState) {
-    if (type == StudentMembershipType.junior) {
-      setState(() {
-        junHighSelected = typeState;
-        studMemSelected = memberState;
-      });
-    } else if (type == StudentMembershipType.senior) {
-      setState(() {
-        senHighSelected = typeState;
-        studMemSelected = memberState;
-      });
-    } else if (type == StudentMembershipType.college) {
-      setState(() {
-        collegeSelected = typeState;
-        studMemSelected = memberState;
-      });
-    }
-  }
-
-  setStudentMemTypeState(StudentMembershipType type, bool selectedValue) {
-    print(type);
-    printStates();
-
-    if (selectedValue == true && studMemSelected == true) {
-      setStateValue(type, false, false);
-    } else if (selectedValue == false && studMemSelected == false) {
-      setStateValue(type, true, true);
-    } else if (selectedValue == false && studMemSelected == true) {
-      resetStates();
-      setStateValue(type, true, true);
-    }
-  }
-
-  printStates() {
-    print('studMemSelected $studMemSelected');
-    print('junHighSelected: $junHighSelected');
-    print('senHighSelected: $senHighSelected');
-    print('collegeSelected: $collegeSelected');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.sizeOf(context).width,
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                children: [
-                  CircleAvatar(
-                    radius: 70,
-                    backgroundColor:
-                        junHighSelected ? mainBlue : unselectedGray,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.groups,
-                        size: 90,
-                        color: junHighSelected ? Colors.white : Colors.black54,
-                      ),
-                      onPressed: () {
-                        print('junHighSelected');
-                        printStates();
-                        setStudentMemTypeState(
-                            StudentMembershipType.junior, junHighSelected);
-                      },
-                    ),
-                  ),
-                  IconTitleBox(
-                      title: "JUNIOR HIGH SCHOOL", overwriteSize: false),
-                ],
-              ),
-              Column(
-                children: [
-                  CircleAvatar(
-                    radius: 70,
-                    backgroundColor:
-                        senHighSelected ? mainBlue : unselectedGray,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.groups,
-                        size: 90,
-                        color: senHighSelected ? Colors.white : Colors.black54,
-                      ),
-                      onPressed: () {
-                        print('senHighSelected');
-                        printStates();
-                        setStudentMemTypeState(
-                            StudentMembershipType.senior, senHighSelected);
-                      },
-                    ),
-                  ),
-                  IconTitleBox(
-                      title: "SENIOR HIGH SCHOOL", overwriteSize: false),
-                ],
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 70,
-                      backgroundColor:
-                          collegeSelected ? mainBlue : unselectedGray,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.groups,
-                          size: 90,
-                          color:
-                              collegeSelected ? Colors.white : Colors.black54,
-                        ),
-                        onPressed: () {
-                          print('collegeSelected');
-                          printStates();
-                          setStudentMemTypeState(
-                              StudentMembershipType.college, collegeSelected);
-                        },
-                      ),
-                    ),
-                    IconTitleBox(title: "COLLEGE", overwriteSize: false),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 90,
-          ),
-          FilledButton(
-            onPressed: () {
-              if (studMemSelected == false) {
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return SimpleDialog(
-                        title: Text('Error'),
-                        contentPadding: EdgeInsets.all(20),
-                        children: [
-                          Text('Please select one of the membership types')
-                        ],
-                      );
-                    });
-              } else if (junHighSelected) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: ((context) =>
-                            JuniorHighSchoolMembershipForm())));
-              } else if (senHighSelected) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: ((context) =>
-                            SeniorHighSchoolMembershipForm())));
-              } else if (collegeSelected) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: ((context) => CollegeMembershipForm())));
-              }
-            },
-            style: ButtonStyle(
-                minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
-            child: Text('SELECT'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class ContributingMembershipForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -1678,12 +1284,20 @@ class ContributingMembershipForm extends StatelessWidget {
   }
 }
 
-class LifeMembershipForm extends StatelessWidget {
+class AssociateMembershipForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -1704,7 +1318,7 @@ class LifeMembershipForm extends StatelessWidget {
         ),
       ),
       body: MembershipForm(
-        membershipType: 'LIFE',
+        membershipType: 'ASSOCIATE',
         membershipHeading: 'Lifetime',
         membershipOverview:
             'Become a part of the mental health promotion and support the cause of Mental Health\n\nHelp Sustain the mental health support we provide for indigent service users\n\nInvitation to PMHA events and activites exclusively for members\n\nReceive quarterly mailers about our recent events and activities',
@@ -1716,12 +1330,20 @@ class LifeMembershipForm extends StatelessWidget {
   }
 }
 
-class SustainingMembershipForm extends StatelessWidget {
+class StudentMembershipForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -1742,13 +1364,13 @@ class SustainingMembershipForm extends StatelessWidget {
         ),
       ),
       body: MembershipForm(
-        membershipType: 'SUSTAINING',
+        membershipType: 'STUDENT',
         membershipHeading: '1 Year',
         membershipOverview:
             'Become a part of the mental health promotion and support the cause of Mental Health\n\nHelp Sustain the mental health support we provide for indigent service users\n\nInvitation to PMHA events and activites exclusively for members\n\nReceive quarterly mailers about our recent events and activities',
         checkBoxHeading:
             'Pursuant to the Data Privacy Act of 2012, I hereby give my consent to PMHA to process my personal data\nas a member of the Association. I understand that the processing  of my personal data shall be limited to\nthe purpose specified.',
-        amount: '₱3,000.00',
+        amount: '₱100.00',
       ),
     );
   }
@@ -1758,8 +1380,16 @@ class CorporateMembershipForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -1792,12 +1422,20 @@ class CorporateMembershipForm extends StatelessWidget {
   }
 }
 
-class JuniorHighSchoolMembershipForm extends StatelessWidget {
+class SustainingMembershipForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -1818,24 +1456,39 @@ class JuniorHighSchoolMembershipForm extends StatelessWidget {
         ),
       ),
       body: MembershipForm(
-        membershipType: 'JUNIOR HIGH\nSCHOOL',
+        membershipType: 'SUSTAINING',
         membershipHeading: '1 Year',
         membershipOverview:
             'Become a part of the mental health promotion and support the cause of Mental Health\n\nHelp Sustain the mental health support we provide for indigent service users\n\nInvitation to PMHA events and activites exclusively for members\n\nReceive quarterly mailers about our recent events and activities',
         checkBoxHeading:
             'Pursuant to the Data Privacy Act of 2012, I hereby give my consent to PMHA to process my personal data\nas a member of the Association. I understand that the processing  of my personal data shall be limited to\nthe purpose specified.',
-        amount: '₱20.00',
+        amount: '₱10,000.00',
       ),
     );
   }
 }
 
-class SeniorHighSchoolMembershipForm extends StatelessWidget {
+class MembershipInfoForm extends StatelessWidget {
+  final String amount;
+
+  const MembershipInfoForm({
+    super.key,
+    required this.amount,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -1855,66 +1508,48 @@ class SeniorHighSchoolMembershipForm extends StatelessWidget {
           ),
         ),
       ),
-      body: MembershipForm(
-        membershipType: 'SENIOR HIGH\nSCHOOL',
-        membershipHeading: '1 Year',
-        membershipOverview:
-            'Become a part of the mental health promotion and support the cause of Mental Health\n\nHelp Sustain the mental health support we provide for indigent service users\n\nInvitation to PMHA events and activites exclusively for members\n\nReceive quarterly mailers about our recent events and activities',
-        checkBoxHeading:
-            'Pursuant to the Data Privacy Act of 2012, I hereby give my consent to PMHA to process my personal data\nas a member of the Association. I understand that the processing  of my personal data shall be limited to\nthe purpose specified.',
-        amount: '₱50.00',
-      ),
+      body: MembershipPaymentForm(amount: amount),
     );
   }
 }
 
-class CollegeMembershipForm extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 60,
-        backgroundColor: mainDeepPurple,
-        leading: SizedBox(
-          width: 20,
-          height: 20,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-            child: IconButton(
-              icon: const Icon(
-                Icons.arrow_back,
-                size: 30,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ),
-        ),
-      ),
-      body: MembershipForm(
-        membershipType: 'COLLEGE',
-        membershipHeading: '1 Year',
-        membershipOverview:
-            'Become a part of the mental health promotion and support the cause of Mental Health\n\nHelp Sustain the mental health support we provide for indigent service users\n\nInvitation to PMHA events and activites exclusively for members\n\nReceive quarterly mailers about our recent events and activities',
-        checkBoxHeading:
-            'Pursuant to the Data Privacy Act of 2012, I hereby give my consent to PMHA to process my personal data\nas a member of the Association. I understand that the processing  of my personal data shall be limited to\nthe purpose specified.',
-        amount: '₱100.00',
-      ),
-    );
-  }
-}
-
-class MembershipForm extends StatelessWidget {
+class MembershipForm extends StatefulWidget {
   final String membershipType;
   final String membershipHeading;
   final String membershipOverview;
   final String checkBoxHeading;
   final String amount;
-
   const MembershipForm({
     super.key,
+    required this.membershipType,
+    required this.membershipHeading,
+    required this.membershipOverview,
+    required this.checkBoxHeading,
+    required this.amount,
+  });
+
+  @override
+  _MembershipFormState createState() {
+    return _MembershipFormState(
+      membershipType: membershipType,
+      membershipHeading: membershipHeading,
+      membershipOverview: membershipOverview,
+      checkBoxHeading: checkBoxHeading,
+      amount: amount,
+    );
+  }
+}
+
+class _MembershipFormState extends State<MembershipForm> {
+  final String membershipType;
+  final String membershipHeading;
+  final String membershipOverview;
+  final String checkBoxHeading;
+  final String amount;
+  bool agreementChecked = false;
+  final _formKey = GlobalKey<FormState>();
+
+  _MembershipFormState({
     required this.membershipType,
     required this.membershipHeading,
     required this.membershipOverview,
@@ -1927,8 +1562,249 @@ class MembershipForm extends StatelessWidget {
   Widget build(BuildContext context) {
     var headingOverflow = (membershipType.length > 15) ? true : false;
     return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TitleSubHeadingText(title: 'MEMBERSHIP'),
+              ),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: 100,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: 8, vertical: headingOverflow ? 10 : 16),
+                child: TitleText(
+                  title: membershipType,
+                  isOverflow: headingOverflow,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: sidePad, right: sidePad),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: FormHeadingText(
+                  title: 'MEMBERSHIP PRIVILEGES',
+                  textColor: Colors.black,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: sidePad, right: sidePad),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: Row(
+                  children: [
+                    FormHeadingText(
+                      title: '$membershipHeading ',
+                      textColor: Colors.lightGreen,
+                    ),
+                    FormHeadingText(
+                      title: 'Membership',
+                      textColor: Color.fromARGB(255, 0, 74, 173),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: sidePad, right: sidePad, top: 10.0),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: Text(
+                  membershipOverview,
+                  softWrap: true,
+                  maxLines: 12,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 30),
+            Padding(
+              padding: const EdgeInsets.only(left: sidePad, right: sidePad),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: FormHeadingText(
+                  title: 'Payment',
+                  textColor: Color.fromARGB(255, 0, 74, 173),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: sidePad, right: sidePad),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Membership Fee',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: SizedBox(
+                        width: 180,
+                        height: 40,
+                        child: TextField(
+                          enabled: false,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            filled: true,
+                            fillColor: unselectedGray,
+                            border: OutlineInputBorder(),
+                            labelText: amount,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              width: MediaQuery.sizeOf(context).width - 35,
+              child: CheckboxListTileFormField(
+                title: Text(
+                  "Pursuant to the Data Privacy Act of 2012, I hereby give my consent to PMHA to process my personal data as a member of the Association. I understand the processing of my personal data shall be limited to the purpose specified.",
+                  softWrap: true,
+                  maxLines: 5,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 8,
+                  ),
+                ),
+                initialValue: false,
+                onSaved: (bool? value) {
+                  print(value);
+                },
+                validator: (bool? value) {
+                  if (value! && agreementChecked) {
+                    return null;
+                  } else {
+                    return 'Please agree to policy before proceeding';
+                  }
+                },
+                onChanged: (value) {
+                  agreementChecked = true;
+                  if (value) {
+                    print("Agreement Checked :)");
+                  } else {
+                    print("Agreement Not Checked :(");
+                  }
+                },
+                errorColor: Colors.red.shade300,
+                checkColor: Colors.white,
+                autovalidateMode: AutovalidateMode.disabled,
+                contentPadding: EdgeInsets.all(1),
+              ),
+            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(left: sidePad, right: sidePad),
+            //   child: SizedBox(
+            //     width: MediaQuery.of(context).size.width,
+            //     child: Row(
+            //       children: [
+            //         CheckBoxExample(),
+            //         Text(
+            //           checkBoxHeading,
+            //           softWrap: true,
+            //           maxLines: 5,
+            //           style: TextStyle(
+            //             color: Colors.grey,
+            //             fontSize: 5,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+            SizedBox(
+              height: 25,
+            ),
+            FilledButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((context) => MembershipInfoForm(
+                            amount: amount,
+                          )),
+                    ),
+                  );
+                }
+              },
+              style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(primaryLightBlue)),
+              child: Text('PAY NOW'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MembershipPaymentForm extends StatefulWidget {
+  final String amount;
+
+  const MembershipPaymentForm({
+    super.key,
+    required this.amount,
+  });
+
+  @override
+  _MembershipPaymentFormState createState() =>
+      _MembershipPaymentFormState(amount: amount);
+}
+
+class _MembershipPaymentFormState extends State<MembershipPaymentForm> {
+  final String amount;
+  File? _image;
+  final picker = ImagePicker();
+
+  _MembershipPaymentFormState({
+    required this.amount,
+  });
+
+  //Image Picker function to get image from gallery
+  Future getImageFromGallery() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile == null) return;
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.sizeOf(context).width,
+      color: backgroundColor,
+      child: ListView(
         children: [
           SizedBox(
             width: MediaQuery.of(context).size.width,
@@ -1937,190 +1813,328 @@ class MembershipForm extends StatelessWidget {
               child: TitleSubHeadingText(title: 'MEMBERSHIP'),
             ),
           ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: 100,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 8, vertical: headingOverflow ? 10 : 16),
-              child: TitleText(
-                title: membershipType,
-                isOverflow: headingOverflow,
-              ),
+          Divider(),
+          SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0),
+            child: Text(
+              'Personal Info',
+              style: TextStyle(
+                  fontFamily: 'Asap',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: primaryBlue),
             ),
           ),
-          SizedBox(
-            height: 10,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: sidePad, right: sidePad),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: FormHeadingText(
-                title: 'MEMBERSHIP PRIVILEGES',
-                textColor: Colors.black,
+          SizedBox(height: 20),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(top: 5.0, left: 40.0),
+                child: InputDescription(desc: 'First Name'),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: sidePad, right: sidePad),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                children: [
-                  FormHeadingText(
-                    title: '$membershipHeading ',
-                    textColor: Colors.lightGreen,
+              Padding(
+                padding: const EdgeInsets.only(left: 40.0, right: 20.0),
+                child: SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 40.0,
+                  child: TextFormField(
+                    autofocus: true,
+                    initialValue: 'Anna Rodina',
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.person),
+                    ),
+                    onSaved: (String? value) {
+                      // This optional block of code can be used to run
+                      // code when the user saves the form.
+                    },
+                    validator: (String? value) {
+                      return (value != null && value.contains('@'))
+                          ? 'Do not use the @ char.'
+                          : null;
+                    },
                   ),
-                  FormHeadingText(
-                    title: 'Membership',
-                    textColor: Color.fromARGB(255, 0, 74, 173),
-                  ),
-                ],
+                ),
               ),
+              Padding(
+                padding: EdgeInsets.only(top: 5.0, left: 40.0),
+                child: InputDescription(desc: 'Last Name'),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 40.0, right: 20.0),
+                child: SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 40.0,
+                  child: TextFormField(
+                    autofocus: true,
+                    initialValue: 'Marte',
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.person),
+                    ),
+                    onSaved: (String? value) {
+                      // This optional block of code can be used to run
+                      // code when the user saves the form.
+                    },
+                    validator: (String? value) {
+                      return (value != null && value.contains('@'))
+                          ? 'Do not use the @ char.'
+                          : null;
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 5.0, left: 40.0),
+                child: InputDescription(desc: 'Address'),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 40.0, right: 20.0),
+                child: SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 40.0,
+                  child: TextFormField(
+                    autofocus: true,
+                    initialValue: 'Puerto Princesa Palawan',
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.person),
+                    ),
+                    onSaved: (String? value) {
+                      // This optional block of code can be used to run
+                      // code when the user saves the form.
+                    },
+                    validator: (String? value) {
+                      return (value != null && value.contains('@'))
+                          ? 'Do not use the @ char.'
+                          : null;
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 5.0, left: 40.0),
+                child: InputDescription(desc: 'Contact Number'),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 40.0, right: 20.0),
+                child: SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 40.0,
+                  child: TextFormField(
+                    autofocus: true,
+                    enabled: true,
+                    decoration: const InputDecoration(
+                      hintText: "Mobile Number",
+                      icon: Icon(Icons.person),
+                    ),
+                    onSaved: (String? value) {
+                      // This optional block of code can be used to run
+                      // code when the user saves the form.
+                    },
+                    validator: (String? value) {
+                      return (value != null && value.contains('@'))
+                          ? 'Do not use the @ char.'
+                          : null;
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 5.0, left: 40.0),
+                child: InputDescription(desc: 'Email Address'),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 40.0, right: 20.0),
+                child: SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 40.0,
+                  child: TextFormField(
+                    autofocus: true,
+                    enabled: false,
+                    initialValue: "anna@gmail.com",
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.person),
+                    ),
+                    onSaved: (String? value) {
+                      // This optional block of code can be used to run
+                      // code when the user saves the form.
+                    },
+                    validator: (String? value) {
+                      return (value != null && value.contains('@'))
+                          ? 'Do not use the @ char.'
+                          : null;
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 20),
+          // SizedBox(
+          //   width: 100,
+          //   height: 50,
+          //   child: TextFormField(
+          //     decoration: const InputDecoration(
+          //       icon: Icon(Icons.person),
+          //       labelText: 'Name *',
+          //     ),
+          //     onSaved: (String? value) {
+          //       // This optional block of code can be used to run
+          //       // code when the user saves the form.
+          //     },
+          //     validator: (String? value) {
+          //       return (value != null && value.contains('@'))
+          //           ? 'Do not use the @ char.'
+          //           : null;
+          //     },
+          //   ),
+          // ),
+          Divider(),
+          SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0),
+            child: Text(
+              'Membership Fee',
+              style: TextStyle(
+                  fontFamily: 'Asap',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: primaryBlue),
             ),
           ),
-          Padding(
-            padding:
-                const EdgeInsets.only(left: sidePad, right: sidePad, top: 10.0),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Text(
-                membershipOverview,
-                softWrap: true,
-                maxLines: 10,
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 15,
+          SizedBox(height: 15),
+          Row(children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 40.0, bottom: 10),
+              child: SizedBox(
+                height: 30,
+                child: Row(
+                  children: [
+                    Text(
+                      'Amount',
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 15,
+                          color: Colors.black87),
+                    ),
+                    Text(
+                      ' * ',
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 15,
+                          color: Colors.red),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: sidePad, right: sidePad),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    child: Text(
-                      'Read more',
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue),
-                    ),
-                    onPressed: () {/* ... */},
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: sidePad, right: sidePad),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: FormHeadingText(
-                title: 'Payment',
-                textColor: Color.fromARGB(255, 0, 74, 173),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: sidePad, right: sidePad),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Membership Fee',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: SizedBox(
-                          width: 180,
-                          height: 40,
-                          child: TextField(
-                            enabled: false,
-                            decoration: InputDecoration(
-                              isDense: true,
-                              filled: true,
-                              fillColor: Colors.grey,
-                              border: OutlineInputBorder(),
-                              labelText: amount,
-                            ),
-                          ),
-                        ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10.0, left: 10),
+              child: SizedBox(
+                width: 120,
+                height: 30,
+                child: TextField(
+                  enabled: false,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    filled: true,
+                    fillColor: unselectedGray,
+                    border: OutlineInputBorder(),
+                    labelText: amount,
+                    disabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                      borderSide: BorderSide(
+                        color: primaryLightBlue,
+                        width: 1.0,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: SizedBox(
-                          width: 180,
-                          height: 40,
-                          child: TextField(
-                            enabled: false,
-                            decoration: InputDecoration(
-                              isDense: true,
-                              filled: true,
-                              fillColor: Colors.grey,
-                              border: OutlineInputBorder(),
-                              label: Text(
-                                'Select Payment Method',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: sidePad, right: sidePad),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                children: [
-                  CheckBoxExample(),
-                  Text(
-                    checkBoxHeading,
-                    softWrap: true,
-                    maxLines: 5,
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 5,
                     ),
                   ),
-                ],
+                ),
               ),
             ),
+          ]),
+          SizedBox(height: 20),
+          Divider(),
+          SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0),
+            child: Text(
+              'Payment',
+              style: TextStyle(
+                  fontFamily: 'Asap',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: primaryBlue),
+            ),
           ),
-          SizedBox(
-            height: 25,
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 20.0, top: 5.0),
+                child: Text(
+                  'Gcash/Bank Transfer',
+                  style: TextStyle(
+                      fontFamily: 'Asap', fontSize: 14, color: mainLightGreen),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 20.0),
+                child: SizedBox(
+                  width: 180,
+                  height: 34,
+                  child: MaterialButton(
+                    color: Colors.blue,
+                    child: const Text("Upload from Gallery",
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.bold)),
+                    onPressed: () {
+                      getImageFromGallery();
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+            ],
           ),
-          FilledButton(
-            onPressed: () {},
-            style: ButtonStyle(
-                minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    Color.fromARGB(255, 0, 74, 173))),
-            child: Text('SUBMIT'),
+          Column(children: [
+            const SizedBox(
+              height: 20,
+              width: 30,
+            ),
+            _image != null
+                ? Image.file(
+                    _image!,
+                    width: 50,
+                    height: 70,
+                    fit: BoxFit.fitWidth,
+                  )
+                : const Text('Please select an image'),
+          ]),
+          Divider(),
+          Column(
+            children: [
+              SizedBox(height: 50),
+              SizedBox(
+                width: 200,
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: ((context) => MembershipSuccessPage()),
+                      ),
+                    );
+                  },
+                  style: ButtonStyle(
+                      minimumSize:
+                          MaterialStateProperty.all<Size>(Size(200, 50)),
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(primaryLightBlue)),
+                  child: Text('PAY NOW'),
+                ),
+              ),
+              SizedBox(height: 100),
+            ],
           ),
         ],
       ),
@@ -2131,60 +2145,643 @@ class MembershipForm extends StatelessWidget {
 class MembershipIntroPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: ((context) => DashboardPage()),
+          ),
+        );
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(
+          child: Column(
+            children: [
+              SizedBox(height: 80),
+              Image.asset(
+                'images/therapy_logo.png',
+                width: 300,
+                fit: BoxFit.fitWidth,
+                height: 400,
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Membership',
+                    style: TextStyle(
+                        fontFamily: 'Roboto',
+                        fontSize: 40,
+                        fontWeight: FontWeight.w800,
+                        color: primaryPurple),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Join us and be a mental health advocate!',
+                    softWrap: true,
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: 'Open Sans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87),
+                  ),
+                ],
+              ),
+              SizedBox(height: 70),
+              FilledButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => MembershipView())));
+                },
+                style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(mainBlue)),
+                child: Text('GET STARTED'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class IndividualMembershipSelectionView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: Column(
-          children: [
-            SizedBox(height: 60),
-            Image.asset(
-              'images/therapy_logo.png',
-              fit: BoxFit.fitWidth,
-              height: 400,
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'MEMBERSHIP',
-                  style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontSize: 40,
-                      fontWeight: FontWeight.w800,
-                      color: mainDarkBlue),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Join us and be a mental health\nadvocate!',
-                  softWrap: true,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontFamily: 'Open Sans',
-                      fontSize: 20,
-                      color: mainLightPurple),
-                ),
-              ],
-            ),
-            SizedBox(height: 70),
-            FilledButton(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        toolbarHeight: 60,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
+        leading: SizedBox(
+          width: 20,
+          height: 20,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            child: IconButton(
+              icon: const Icon(
+                Icons.arrow_back,
+                size: 30,
+                color: Colors.white,
+              ),
               onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 50,
+          ),
+          SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: TitleText(
+              title: 'INDIVIDUAL',
+              isOverflow: false,
+            ),
+          ),
+          SizedBox(
+            height: 50,
+          ),
+          IndividualMembershipIcons(),
+        ],
+      ),
+    );
+  }
+}
+
+enum IndividualMembershipType { contributing, associate, student }
+
+class IndividualMembershipIcons extends StatefulWidget {
+  const IndividualMembershipIcons({super.key});
+
+  @override
+  State<IndividualMembershipIcons> createState() =>
+      _IndividualMembershipIconsState();
+}
+
+class _IndividualMembershipIconsState extends State<IndividualMembershipIcons> {
+  bool indvMemSelected = false;
+  bool contMemSelected = false;
+  bool assocMemSelected = false;
+  bool studMemSelected = false;
+
+  resetStates() {
+    if (contMemSelected) {
+      setState(() {
+        contMemSelected = false;
+      });
+    } else if (assocMemSelected) {
+      setState(() {
+        assocMemSelected = false;
+      });
+    } else if (studMemSelected) {
+      setState(() {
+        studMemSelected = false;
+      });
+    }
+  }
+
+  setStateValue(
+      IndividualMembershipType type, bool typeState, bool memberState) {
+    if (type == IndividualMembershipType.contributing) {
+      setState(() {
+        contMemSelected = typeState;
+        indvMemSelected = memberState;
+      });
+    } else if (type == IndividualMembershipType.associate) {
+      setState(() {
+        assocMemSelected = typeState;
+        indvMemSelected = memberState;
+      });
+    } else if (type == IndividualMembershipType.student) {
+      setState(() {
+        studMemSelected = typeState;
+        indvMemSelected = memberState;
+      });
+    }
+  }
+
+  setIndivMemTypeState(IndividualMembershipType type, bool selectedValue) {
+    print(type);
+    printStates();
+
+    if (selectedValue == true && indvMemSelected == true) {
+      setStateValue(type, false, false);
+    } else if (selectedValue == false && indvMemSelected == false) {
+      setStateValue(type, true, true);
+    } else if (selectedValue == false && indvMemSelected == true) {
+      resetStates();
+      setStateValue(type, true, true);
+    }
+  }
+
+  printStates() {
+    print('indvMemSelected $indvMemSelected');
+    print('contMemSelected: $contMemSelected');
+    print('assocMemSelected: $assocMemSelected');
+    print('studMemSelected: $studMemSelected');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.sizeOf(context).width,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor:
+                        contMemSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.person,
+                        size: 90,
+                        color: contMemSelected ? Colors.white : Colors.black54,
+                      ),
+                      onPressed: () {
+                        print('contMemSelected');
+                        printStates();
+                        setIndivMemTypeState(
+                            IndividualMembershipType.contributing,
+                            contMemSelected);
+                      },
+                    ),
+                  ),
+                  IconTitleBox(
+                    title: "CONTRIBUTING",
+                    overwriteSize: true,
+                    fontSize: 20.0,
+                  ),
+                  IconSubheadingBox(title: "Professional"),
+                ],
+              ),
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor:
+                        assocMemSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.person,
+                        size: 90,
+                        color: assocMemSelected ? Colors.white : Colors.black54,
+                      ),
+                      onPressed: () {
+                        print('assocMemSelected');
+                        printStates();
+                        setIndivMemTypeState(IndividualMembershipType.associate,
+                            assocMemSelected);
+                      },
+                    ),
+                  ),
+                  IconTitleBox(
+                    title: "ASSOCIATE",
+                    overwriteSize: true,
+                    fontSize: 20.0,
+                  ),
+                  IconSubheadingBox(title: "Individual"),
+                ],
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 70,
+                      backgroundColor:
+                          studMemSelected ? mainBlue : unselectedGray,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.school,
+                          size: 90,
+                          color:
+                              studMemSelected ? Colors.white : Colors.black54,
+                        ),
+                        onPressed: () {
+                          print('studMemSelected');
+                          printStates();
+                          setIndivMemTypeState(IndividualMembershipType.student,
+                              studMemSelected);
+                        },
+                      ),
+                    ),
+                    IconTitleBox(
+                      title: "Student",
+                      overwriteSize: true,
+                      fontSize: 20.0,
+                    ),
+                    IconSubheadingBox(title: "High School and College"),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 90,
+          ),
+          FilledButton(
+            onPressed: () {
+              if (indvMemSelected == false) {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return SimpleDialog(
+                        title: Text('Error'),
+                        contentPadding: EdgeInsets.all(20),
+                        children: [
+                          Text('Please select one of the membership types')
+                        ],
+                      );
+                    });
+              } else if (contMemSelected) {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: ((context) => MembershipView())));
+                        builder: ((context) => ContributingMembershipForm())));
+              } else if (assocMemSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => AssociateMembershipForm())));
+              } else if (studMemSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => StudentMembershipForm())));
+              }
+            },
+            style: ButtonStyle(
+                minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
+            child: Text('SELECT'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class GroupMembershipSelectionView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        toolbarHeight: 60,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
+        leading: SizedBox(
+          width: 20,
+          height: 20,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            child: IconButton(
+              icon: const Icon(
+                Icons.arrow_back,
+                size: 30,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
               },
-              style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
-              child: Text('GET STARTED'),
             ),
-          ],
+          ),
+        ),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 50,
+          ),
+          SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: TitleText(
+              title: 'GROUP',
+              isOverflow: false,
+            ),
+          ),
+          SizedBox(
+            height: 50,
+          ),
+          GroupMembershipIcons(),
+        ],
+      ),
+    );
+  }
+}
+
+enum GroupMembershipType { sustaining, corporate }
+
+class GroupMembershipIcons extends StatefulWidget {
+  const GroupMembershipIcons({super.key});
+
+  @override
+  State<GroupMembershipIcons> createState() => _GroupMembershipIconsState();
+}
+
+class _GroupMembershipIconsState extends State<GroupMembershipIcons> {
+  bool groupMemSelected = false;
+  bool susMemSelected = false;
+  bool corpMemSelected = false;
+
+  resetStates() {
+    if (susMemSelected) {
+      setState(() {
+        susMemSelected = false;
+      });
+    } else if (corpMemSelected) {
+      setState(() {
+        corpMemSelected = false;
+      });
+    }
+  }
+
+  setStateValue(GroupMembershipType type, bool typeState, bool memberState) {
+    if (type == GroupMembershipType.sustaining) {
+      setState(() {
+        susMemSelected = typeState;
+        groupMemSelected = memberState;
+      });
+    } else if (type == GroupMembershipType.corporate) {
+      setState(() {
+        corpMemSelected = typeState;
+        groupMemSelected = memberState;
+      });
+    }
+  }
+
+  setRegMemTypeState(GroupMembershipType type, bool selectedValue) {
+    print(type);
+    printStates();
+
+    if (selectedValue == true && groupMemSelected == true) {
+      setStateValue(type, false, false);
+    } else if (selectedValue == false && groupMemSelected == false) {
+      setStateValue(type, true, true);
+    } else if (selectedValue == false && groupMemSelected == true) {
+      resetStates();
+      setStateValue(type, true, true);
+    }
+  }
+
+  printStates() {
+    print('groupMemSelected $groupMemSelected');
+    print('susMemSelected: $susMemSelected');
+    print('corpMemSelected: $corpMemSelected');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.sizeOf(context).width,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor: susMemSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.person,
+                        size: 90,
+                        color: susMemSelected ? Colors.white : Colors.black54,
+                      ),
+                      onPressed: () {
+                        print('susMemSelected');
+                        printStates();
+                        setRegMemTypeState(
+                            GroupMembershipType.sustaining, susMemSelected);
+                      },
+                    ),
+                  ),
+                  IconTitleBox(
+                    title: "SUSTAINING",
+                    overwriteSize: true,
+                    fontSize: 20.0,
+                  ),
+                  IconSubheadingBox(title: "Government and Non-Government"),
+                ],
+              ),
+              Column(
+                children: [
+                  CircleAvatar(
+                    radius: 70,
+                    backgroundColor:
+                        corpMemSelected ? mainBlue : unselectedGray,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.person,
+                        size: 90,
+                        color: corpMemSelected ? Colors.white : Colors.black54,
+                      ),
+                      onPressed: () {
+                        print('corpMemSelected');
+                        printStates();
+                        setRegMemTypeState(
+                            GroupMembershipType.corporate, corpMemSelected);
+                      },
+                    ),
+                  ),
+                  IconTitleBox(
+                    title: "CORPORATE",
+                    overwriteSize: true,
+                    fontSize: 20.0,
+                  ),
+                  IconSubheadingBox(title: "Corporation and Big Companies"),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 90,
+          ),
+          FilledButton(
+            onPressed: () {
+              if (groupMemSelected == false) {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return SimpleDialog(
+                        title: Text('Error'),
+                        contentPadding: EdgeInsets.all(20),
+                        children: [
+                          Text('Please select one of the membership types')
+                        ],
+                      );
+                    });
+              } else if (susMemSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => SustainingMembershipForm())));
+              } else if (corpMemSelected) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => CorporateMembershipForm())));
+              }
+            },
+            style: ButtonStyle(
+                minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
+            child: Text('SELECT'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MembershipSuccessPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: ((context) => DashboardPage())));
+        },
+        child: Container(
+          color: backgroundColor,
+          child: Column(
+            children: [
+              SizedBox(height: 100),
+              Image.asset(
+                'images/welcome_logo.png',
+                fit: BoxFit.fitHeight,
+                height: 300,
+              ),
+              SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 15.0),
+                    child: MainHeadingText(
+                        title: "Thank you!",
+                        isOverflow: true,
+                        isHeavy: true,
+                        customColor: mainLightGreen),
+                  )
+                ],
+              ),
+              SizedBox(height: 70),
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width - 80,
+                child: HeaderContentText(
+                    title:
+                        'Your payment request has been submitted. Please wait for our call (09362855204) between 2-3 business days for confirmation of payment.',
+                    isOverflow: true,
+                    isHeavy: true,
+                    customColor: Colors.black87),
+              ),
+              SizedBox(height: 70),
+              FilledButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => DashboardPage())));
+                },
+                style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(primaryLightBlue)),
+                child: Text('CONTINUE'),
+              ),
+            ],
+          ),
         ),
       ),
     );

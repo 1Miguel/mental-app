@@ -50,6 +50,7 @@ class LoginController extends GetxController {
 
           await prefs?.setString('user_data', jsonEncode(userdata));
           await prefs?.setString('token', accessToken);
+          await prefs?.setString('token_type', tokenType);
           await prefs?.setString('first_name', userdata['firstname']);
           await prefs?.setString('last_name', userdata['lastname']);
           await prefs?.setString('islogged_in', "true");

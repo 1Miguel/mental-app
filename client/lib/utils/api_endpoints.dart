@@ -20,4 +20,5 @@ class _AuthEndPoints {
   final String registerEmail = "/signup";
   final String login = "/login";
   final String token = "/token";
+  final String usermoood = "/user/mood";
 }

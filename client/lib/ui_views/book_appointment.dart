@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
 import 'dashboard_views.dart';
 import 'dart:convert';
@@ -53,6 +54,109 @@ class AccountNameHeadingText extends StatelessWidget {
   }
 }
 
+class MainHeadingText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const MainHeadingText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 20 : 40;
+    //Overwrite size based on length
+    newSize = (title.length > 20) ? 25 : 30;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Proza Libre',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
+class SubHeadingText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const SubHeadingText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 10 : 20;
+    //Overwrite size based on length
+    newSize = (title.length > 20) ? 12 : 20;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Proza Libre',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
+class HeaderContentText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const HeaderContentText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 18 : 22;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 5,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Open Sans',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
 class TimeBox extends StatelessWidget {
   final String time;
 
@@ -70,7 +174,9 @@ class TimeBox extends StatelessWidget {
         style:
             TextStyle(fontFamily: 'Roboto', fontSize: 10, color: Colors.black),
       ),
-      selectedColor: Colors.black26,
+      isEnabled: true,
+      selectedColor: primaryBlue,
+      onSelected: (bool selected) {},
     );
   }
 }
@@ -95,7 +201,7 @@ class BookIconBox extends StatelessWidget {
           softWrap: true,
           maxLines: 2,
           style: TextStyle(
-            color: mainDeepPurple,
+            color: primaryBlue,
             fontWeight: FontWeight.bold,
             fontFamily: 'Roboto',
             fontSize: 20,
@@ -182,6 +288,7 @@ class BookAppointmentPage extends StatelessWidget {
     address: "",
     age: 0,
     occupation: "",
+    contact_number: "",
   );
 
   getUserData() async {
@@ -194,7 +301,14 @@ class BookAppointmentPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -226,69 +340,28 @@ class BookAppointmentPage extends StatelessWidget {
           ),
         ),
       ),
-      body: FutureBuilder(
-          future: getUserData(),
-          builder: (BuildContext context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.deepPurpleAccent,
-                ),
-              );
-            }
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    'An ${snapshot.error} occurred',
-                    style: const TextStyle(fontSize: 18, color: Colors.red),
-                  ),
-                );
-              } else if (snapshot.hasData) {
-                final data = snapshot.data;
-                String mystring = data.toString();
-                //Map<String, dynamic> myjson = jsonDecode(mystring);
-                User userdata = User.fromJson(jsonDecode(mystring));
-                String firstname = userdata.firstname;
-                String lastname = userdata.lastname;
-                String address = userdata.address;
-                String occupation = userdata.occupation;
-                int age = userdata.age;
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    BookAccountSummaryCard(
-                      name: "$lastname, $firstname",
-                      address: address,
-                      occupation: occupation,
-                      age: "$age yo",
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 30.0),
-                      child: Text(
-                        "SERVICES",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: mainDeepPurple,
-                          fontSize: 30,
-                          fontFamily: 'Proza Libre',
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    ServiceIcons(),
-                  ],
-                );
-              }
-            }
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 30.0, top: 30.0),
+            child: Text(
+              "Please select the service you want",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: primaryGrey,
+                fontSize: 20,
+                fontFamily: 'Asap',
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 50,
+          ),
+          ServiceIcons(),
+        ],
+      ),
     );
   }
 }
@@ -764,6 +837,7 @@ class GenericConsultationPage extends StatelessWidget {
     address: "",
     age: 0,
     occupation: "",
+    contact_number: "",
   );
 
   GenericConsultationPage({
@@ -800,214 +874,16 @@ class GenericConsultationPage extends StatelessWidget {
       icon = Icons.psychology;
     }
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          backgroundColor: mainDeepPurple,
-          toolbarHeight: 60,
-          leading: SizedBox(
-            width: 20,
-            height: 20,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  size: 30,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-          ),
-          title: Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Text(
-              'BOOK APPOINTMENT',
-              style: TextStyle(
-                  fontFamily: 'Proza Libre',
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
           ),
         ),
-        body: FutureBuilder(
-            future: getUserData(),
-            builder: (BuildContext context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.deepPurpleAccent,
-                  ),
-                );
-              }
-              if (snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'An ${snapshot.error} occurred',
-                      style: const TextStyle(fontSize: 18, color: Colors.red),
-                    ),
-                  );
-                } else if (snapshot.hasData) {
-                  final data = snapshot.data;
-                  String mystring = data.toString();
-                  User userdata = User.fromJson(jsonDecode(mystring));
-                  String firstname = userdata.firstname;
-                  String lastname = userdata.lastname;
-                  String address = userdata.address;
-                  String occupation = userdata.occupation;
-                  int age = userdata.age;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BookAccountSummaryCard(
-                        name: '$lastname, $firstname',
-                        address: address,
-                        occupation: occupation,
-                        age: '$age yo',
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 30.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircleAvatar(
-                              radius: 70,
-                              backgroundColor: mainBlue,
-                              child: IconButton(
-                                icon: Icon(
-                                  icon,
-                                  size: 70,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () {},
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: SizedBox(
-                          width: MediaQuery.sizeOf(context).width,
-                          child: SizedBox(
-                            width: 170,
-                            child: Center(
-                              child: Text(
-                                title,
-                                textAlign: TextAlign.center,
-                                softWrap: true,
-                                maxLines: 2,
-                                style: TextStyle(
-                                  color: mainDeepPurple,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Roboto',
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 30.0),
-                        child: SizedBox(
-                          height: 80,
-                          width: MediaQuery.sizeOf(context).width,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.only(left: 20.0, right: 20.0),
-                            child: Text(
-                              subheading,
-                              softWrap: true,
-                              maxLines: 6,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 15,
-                                  color: Colors.black54),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 30.0, top: 30.0),
-                        child: Text(
-                          "Concerns",
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            color: mainDeepPurple,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width - 20.0,
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 16),
-                              child: TextField(
-                                maxLines: 3,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(25.0)),
-                                  ),
-                                  hintText: 'Please note here your concern',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 30.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            FilledButton(
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: ((context) =>
-                                            BookSchedulePage())));
-                              },
-                              style: ButtonStyle(
-                                  minimumSize: MaterialStateProperty.all<Size>(
-                                      Size(200, 50)),
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          mainBlue)),
-                              child: Text('BOOK'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                }
-              }
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }));
-  }
-}
-
-class BookSchedulePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: mainDeepPurple,
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -1039,41 +915,244 @@ class BookSchedulePage extends StatelessWidget {
         ),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BookAccountSummaryCard(
-            name: "Philippine Mental Health\nAssociation-Palawan Chapter",
-            address: "Manalo Extension, Puerto Princesa",
-            occupation: "",
-            age: "",
+          SizedBox(height: 80),
+          Padding(
+            padding: const EdgeInsets.only(top: 30.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 70,
+                  backgroundColor: mainBlue,
+                  child: IconButton(
+                    icon: Icon(
+                      icon,
+                      size: 70,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {},
+                  ),
+                ),
+              ],
+            ),
           ),
-          SizedBox(
-            width: MediaQuery.sizeOf(context).width,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 30.0, top: 20.0),
-              child: Text(
-                'DATE',
-                style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+          SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: SizedBox(
+              width: MediaQuery.sizeOf(context).width,
+              child: SizedBox(
+                width: 170,
+                child: Center(
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    maxLines: 2,
+                    style: TextStyle(
+                      color: primaryBlue,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Roboto',
+                      fontSize: 20,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(top: 30.0),
+            child: SizedBox(
+              height: 80,
+              width: MediaQuery.sizeOf(context).width,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                child: Text(
+                  subheading,
+                  softWrap: true,
+                  maxLines: 6,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 15,
+                      color: Colors.black54),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 30.0, top: 30.0),
+            child: Text(
+              "Concerns",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: primaryBlue,
+                fontSize: 30,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width - 20.0,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  child: TextField(
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                      ),
+                      hintText: 'Please note here your concern',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 30.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FilledButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: ((context) => BookSchedulePage())));
+                  },
+                  style: ButtonStyle(
+                      minimumSize:
+                          MaterialStateProperty.all<Size>(Size(200, 50)),
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(mainBlue)),
+                  child: Text('BOOK'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BookSchedulePage extends StatefulWidget {
+  const BookSchedulePage({super.key});
+
+  @override
+  State<BookSchedulePage> createState() => _BookSchedulePageState();
+}
+
+class _BookSchedulePageState extends State<BookSchedulePage> {
+  int? scheduleValue = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
+        toolbarHeight: 60,
+        leading: SizedBox(
+          width: 20,
+          height: 20,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            child: IconButton(
+              icon: const Icon(
+                Icons.arrow_back,
+                size: 30,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
+        title: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Text(
+            'SCHEDULE APPOINTMENT',
+            style: TextStyle(
+                fontFamily: 'Proza Libre',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white),
+          ),
+        ),
+      ),
+      body: Column(
+        children: [
+          SizedBox(height: 60),
           SizedBox(
             width: MediaQuery.sizeOf(context).width,
             height: 380,
             child: SfDateRangePicker(
               showTodayButton: false,
               enablePastDates: false,
+              selectionShape: DateRangePickerSelectionShape.rectangle,
+              selectionColor: primaryLightBlue,
+              headerHeight: 80,
               monthViewSettings: DateRangePickerMonthViewSettings(
-                  blackoutDates: [
-                    DateTime(2023, 10, 20),
-                    DateTime(2023, 10, 21)
-                  ]),
+                blackoutDates: [DateTime(2023, 10, 20), DateTime(2023, 10, 21)],
+                viewHeaderStyle: DateRangePickerViewHeaderStyle(
+                    backgroundColor: calendarHeaderBgLightTeal),
+              ),
+              monthCellStyle: DateRangePickerMonthCellStyle(
+                cellDecoration: BoxDecoration(
+                    color: calendarCellUnselectedBgWhite,
+                    // border:
+                    //     Border.all(color: const Color(0xFFF44436), width: 1),
+                    shape: BoxShape.rectangle),
+                blackoutDatesDecoration: BoxDecoration(
+                    color: Colors.red,
+                    border:
+                        Border.all(color: const Color(0xFFF44436), width: 1),
+                    shape: BoxShape.rectangle),
+                disabledDatesDecoration: BoxDecoration(
+                    color: unselectedGray,
+                    border: Border.all(color: unselectedGray, width: 1),
+                    shape: BoxShape.rectangle),
+                specialDatesDecoration: BoxDecoration(
+                    color: Colors.green,
+                    border:
+                        Border.all(color: const Color(0xFF2B732F), width: 1),
+                    shape: BoxShape.circle),
+              ),
+              headerStyle: DateRangePickerHeaderStyle(
+                  backgroundColor: calendarHeaderMainLightBlue,
+                  textAlign: TextAlign.center,
+                  textStyle: TextStyle(
+                    fontStyle: FontStyle.normal,
+                    fontSize: 25,
+                    letterSpacing: 5,
+                    color: backgroundColor,
+                  )),
             ),
           ),
+          Container(
+            height: 8,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: <Color>[mainLightBlue, primaryBlue]),
+            ),
+          ),
+          SizedBox(height: 20),
           SizedBox(
             width: MediaQuery.sizeOf(context).width,
             child: Padding(
@@ -1084,7 +1163,7 @@ class BookSchedulePage extends StatelessWidget {
                   fontFamily: 'Roboto',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: primaryBlue,
                 ),
               ),
             ),
@@ -1092,18 +1171,64 @@ class BookSchedulePage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              TimeBox(time: "11:00"),
-              TimeBox(time: "14:30"),
-              TimeBox(time: "15:00"),
-              TimeBox(time: "14:30"),
-              TimeBox(time: "15:00"),
+              ChoiceChip(
+                label: Text('9:00-10:00'),
+                selected: scheduleValue == 0,
+                onSelected: (bool selected) {
+                  setState(() {
+                    scheduleValue = selected ? 0 : null;
+                  });
+                },
+              ),
+              ChoiceChip(
+                label: Text('10:00-11:00'),
+                selected: scheduleValue == 1,
+                onSelected: (bool selected) {
+                  setState(() {
+                    scheduleValue = selected ? 1 : null;
+                  });
+                },
+              ),
+              ChoiceChip(
+                label: Text('11:00-12:00'),
+                selected: scheduleValue == 2,
+                onSelected: (bool selected) {
+                  setState(() {
+                    scheduleValue = selected ? 2 : null;
+                  });
+                },
+              ),
             ],
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: TimeBox(time: "11:00"),
+              ChoiceChip(
+                label: Text('1:00-2:00'),
+                selected: scheduleValue == 3,
+                onSelected: (bool selected) {
+                  setState(() {
+                    scheduleValue = selected ? 3 : null;
+                  });
+                },
+              ),
+              ChoiceChip(
+                label: Text('2:00-3:00'),
+                selected: scheduleValue == 4,
+                onSelected: (bool selected) {
+                  setState(() {
+                    scheduleValue = selected ? 4 : null;
+                  });
+                },
+              ),
+              ChoiceChip(
+                label: Text('3:00-4:00'),
+                selected: scheduleValue == 5,
+                onSelected: (bool selected) {
+                  setState(() {
+                    scheduleValue = selected ? 5 : null;
+                  });
+                },
               ),
             ],
           ),
@@ -1117,19 +1242,99 @@ class BookSchedulePage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: ((context) => DashboardPage())));
+                            builder: ((context) => BookScheduleSuccessPage())));
                   },
                   style: ButtonStyle(
                       minimumSize:
                           MaterialStateProperty.all<Size>(Size(200, 50)),
                       backgroundColor:
-                          MaterialStateProperty.all<Color>(Colors.deepPurple)),
+                          MaterialStateProperty.all<Color>(primaryLightBlue)),
                   child: Text('BOOK'),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class BookScheduleSuccessPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: ((context) => DashboardPage())));
+        },
+        child: Container(
+          color: backgroundColor,
+          child: Column(
+            children: [
+              SizedBox(height: 100),
+              Image.asset(
+                'images/welcome_logo.png',
+                fit: BoxFit.fitHeight,
+                height: 300,
+              ),
+              SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 15.0),
+                    child: MainHeadingText(
+                        title: "October 15, 2023",
+                        isOverflow: false,
+                        isHeavy: true,
+                        customColor: mainLightGreen),
+                  )
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 15.0),
+                    child: SubHeadingText(
+                        title: "Friday (1:00 - 2:00)",
+                        isOverflow: false,
+                        isHeavy: true,
+                        customColor: Colors.black),
+                  )
+                ],
+              ),
+              SizedBox(height: 50),
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width - 80,
+                child: HeaderContentText(
+                    title:
+                        'Your appointment request has been submitted. Please wait for our call(09362855204) between 2-3 business days for confirmation of booking appointment.',
+                    isOverflow: true,
+                    isHeavy: true,
+                    customColor: Colors.black87),
+              ),
+              SizedBox(height: 70),
+              FilledButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => DashboardPage())));
+                },
+                style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(primaryLightBlue)),
+                child: Text('CONFIRM'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
