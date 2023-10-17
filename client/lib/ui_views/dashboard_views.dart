@@ -4,7 +4,6 @@ import 'dart:convert';
 // Local import
 import 'package:flutter_intro/ui_views/login_views.dart';
 import 'package:flutter_intro/ui_views/book_appointment.dart';
-import 'package:flutter_intro/ui_views/hero_anim_sample.dart';
 import 'package:flutter_intro/ui_views/mood_views.dart';
 import 'package:flutter_intro/model/user.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';

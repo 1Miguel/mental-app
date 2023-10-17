@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 // Local import
 import 'package:flutter_intro/controllers/signup_controller.dart';
 import 'package:flutter_intro/controllers/login_controller.dart';
-import 'package:flutter_intro/ui_views/admin_sample_views.dart';
+import 'package:flutter_intro/ui_views/admin_navigation_views.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dashboard_views.dart';
 import 'mood_views.dart';

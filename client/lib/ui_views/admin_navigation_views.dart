@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sidebarx/sidebarx.dart';
-import 'admin_views.dart';
+import 'admin_dashboard.dart';
 import 'admin_appointment_views.dart';
 import 'admin_appointment_requests.dart';
 import 'admin_appointment_calendar.dart';

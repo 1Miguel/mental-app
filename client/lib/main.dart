@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'ui_views/login_views.dart';
-import 'ui_views/admin_views.dart';
-import 'ui_views/admin_sample_views.dart';
+import 'ui_views/admin_dashboard.dart';
+import 'ui_views/admin_navigation_views.dart';
 import 'ui_views/dashboard_views.dart';
 
 void main() {
