@@ -151,7 +151,7 @@ class TestServer(unittest.TestCase):
         """
 
     def test_membership_registration(self) -> None:
-        """_summary_
+        """Test User Membership Registration
         """
         headers, _ = self.login_routine()
         headers["accept"]: "application/json"

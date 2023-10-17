@@ -16,7 +16,6 @@ from tortoise.fields import (
     CharField,
     ForeignKeyField,
     CharEnumField,
-    FileField
 )
 
 
@@ -38,6 +37,7 @@ class MembershipStatus(str, Enum):
     ACTIVE = "ACTIVE"
     EXPIRED = "EXPIRED"
     CANCELLED = "CANCELLED"
+    REJECTED = "REJECTED"
 
 class MembershipType(IntEnum):
     """Member Subscription Type Ids."""
@@ -116,8 +116,8 @@ class MembershipModel(Model):
     id = IntField(pk=True)
     user = ForeignKeyField("models.UserModel")
     type = IntEnumField(MembershipType)
-    start_time = DateField()
-    end_time = DateField()
+    start_time = DateField(default=datetime.today())
+    end_time = DateField(default=datetime.today())
     status = CharEnumField(MembershipStatus, max_length=64)
-    cancel_reason = CharField(max_length=160)
-    cancel_suggestion = CharField(max_length=160)
+    cancel_reason = CharField(max_length=160, default="")
+    cancel_suggestion = CharField(max_length=160, default="")
