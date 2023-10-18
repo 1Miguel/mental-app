@@ -11,6 +11,7 @@ from passlib.hash import bcrypt
 from tortoise.models import Model
 from tortoise.fields import (
     DateField,
+    DatetimeField,
     IntEnumField,
     IntField,
     CharField,
@@ -72,6 +73,14 @@ class UserModel(Model):
         return bcrypt.verify(password, self.password_hash)
 
 
+class AppointmentStatus(str, Enum):
+    """Appointment Status."""
+
+    PENDING = "PENDING"
+    RESERVED = "RESERVED"
+    CANCELLED = "CANCELLED"
+
+
 class MoodModel(Model):
     """Mood model."""
 
@@ -121,3 +130,30 @@ class MembershipModel(Model):
     status = CharEnumField(MembershipStatus, max_length=64)
     cancel_reason = CharField(max_length=160, default="")
     cancel_suggestion = CharField(max_length=160, default="")
+
+
+class Doctor(Model):
+    """Model that links user account(doctor) and health center."""
+
+    id = IntField(pk=True)
+    user_id = ForeignKeyField("models.UserModel")
+    center = ForeignKeyField("models.HealthCenter")
+
+
+class Appointment(Model):
+    """Model the describe an appointment.
+
+    An appointment basically consists of a patient(user), doctor(user) and the
+    scheduled duration of an appointment."""
+
+    id = IntField(pk=True)
+    patient = ForeignKeyField("models.UserModel")
+    center = ForeignKeyField("models.HealthCenter")
+    start_time = DatetimeField()
+    end_time = DatetimeField()
+    status = CharEnumField(AppointmentStatus, max_length=64)
+
+    @classmethod
+    async def get_by_month(cls, date: datetime) -> None:
+        """Get appointment by day."""
+        return await cls.filter(start_time__startswith=date.date().isoformat()).all()
