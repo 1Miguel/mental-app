@@ -1,5 +1,5 @@
-import os
 import sys
+import json
 import logging
 import unittest
 import requests
@@ -150,6 +150,22 @@ class TestServer(unittest.TestCase):
          Then: Serve must return unauthorize access to all API request.
         """
 
+    def test_membership_registration(self) -> None:
+        """Test User Membership Registration
+        """
+        headers, _ = self.login_routine()
+        headers["accept"]: "application/json"
+        with open("./test_file.txt", "rb") as file, open("./test_file_2.txt", "rb") as file_2:
+            test_response = self.client.post(
+                "http://127.0.0.1:8000/user/membership/register",
+                headers=headers,
+                # [('files', open('images/1.png', 'rb')), ('files', open('images/2.png', 'rb'))]
+                files=[("files", file), ("files", file_2)],
+                data={
+                    "membership_api": json.dumps({"membership_type": 0}),
+                }
+            )
+            self.assertTrue(test_response.ok)
 
 if __name__ == "__main__":
     unittest.main()
