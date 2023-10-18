@@ -6,6 +6,7 @@ import 'package:flutter_intro/controllers/mood_controller.dart';
 import 'package:flutter_intro/model/user.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
 import 'package:flutter_intro/ui_views/membership_views.dart';
+import 'package:flutter_intro/ui_views/mood_timeline.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 
 // Third-party import
@@ -645,6 +646,350 @@ class HappyMoodPage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class MoodHistoryPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 60,
+        backgroundColor: Colors.transparent,
+        title: Text(
+          'Mood History',
+          style: TextStyle(
+            color: primaryGrey,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        leading: SizedBox(
+          width: 20,
+          height: 20,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                size: 30,
+                color: primaryGrey,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        color: Colors.white,
+        width: MediaQuery.sizeOf(context).width,
+        child: ListView(
+          children: [
+            Column(
+              children: [
+                SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width - 20.0,
+                    child: Text('October',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 25)),
+                  ),
+                ),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 20.0,
+                  child: MonthlyMoodSummary(),
+                ),
+                SizedBox(height: 30),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width - 20.0,
+                    child: Text('Today',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 25)),
+                  ),
+                ),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 20.0,
+                  child: TodayMoodInfo(),
+                ),
+              ],
+            ),
+            SizedBox(height: 50),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MonthlyMoodSummary extends StatelessWidget {
+  const MonthlyMoodSummary({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomLeft,
+            colors: <Color>[pastelYellow, pastelYellow]),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 25.0),
+                  child: SizedBox(
+                      child: Text("This Month's Overview",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18))),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 25.0),
+                  child: TextButton(
+                    child: Text(
+                      'More Info',
+                      style: TextStyle(
+                          color: solidPurple,
+                          decoration: TextDecoration.underline),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: ((context) => MoodTimeline()),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: MoodBar(
+              moodLogo: 'images/happy_emoji.png',
+              moodName: 'Happy',
+              moodColor: Colors.pinkAccent,
+              moodPercent: '50%',
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: MoodBar(
+              moodLogo: 'images/sad_emoji.png',
+              moodName: 'Sad',
+              moodColor: Colors.blueAccent,
+              moodPercent: '40%',
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: MoodBar(
+              moodLogo: 'images/confused_emoji.png',
+              moodName: 'Confused',
+              moodColor: Colors.orangeAccent,
+              moodPercent: '30%',
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: MoodBar(
+              moodLogo: 'images/angry_emoji.png',
+              moodName: 'Angry',
+              moodColor: Colors.redAccent,
+              moodPercent: '20%',
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: MoodBar(
+              moodLogo: 'images/scared_emoji.png',
+              moodName: 'Scared',
+              moodColor: Colors.deepPurpleAccent,
+              moodPercent: '10%',
+            ),
+          ),
+          SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+}
+
+class MoodBar extends StatelessWidget {
+  final String moodLogo;
+  final String moodName;
+  final Color moodColor;
+  final String moodPercent;
+
+  const MoodBar({
+    super.key,
+    required this.moodLogo,
+    required this.moodName,
+    required this.moodColor,
+    required this.moodPercent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.sizeOf(context).width,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: MediaQuery.sizeOf(context).width - 50.0,
+            child: Card(
+              elevation: 1,
+              surfaceTintColor: moodColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(20)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20.0),
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: Image.asset(
+                        moodLogo,
+                      ),
+                    ),
+                  ),
+                  Text(moodName),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20.0),
+                    child: SizedBox(
+                        height: 50,
+                        width: 50,
+                        child: Center(
+                            child: Text(moodPercent,
+                                style: TextStyle(
+                                    fontFamily: 'Roboto',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w900)))),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TodayMoodInfo extends StatelessWidget {
+  const TodayMoodInfo({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomLeft,
+            colors: <Color>[primaryLightBlue, primaryBlue]),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Padding(
+                //   padding: const EdgeInsets.only(left: 25.0),
+                //   child: SizedBox(
+                //       child: Text("My Mood Today",
+                //           style: TextStyle(
+                //               fontWeight: FontWeight.bold, fontSize: 18))),
+                // ),
+                // Padding(
+                //   padding: const EdgeInsets.only(right: 25.0),
+                //   child: Row(
+                //     children: [
+                //       SizedBox(
+                //         child: IconButton(
+                //           icon: Icon(
+                //             Icons.note,
+                //             size: 30,
+                //             color: Colors.black87,
+                //           ),
+                //           onPressed: () {},
+                //         ),
+                //       ),
+                //       // SizedBox(
+                //       //   child: IconButton(
+                //       //     icon: Icon(
+                //       //       Icons.edit,
+                //       //       size: 30,
+                //       //       color: primaryGrey,
+                //       //     ),
+                //       //     onPressed: () {},
+                //       //   ),
+                //       // ),
+                //     ],
+                //   ),
+                // ),
+              ],
+            ),
+          ),
+          SizedBox(height: 20),
+          SizedBox(
+            width: 150,
+            height: 150,
+            child: Image.asset(
+              'images/happy_emoji.png',
+            ),
+          ),
+          SizedBox(
+            width: MediaQuery.sizeOf(context).width,
+            child: Text(
+              'HAPPY',
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(
+            width: MediaQuery.sizeOf(context).width - 40.0,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: TextField(
+                maxLines: 3,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: unselectedLightBlue,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                  ),
+                  hintText: 'Tell us how you feel...',
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 30),
+        ],
       ),
     );
   }

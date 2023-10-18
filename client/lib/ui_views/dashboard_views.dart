@@ -774,10 +774,10 @@ class AccountsPage extends StatelessWidget {
                       menu: 'Mood History',
                       menuIcon: Icons.emoji_emotions,
                       onTap: () {
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: ((context) => AccountProfilePage())));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => MoodHistoryPage())));
                       },
                     ),
                     AccountMenuTile(

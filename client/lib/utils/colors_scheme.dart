@@ -30,3 +30,11 @@ final HexColor iconBoxBgColor = HexColor('#CFD8DC');
 
 // Admin Approve
 final HexColor approveButtonColor = HexColor('#81C784');
+
+// Moods quicksand
+final HexColor pastelYellow = HexColor('#ffe68f');
+final HexColor pastelPurple = HexColor('#d9d1f8');
+final HexColor pastelBlue = HexColor('#cdeff9');
+final HexColor pastelPink = HexColor('#ffdff7');
+final HexColor solidPurple = HexColor('#8b4cfc');
+final HexColor solidPink = HexColor('#e258c0');
