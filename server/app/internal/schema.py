@@ -5,10 +5,9 @@ uses pydantic base model.
 
 date: 10/07/2023
 """
-from typing import List
+from typing import List, Tuple, Dict
 from pydantic import BaseModel
-from internal.database import MembershipType, MembershipStatus
-
+from internal.database import MembershipType, MembershipStatus, AppointmentStatus
 
 class MoodLog(BaseModel):
     """Daily mood API schema.
@@ -28,6 +27,46 @@ class MoodListResponse(BaseModel):
     """
 
     mood_list: List[MoodLog]
+
+
+class AppointmentApi(BaseModel):
+    """API model of appointment.
+    
+    Supported Method: POST
+    """
+    id: int
+    patient: int
+    center: str
+    start_time: str
+    end_time: str
+    status: AppointmentStatus
+
+class AppointmentAvailSlot(BaseModel):
+    time: str
+    available: bool
+
+class AppointmentListSlots(BaseModel):
+    """API model of appointment slot. This is a user level model
+    which only expose the necessary data to the user.
+    [
+        time: str
+        slots: [
+            (time, available)
+        ]
+    ]
+
+    Supported Method: GET
+    """
+    slots: list[AppointmentAvailSlot]
+
+
+class AppointmentListResponse(BaseModel):
+    """API model of appointment list query response.
+    
+    Supported Method: GET
+    """
+
+    appointment_list: List[AppointmentApi]
 
 
 class UserApi(BaseModel):

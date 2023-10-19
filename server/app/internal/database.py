@@ -137,7 +137,7 @@ class Doctor(Model):
 
     id = IntField(pk=True)
     user_id = ForeignKeyField("models.UserModel")
-    center = ForeignKeyField("models.HealthCenter")
+    # center = ForeignKeyField("models.HealthCenter")
 
 
 class Appointment(Model):
@@ -148,12 +148,12 @@ class Appointment(Model):
 
     id = IntField(pk=True)
     patient = ForeignKeyField("models.UserModel")
-    center = ForeignKeyField("models.HealthCenter")
+    #center = ForeignKeyField("models.HealthCenter")
     start_time = DatetimeField()
     end_time = DatetimeField()
     status = CharEnumField(AppointmentStatus, max_length=64)
 
     @classmethod
-    async def get_by_month(cls, date: datetime) -> None:
+    async def get_by_month(cls, date: datetime) -> List[Self]:
         """Get appointment by day."""
         return await cls.filter(start_time__startswith=date.date().isoformat()).all()
