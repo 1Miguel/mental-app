@@ -19,15 +19,19 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: GetMaterialApp(
-        title: 'Mental Health App',
-        theme: ThemeData(
-            useMaterial3: true,
-            primarySwatch: Colors.blue,
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-            scaffoldBackgroundColor: Colors.white,
-            platform: TargetPlatform.android),
-        home: LoginMainPage(),
-      ),
+          title: 'Mental Health App',
+          theme: ThemeData(
+              useMaterial3: true,
+              primarySwatch: Colors.blue,
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+              scaffoldBackgroundColor: Colors.white,
+              platform: TargetPlatform.android),
+          //home: LoginMainPage(),
+          initialRoute: '/',
+          routes: {
+            '/': (context) => LoginMainPage(),
+            '/admin': (context) => AdminApp(),
+          }),
     );
   }
 }
