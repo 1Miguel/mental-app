@@ -305,22 +305,21 @@ async def update_profile(
         user_model.occupation = profile.occupation
     await user_model.save()
 
-@app.get("user/appointments")
+
+@app.get("/user/appointments/{year}/{month}")
 async def get_appointment_list(
-    user: UserSchema = Depends(get_current_user)
-) -> List[AppointmentAvailSlot]:
-    filter = ""
-    filter_key, filter_val = filter.split(",")
-    if filter_key != "month":
-        pass
+    year: str, month: str, user: UserSchema = Depends(get_current_user)
+) -> List[AppointmentBlockedSlot]:
+    log.info("get all available appointments %s %s", year, month)
     try:
-        month_filter = datetime.fromisoformat(filter_val)
-        return [
-            AppointmentAvailSlot(time="", available=True)
-        ]
+        date = datetime.fromisoformat(f"{year}-{month}-01")
     except ValueError:
         #invalid filter value, expect iso format month
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Invalid param {filter_key}, expected Iso")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Invalid param {year}/{month}, expected Iso")
+    avail_apmnts: List[Appointment] = await Appointment.get_by_month(date)
+    if avail_apmnts:
+        return [AppointmentBlockedSlot(ap.start_time, ap.end_time) for ap in avail_apmnts]
+
 
 def run() -> None:
     import uvicorn

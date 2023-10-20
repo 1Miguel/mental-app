@@ -19,6 +19,17 @@ from tortoise.fields import (
     CharEnumField,
 )
 
+def _iso_datetime_month(d: datetime) -> str:
+    # the month is in datetime isoformat YYYY-MM-DD to get only the
+    # year and month, we need to cut the string
+    return d.date()[:7]
+
+def is_iso_month(month: str) -> bool:
+    try:
+        date = datetime.fromisoformat(f"{month}-01")
+    except:
+        return False
+    return True
 
 class MoodId(IntEnum):
     """Mood Score Ids."""
@@ -148,6 +159,7 @@ class Appointment(Model):
 
     id = IntField(pk=True)
     patient = ForeignKeyField("models.UserModel")
+    #doctor = ForeignKeyField("models.Doctor")
     #center = ForeignKeyField("models.HealthCenter")
     start_time = DatetimeField()
     end_time = DatetimeField()
@@ -156,4 +168,4 @@ class Appointment(Model):
     @classmethod
     async def get_by_month(cls, date: datetime) -> List[Self]:
         """Get appointment by day."""
-        return await cls.filter(start_time__startswith=date.date().isoformat()).all()
+        return await cls.filter(start_time__startswith=_iso_datetime_month(date)).all()

@@ -41,9 +41,10 @@ class AppointmentApi(BaseModel):
     end_time: str
     status: AppointmentStatus
 
-class AppointmentAvailSlot(BaseModel):
-    time: str
-    available: bool
+class AppointmentBlockedSlot(BaseModel):
+    start_time: str
+    stop_time: str
+
 
 class AppointmentListSlots(BaseModel):
     """API model of appointment slot. This is a user level model
@@ -57,7 +58,7 @@ class AppointmentListSlots(BaseModel):
 
     Supported Method: GET
     """
-    slots: list[AppointmentAvailSlot]
+    slots: list[AppointmentBlockedSlot]
 
 
 class AppointmentListResponse(BaseModel):
