@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 // Local import
-import 'package:flutter_intro/ui_views/video_sample.dart';
+import 'package:flutter_intro/ui_views/youtube_player.dart';
+import 'package:flutter_intro/ui_views/community_views.dart';
 
 // Third-party
 import 'package:flutter_intro/utils/colors_scheme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TalkToUsIntroPage extends StatelessWidget {
   @override
@@ -673,11 +675,10 @@ class _GenericEmotionSurveyPageState extends State<GenericEmotionSurveyPage> {
                     ),
                     FilledButton(
                       onPressed: () {
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: ((context) =>
-                        //             BookScheduleSuccessPage())));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => CommunityIntroPage())));
                       },
                       style: ButtonStyle(
                           minimumSize:
@@ -691,6 +692,87 @@ class _GenericEmotionSurveyPageState extends State<GenericEmotionSurveyPage> {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class DiscoverIntroPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: ((context) => DashboardPage()),
+        //   ),
+        // );
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(
+          child: Column(
+            children: [
+              SizedBox(height: 80),
+              Image.asset(
+                'images/therapy_logo.png',
+                width: 300,
+                fit: BoxFit.fitWidth,
+                height: 400,
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Discover',
+                    style: TextStyle(
+                        fontFamily: 'Roboto',
+                        fontSize: 40,
+                        fontWeight: FontWeight.w800,
+                        color: primaryPurple),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "Discover articles, videos and infographics about mental health and mental wellbeing",
+                      softWrap: true,
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: 'Open Sans',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 70),
+              FilledButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => DiscoverMainPage())));
+                },
+                style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(mainBlue)),
+                child: Text('GET STARTED'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -768,7 +850,13 @@ class DiscoverMainPage extends StatelessWidget {
                   title: 'Mental Health Issues',
                   desc:
                       "Learn about the different types of mental health issues facing the society today",
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => MentalHealthIssuesPage())),
+                    );
+                  },
                 ),
                 TopicCardWidget(
                   imageLoc: 'images/video_logo.png',
@@ -779,7 +867,7 @@ class DiscoverMainPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: ((context) => VideoDiscoverPage())),
+                          builder: ((context) => UnderstandingSelfPage())),
                     );
                   },
                 ),
@@ -788,21 +876,39 @@ class DiscoverMainPage extends StatelessWidget {
                   title: 'What is depression',
                   desc:
                       "Understand what causes and symptoms of depression and how to overcome it",
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => WhatIsDepressionPage())),
+                    );
+                  },
                 ),
                 TopicCardWidget(
                   imageLoc: 'images/video_logo.png',
                   title: 'Self Confidence',
                   desc:
                       "Build your self esteem so you can unlock your potential as a person",
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => SelfConfidencePage())),
+                    );
+                  },
                 ),
                 TopicCardWidget(
                   imageLoc: 'images/video_logo.png',
                   title: 'Breaking a bad Habit',
                   desc:
                       "Know where does a habit start and how you can stop your bad habits",
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => BreakingBadHabitPage())),
+                    );
+                  },
                 ),
               ],
             ),
@@ -887,20 +993,12 @@ class TopicCardWidget extends StatelessWidget {
   }
 }
 
-class VideoDiscoverPage extends StatelessWidget {
+class UnderstandingSelfPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        // flexibleSpace: Container(
-        //   decoration: BoxDecoration(
-        //     gradient: LinearGradient(
-        //         begin: Alignment.centerLeft,
-        //         end: Alignment.centerRight,
-        //         colors: <Color>[primaryLightBlue, primaryBlue]),
-        //   ),
-        // ),
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -919,21 +1017,6 @@ class VideoDiscoverPage extends StatelessWidget {
             ),
           ),
         ),
-        // title: Padding(
-        //   padding:
-        //       const EdgeInsets.only(top: 0.0, bottom: 0.0, left: 0, right: 10),
-        //   child: SizedBox(
-        //     width: MediaQuery.sizeOf(context).width,
-        //     child: Text(
-        //       "Discover",
-        //       style: TextStyle(
-        //           fontFamily: 'Roboto',
-        //           fontSize: 30,
-        //           fontWeight: FontWeight.bold,
-        //           color: mainBlue),
-        //     ),
-        //   ),
-        // ),
       ),
       body: Container(
         child: ListView(
@@ -1042,6 +1125,460 @@ class VideoDiscoverPage extends StatelessWidget {
                   width: MediaQuery.sizeOf(context).width,
                   child: YoutubeApp(videoId: '4lTbWQ8zD3w'),
                 ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SelfConfidencePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        toolbarHeight: 60,
+        leading: SizedBox(
+          width: 20,
+          height: 20,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                size: 30,
+                color: primaryGrey,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        child: ListView(
+          children: [
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 0.0, bottom: 0.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "Discover",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: mainBlue),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 0.0, bottom: 10.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "Videos that may help you",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: primaryGrey),
+                    ),
+                  ),
+                ),
+                Divider(
+                  color: mainLightBlue,
+                  thickness: 2,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 20.0, bottom: 10.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "3 Tips to boost your confidence",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.only(left: 20.0, right: 10, bottom: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "A video that will help you gain your confidence",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal,
+                          color: primaryGrey),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width,
+                  child: YoutubeApp(videoId: 'l_NYrWqUR40'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class BreakingBadHabitPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        toolbarHeight: 60,
+        leading: SizedBox(
+          width: 20,
+          height: 20,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                size: 30,
+                color: primaryGrey,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        child: ListView(
+          children: [
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 0.0, bottom: 0.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "Discover",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: mainBlue),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 0.0, bottom: 10.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "Videos that may help you",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: primaryGrey),
+                    ),
+                  ),
+                ),
+                Divider(
+                  color: mainLightBlue,
+                  thickness: 2,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 20.0, bottom: 10.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "How To Change Your Bad Habits - The Easiest Way",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.only(left: 20.0, right: 10, bottom: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "A short video providing ways to break your bad habits",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal,
+                          color: primaryGrey),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width,
+                  child: YoutubeApp(videoId: 'y7HT2EgMvLo'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MentalHealthIssuesPage extends StatelessWidget {
+  final Uri articleUrl = Uri(
+      scheme: 'https',
+      path:
+          "www.who.int/news-room/fact-sheets/detail/mental-disorders/?gclid=EAIaIQobChMInaW_lbzKgQMVxnQrCh0s6gKFEAAYASAAEgI_WPD_BwE");
+  final articleUri = Uri.parse(
+      "https://www.who.int/news-room/fact-sheets/detail/mental-disorders/?gclid=EAIaIQobChMInaW_lbzKgQMVxnQrCh0s6gKFEAAYASAAEgI_WPD_BwE");
+
+  Future<void> _launchUrl() async {
+    if (!await launchUrl(articleUri)) {
+      throw Exception('Could not launch $articleUri');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        toolbarHeight: 60,
+        leading: SizedBox(
+          width: 20,
+          height: 20,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                size: 30,
+                color: primaryGrey,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        child: ListView(
+          children: [
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 0.0, bottom: 0.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "Discover",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: mainBlue),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 0.0, bottom: 10.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "Articles that may help you",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: primaryGrey),
+                    ),
+                  ),
+                ),
+                Divider(
+                  color: mainLightBlue,
+                  thickness: 2,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 20.0, bottom: 10.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "Mental Disorders",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.only(left: 20.0, right: 10, bottom: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "This article discusses facts about different types of mental disorders. Click on the link below",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal,
+                          color: primaryGrey),
+                    ),
+                  ),
+                ),
+                // SizedBox(
+                //   width: MediaQuery.sizeOf(context).width,
+                //   child: YoutubeApp(videoId: 'y7HT2EgMvLo'),
+                // ),
+                //URLLauncherApp(uriString: articleUrl),
+                // Link(
+                //     uri: articleUri,
+                //     target: LinkTarget.defaultTarget,
+                //     builder: (context, openLink) => TextButton(
+                //           onPressed: openLink,
+                //           child: Text(articleUri.toString()),
+                //         )),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class WhatIsDepressionPage extends StatelessWidget {
+  final Uri articleUrl = Uri(
+      scheme: 'https',
+      path:
+          "workplacementalhealth.org/employer-resources/infographics/infographic-depression");
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        toolbarHeight: 60,
+        leading: SizedBox(
+          width: 20,
+          height: 20,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                size: 30,
+                color: primaryGrey,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        child: ListView(
+          children: [
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 0.0, bottom: 0.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "Discover",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: mainBlue),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 0.0, bottom: 10.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "Articles that may help you",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: primaryGrey),
+                    ),
+                  ),
+                ),
+                Divider(
+                  color: mainLightBlue,
+                  thickness: 2,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 20.0, bottom: 10.0, left: 20, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "Depression is more common than you think",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.only(left: 20.0, right: 10, bottom: 10),
+                  child: SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    child: Text(
+                      "A detailed infographic about depression",
+                      style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal,
+                          color: primaryGrey),
+                    ),
+                  ),
+                ),
+                // SizedBox(
+                //   width: MediaQuery.sizeOf(context).width,
+                //   child: YoutubeApp(videoId: 'y7HT2EgMvLo'),
+                // ),
+                //URLLauncherApp(uriString: articleUrl),
               ],
             ),
           ],

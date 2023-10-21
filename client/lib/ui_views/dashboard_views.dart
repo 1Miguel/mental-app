@@ -7,6 +7,7 @@ import 'package:flutter_intro/ui_views/book_appointment.dart';
 import 'package:flutter_intro/ui_views/mood_views.dart';
 import 'package:flutter_intro/model/user.dart';
 import 'package:flutter_intro/ui_views/talktous_views.dart';
+import 'package:flutter_intro/ui_views/community_views.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'membership_views.dart';
 
@@ -428,7 +429,8 @@ class DashboardPage extends StatelessWidget {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: ((context) => MoodModalPage())));
+                                      builder: ((context) =>
+                                          DiscoverIntroPage())));
                             },
                           ),
                           DashboardCategoryButtons(
@@ -771,10 +773,10 @@ class AccountsPage extends StatelessWidget {
                       menu: 'Community',
                       menuIcon: Icons.groups,
                       onTap: () {
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: ((context) => AccountProfilePage())));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => CommunityIntroPage())));
                       },
                     ),
                     AccountMenuTile(
