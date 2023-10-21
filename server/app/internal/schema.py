@@ -9,6 +9,7 @@ from typing import List, Tuple, Dict
 from pydantic import BaseModel
 from internal.database import MembershipType, MembershipStatus, AppointmentStatus
 
+
 class MoodLog(BaseModel):
     """Daily mood API schema.
     Supported Method: POST
@@ -31,9 +32,10 @@ class MoodListResponse(BaseModel):
 
 class AppointmentApi(BaseModel):
     """API model of appointment.
-    
+
     Supported Method: POST
     """
+
     id: int
     patient: int
     center: str
@@ -41,33 +43,20 @@ class AppointmentApi(BaseModel):
     end_time: str
     status: AppointmentStatus
 
+
 class AppointmentBlockedSlot(BaseModel):
     start_time: str
-    stop_time: str
+    end_time: str
 
 
-class AppointmentListSlots(BaseModel):
-    """API model of appointment slot. This is a user level model
-    which only expose the necessary data to the user.
-    [
-        time: str
-        slots: [
-            (time, available)
-        ]
-    ]
+class AppointmentApi(BaseModel):
+    """API model for appointment booking.
 
-    Supported Method: GET
-    """
-    slots: list[AppointmentBlockedSlot]
-
-
-class AppointmentListResponse(BaseModel):
-    """API model of appointment list query response.
-    
-    Supported Method: GET
+    Supported Method: POST
     """
 
-    appointment_list: List[AppointmentApi]
+    start_time: str
+    end_time: str
 
 
 class UserApi(BaseModel):
@@ -100,17 +89,19 @@ class UserProfileApi(BaseModel):
     membership_type: MembershipType = MembershipType.NONE
     membership_status: MembershipStatus = MembershipStatus.NULL
 
+
 class MembershipRegisterApi(BaseModel):
     """API model of a user membership.
-    
+
     Supported Method: POST
     """
 
     membership_type: MembershipType
 
+
 class MembershipCancelApi(BaseModel):
     """API model of a user membership cancellation.
-    
+
     Supported Method: POST
     """
 

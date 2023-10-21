@@ -8,6 +8,7 @@ from datetime import datetime
 from typing import List
 from typing_extensions import Self
 from passlib.hash import bcrypt
+from tortoise.expressions import Q
 from tortoise.models import Model
 from tortoise.fields import (
     DateField,
@@ -19,17 +20,20 @@ from tortoise.fields import (
     CharEnumField,
 )
 
+
 def _iso_datetime_month(d: datetime) -> str:
     # the month is in datetime isoformat YYYY-MM-DD to get only the
     # year and month, we need to cut the string
-    return d.date()[:7]
+    return d.date().isoformat()[:7]
+
 
 def is_iso_month(month: str) -> bool:
     try:
-        date = datetime.fromisoformat(f"{month}-01")
+        datetime.fromisoformat(f"{month}-01")
     except:
         return False
     return True
+
 
 class MoodId(IntEnum):
     """Mood Score Ids."""
@@ -50,6 +54,7 @@ class MembershipStatus(str, Enum):
     EXPIRED = "EXPIRED"
     CANCELLED = "CANCELLED"
     REJECTED = "REJECTED"
+
 
 class MembershipType(IntEnum):
     """Member Subscription Type Ids."""
@@ -122,7 +127,7 @@ class MembershipModel(Model):
     """Membership model. Contains information related to
     a user membership which includes type of membership
     and expiration date.
-    
+
     The status field indicatest the membership status
         - ACTIVE: membership is active and can be cancelled
         - EXPIRED: membership is at past expiration date,
@@ -159,8 +164,8 @@ class Appointment(Model):
 
     id = IntField(pk=True)
     patient = ForeignKeyField("models.UserModel")
-    #doctor = ForeignKeyField("models.Doctor")
-    #center = ForeignKeyField("models.HealthCenter")
+    # doctor = ForeignKeyField("models.Doctor")
+    # center = ForeignKeyField("models.HealthCenter")
     start_time = DatetimeField()
     end_time = DatetimeField()
     status = CharEnumField(AppointmentStatus, max_length=64)
@@ -169,3 +174,11 @@ class Appointment(Model):
     async def get_by_month(cls, date: datetime) -> List[Self]:
         """Get appointment by day."""
         return await cls.filter(start_time__startswith=_iso_datetime_month(date)).all()
+
+    @classmethod
+    async def get_by_datetime(cls, start_time: datetime, end_time: datetime) -> List[Self]:
+        """Get appointment by datetime."""
+        return await cls.filter(
+            Q(start_time__startswith=start_time.isoformat())
+            | Q(end_time__startswith=end_time.isoformat())
+        ).all()
