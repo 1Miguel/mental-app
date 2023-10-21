@@ -84,6 +84,23 @@ async def startup() -> None:
     log.info("Startup routine")
     temp_file_storage = TemporaryDirectory(dir=".")
 
+    # create a default admin if it doesn't exist
+    try:
+        user = UserModel(
+            email="admin0@mentalapp.com",
+            password_hash=bcrypt.hash("testadminpassword"),
+            firstname="",
+            lastname="",
+            address="",
+            age=0,
+            occupation="",
+            birthday=datetime(year=1900, month=1, day=1).isoformat(),
+        )
+        await user.save()
+        await AdminModel(admin_user = user).save()
+    except:
+        pass
+
 
 @app.on_event("shutdown")
 async def shutdown() -> None:
@@ -110,6 +127,15 @@ async def get_authenticated_user(email: str, password: str) -> UserModel:
     if not user.verify_password(password):
         return None
     return user
+
+
+async def is_user_admin(user: UserModel) -> None:
+    """Validate if this is an admin user."""
+    try:
+        await AdminModel.get(admin_user=user)
+    except DoesNotExist:
+        return False
+    return True
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> Any:

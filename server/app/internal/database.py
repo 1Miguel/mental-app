@@ -90,6 +90,11 @@ class UserModel(Model):
         return bcrypt.verify(password, self.password_hash)
 
 
+class AdminModel(Model):
+    id = IntField(pk=True)
+    admin_user = ForeignKeyField("models.UserModel")
+
+
 class AppointmentStatus(str, Enum):
     """Appointment Status."""
 
