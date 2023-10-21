@@ -27,6 +27,7 @@ class MoodListResponse(BaseModel):
     Supported Method: GET
     """
 
+    percentage: int
     mood_list: List[MoodLog]
 
 
@@ -107,6 +108,25 @@ class MembershipCancelApi(BaseModel):
 
     reason: str
     suggestion: str
+
+
+class MembershipProfileApi(BaseModel):
+    """API model for accessing membership profile
+
+    Supported Method: GET
+    """
+
+    id: int
+    user: int
+    firstname: str
+    lastname: str
+    email: str
+    type: str
+    status: str
+
+
+class MembershipSetStatusApi(BaseModel):
+    status: str
 
 
 class ThreadCommentApi(BaseModel):

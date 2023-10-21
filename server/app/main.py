@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from datetime import datetime
-from typing import Dict, Any, Optional, Annotated
+from typing import Dict, Any, Optional
 
 # third-party imports
 import jwt
@@ -84,6 +84,23 @@ async def startup() -> None:
     log.info("Startup routine")
     temp_file_storage = TemporaryDirectory(dir=".")
 
+    # create a default admin if it doesn't exist
+    try:
+        user = UserModel(
+            email="admin0@mentalapp.com",
+            password_hash=bcrypt.hash("testadminpassword"),
+            firstname="",
+            lastname="",
+            address="",
+            age=0,
+            occupation="",
+            birthday=datetime(year=1900, month=1, day=1).isoformat(),
+        )
+        await user.save()
+        await AdminModel(admin_user=user).save()
+    except:
+        pass
+
 
 @app.on_event("shutdown")
 async def shutdown() -> None:
@@ -110,6 +127,20 @@ async def get_authenticated_user(email: str, password: str) -> UserModel:
     if not user.verify_password(password):
         return None
     return user
+
+
+async def get_admin_user(token: str = Depends(oauth2_scheme)) -> Any:
+    try:
+        payload = jwt.decode(token, _JWT_SECRET, algorithms="HS256")
+        user = await UserModel.get(email=payload.get("email"))
+        # if this failes, user is not in the admin list, unauthorized
+        admin = await AdminModel.get(admin_user=user)
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
+    return await UserSchema.from_tortoise_orm(user)
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> Any:
@@ -172,10 +203,10 @@ async def mood_log(mood: MoodLog, user: UserSchema = Depends(get_current_user)) 
     """Daily Mood Logging. if mood score has been log for today, dont lot anymore
     and return an HTTP_409_CONFLICT error."""
     user = await UserModel.get(email=user.email)
-    today = datetime.today().date()
+    today = datetime.today().date() if not mood.date else mood.date
     try:
         mood_id = MoodId(mood.mood)
-        mood_db = await MoodModel.get(date=datetime.today().date())
+        mood_db = await MoodModel.get(date=today)
         mood_db.mood = mood_id
         mood_db.note = mood.note
     except DoesNotExist:  # no data log today, create a new data to save
@@ -191,15 +222,18 @@ async def mood_get(month: str, user: UserSchema = Depends(get_current_user)) -> 
     list of all moods log in a given month."""
     try:
         month = datetime.fromisoformat(month)
-        response = MoodListResponse(mood_list=[])
+        response = MoodListResponse(percentage=0, mood_list=[])
+        total = 0
         for mood_db_data in await MoodModel.get_all_by_month(user.email, month):
+            total += mood_db_data.mood
             response.mood_list += [
-                MoodLog(
-                    mood=mood_db_data.id,
+            MoodLog(
+                    mood=mood_db_data.mood,
                     note=mood_db_data.note,
                     date=mood_db_data.date.isoformat(),
                 )
             ]
+        response.percentage = 100 - int(100 * (total / len(response.mood_list)) / max([m for m in MoodId]))
         return response
     except ValueError as exc:  # wrong datetime isoformat
         log.error("Receive Invalid Month %s", month)
@@ -460,6 +494,64 @@ async def set_appointment_list(
     )
     log.info("saving appointment %s...", new_appointment)
     await new_appointment.save()
+
+
+@app.get("/user/membership/requests/")
+async def get_membership_profile_list(
+    admin: UserSchema = Depends(get_admin_user),
+) -> List[MembershipProfileApi]:
+    membership: MembershipModel
+
+    mem_profile_list = []
+    for membership in await MembershipModel.all():
+        user = await membership.user
+        mem_profile_list.append(
+            MembershipProfileApi(
+                id=membership.id,
+                user=user.id,
+                firstname=user.firstname,
+                lastname=user.lastname,
+                email=user.email,
+                type=membership.type.name,
+                status=membership.status,
+            )
+        )
+    return mem_profile_list
+
+
+@app.post("/user/membership/{membership_id}/set")
+async def set_membership_status(
+    membership_id: int,
+    membership_status: MembershipSetStatusApi,
+    admin: UserSchema = Depends(get_admin_user),
+) -> None:
+    """Admin - Set Membership Status."""
+    try:
+        membership: MembershipModel = await MembershipModel.get(id=membership_id)
+    except DoesNotExist:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail="{membership_id} not found or does not exist."
+        )
+
+    if (
+        membership.status != membership_status.status
+        and membership_status.status == MembershipStatus.ACTIVE.value
+    ):
+        # if approve, it will be activated, the start is now
+        membership.start_time = datetime.now()
+        # NOTE: Expiration has only two choices, by default 1 year unless
+        # the type of membership user is applying is LIFE which means lifetime
+        # membership. This is a quick fix.
+        # TODO: this must be refactored, the duration must be within the database.
+        end_year = membership.start_time.year
+        if membership.type == MembershipType.LIFE:
+            end_year += 99
+        else:
+            end_year += 1
+        membership.end_time = datetime(
+            end_year, membership.start_time.month, membership.start_time.day
+        )
+    await membership.save()
 
 
 def run() -> None:
