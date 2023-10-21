@@ -5,9 +5,9 @@ uses pydantic base model.
 
 date: 10/07/2023
 """
-from typing import List, Optional
+from typing import List, Tuple, Dict
 from pydantic import BaseModel, Field
-from internal.database import MembershipType
+from internal.database import MembershipType, MembershipStatus, AppointmentStatus
 
 
 class MoodLog(BaseModel):
@@ -28,6 +28,35 @@ class MoodListResponse(BaseModel):
     """
 
     mood_list: List[MoodLog]
+
+
+class AppointmentApi(BaseModel):
+    """API model of appointment.
+
+    Supported Method: POST
+    """
+
+    id: int
+    patient: int
+    center: str
+    start_time: str
+    end_time: str
+    status: AppointmentStatus
+
+
+class AppointmentBlockedSlot(BaseModel):
+    start_time: str
+    end_time: str
+
+
+class AppointmentApi(BaseModel):
+    """API model for appointment booking.
+
+    Supported Method: POST
+    """
+
+    start_time: str
+    end_time: str
 
 
 class UserApi(BaseModel):
@@ -58,3 +87,43 @@ class UserProfileApi(BaseModel):
     occupation: str = ""
     mobile_number: str = ""
     membership_type: MembershipType = MembershipType.NONE
+    membership_status: MembershipStatus = MembershipStatus.NULL
+
+
+class MembershipRegisterApi(BaseModel):
+    """API model of a user membership.
+
+    Supported Method: POST
+    """
+
+    membership_type: MembershipType
+
+
+class MembershipCancelApi(BaseModel):
+    """API model of a user membership cancellation.
+
+    Supported Method: POST
+    """
+
+    reason: str
+    suggestion: str
+
+
+class ThreadCommentApi(BaseModel):
+    """API model for posting a comment to a thread.
+
+    Supported Method: POST
+    """
+
+    creator: str = ""
+    date_created: str = ""
+    content: str
+
+
+class ThreadRequestApi(BaseModel):
+    thread_id: int
+    topic: str
+    content: str
+    creator: str = ""
+    date_created: str = ""
+    comments: List[ThreadCommentApi] = Field(default_factory=list)

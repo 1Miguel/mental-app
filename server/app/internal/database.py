@@ -3,19 +3,37 @@ This module contains all database schema models.
 
 date: 10/07/2023
 """
-from enum import IntEnum, auto
+from enum import IntEnum, Enum, auto
 from datetime import datetime
 from typing import List
 from typing_extensions import Self
 from passlib.hash import bcrypt
+from tortoise.expressions import Q
 from tortoise.models import Model
 from tortoise.fields import (
     DateField,
+    DatetimeField,
     IntEnumField,
     IntField,
     CharField,
     ForeignKeyField,
+    CharEnumField,
+    ReverseRelation,
 )
+
+
+def _iso_datetime_month(d: datetime) -> str:
+    # the month is in datetime isoformat YYYY-MM-DD to get only the
+    # year and month, we need to cut the string
+    return d.date().isoformat()[:7]
+
+
+def is_iso_month(month: str) -> bool:
+    try:
+        datetime.fromisoformat(f"{month}-01")
+    except:
+        return False
+    return True
 
 
 class MoodId(IntEnum):
@@ -28,15 +46,25 @@ class MoodId(IntEnum):
     ANGRY = auto()
 
 
+class MembershipStatus(str, Enum):
+    """Membership Status."""
+
+    NULL = "NULL"
+    PENDING = "PENDING"
+    ACTIVE = "ACTIVE"
+    EXPIRED = "EXPIRED"
+    CANCELLED = "CANCELLED"
+    REJECTED = "REJECTED"
+
+
 class MembershipType(IntEnum):
     """Member Subscription Type Ids."""
 
     NONE = 0
-    LIFE = auto()
-    CONTRIBUTING = auto()
     SUSTAINING = auto()
     CORPORATE = auto()
-    COLLEGE = auto()
+    CONTRIBUTING = auto()
+    ASSOCIATE = auto()
     SENIOR_HS = auto()
     JUNIOR_HS = auto()
 
@@ -60,6 +88,14 @@ class UserModel(Model):
 
     def verify_password(self, password) -> bool:
         return bcrypt.verify(password, self.password_hash)
+
+
+class AppointmentStatus(str, Enum):
+    """Appointment Status."""
+
+    PENDING = "PENDING"
+    RESERVED = "RESERVED"
+    CANCELLED = "CANCELLED"
 
 
 class MoodModel(Model):
@@ -88,19 +124,79 @@ class MoodModel(Model):
         ).all()
 
 
-if __name__ == "__main__":
-    from tortoise import Tortoise, run_async
+class MembershipModel(Model):
+    """Membership model. Contains information related to
+    a user membership which includes type of membership
+    and expiration date.
 
-    async def main():
-        await Tortoise.init(db_url="sqlite://db.sqlite3", modules={"models": ["__main__"]})
-        await Tortoise.generate_schemas()
+    The status field indicatest the membership status
+        - ACTIVE: membership is active and can be cancelled
+        - EXPIRED: membership is at past expiration date,
+                membership could be renewed, which will change status
+                back to ACTIVE.
+        - CANCELLED: membership was cancelled. When membership is cancelled
+                cancel_reason and cancel_suggestion might contain some data.
+                Will only get to this status from ACTIVE.
+    """
 
-        user = await UserModel.get(email="johndoe@gmail.com")
-        for day in range(1, 15, 1):
-            today = datetime(year=2023, month=10, day=day)
-            await MoodModel(user=user, mood=MoodId.GOOD, date=today, note="I feel good!").save()
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    type = IntEnumField(MembershipType)
+    start_time = DateField(default=datetime.today())
+    end_time = DateField(default=datetime.today())
+    status = CharEnumField(MembershipStatus, max_length=64)
+    cancel_reason = CharField(max_length=160, default="")
+    cancel_suggestion = CharField(max_length=160, default="")
 
-        for d in await MoodModel.get_all_by_month(user.email, datetime.now()):
-            print(d)
 
-    run_async(main())
+class ThreadModel(Model):
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    created = DatetimeField(auto_now=True)
+    topic = CharField(max_length=160)
+    content = CharField(max_length=1024)
+    comments = ReverseRelation["ThreadCommentModel"]
+
+
+class ThreadCommentModel(Model):
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    thread = ForeignKeyField("models.ThreadModel")
+    created = DatetimeField(auto_now=True)
+    content = CharField(max_length=1024)
+
+
+class Doctor(Model):
+    """Model that links user account(doctor) and health center."""
+
+    id = IntField(pk=True)
+    user_id = ForeignKeyField("models.UserModel")
+    # center = ForeignKeyField("models.HealthCenter")
+
+
+class Appointment(Model):
+    """Model the describe an appointment.
+
+    An appointment basically consists of a patient(user), doctor(user) and the
+    scheduled duration of an appointment."""
+
+    id = IntField(pk=True)
+    patient = ForeignKeyField("models.UserModel")
+    # doctor = ForeignKeyField("models.Doctor")
+    # center = ForeignKeyField("models.HealthCenter")
+    start_time = DatetimeField()
+    end_time = DatetimeField()
+    status = CharEnumField(AppointmentStatus, max_length=64)
+
+    @classmethod
+    async def get_by_month(cls, date: datetime) -> List[Self]:
+        """Get appointment by day."""
+        return await cls.filter(start_time__startswith=_iso_datetime_month(date)).all()
+
+    @classmethod
+    async def get_by_datetime(cls, start_time: datetime, end_time: datetime) -> List[Self]:
+        """Get appointment by datetime."""
+        return await cls.filter(
+            Q(start_time__startswith=start_time.isoformat())
+            | Q(end_time__startswith=end_time.isoformat())
+        ).all()

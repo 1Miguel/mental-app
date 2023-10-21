@@ -1,5 +1,5 @@
-import os
 import sys
+import json
 import logging
 import unittest
 import requests
@@ -147,8 +147,113 @@ class TestServer(unittest.TestCase):
 
         Given: User is login and user has token
          When: User logout
-         Then: Serve must return unauthorize access to all API request.
+         Then: Server must return unauthorize access to all API request.
         """
+
+    def test_membership_registration(self) -> None:
+        """Test User Membership Registration"""
+        headers, _ = self.login_routine()
+        headers["accept"]: "application/json"
+        with open("./test_file.txt", "rb") as file, open("./test_file_2.txt", "rb") as file_2:
+            test_response = self.client.post(
+                "http://127.0.0.1:8000/user/membership/register",
+                headers=headers,
+                # [('files', open('images/1.png', 'rb')), ('files', open('images/2.png', 'rb'))]
+                files=[("files", file), ("files", file_2)],
+                data={
+                    "membership_api": json.dumps({"membership_type": 0}),
+                },
+            )
+            self.assertTrue(test_response.ok)
+
+    def test_submit_new_thread(self) -> None:
+        """Test Submitting a new threads.
+
+        Given: User is logged in
+         When: User submits a new thread
+         Then: Server must respond with 200 OK
+         When: Thread is queried
+         Then: Thread queried must contain recently submitted threads.
+        """
+        headers, _ = self.login_routine()
+        headers["accept"]: "application/json"
+        test_submit_req = {
+            "topic": "My Test Topic",
+            "content": "My Test Content",
+        }
+        test_response = self.client.post(
+            "http://127.0.0.1:8000/user/thread/submit", headers=headers, json=test_submit_req
+        )
+        self.assertTrue(test_response.ok)
+
+    def test_get_thread_info(self) -> None:
+        """Test GET thread info.
+
+        Given: User is logged in
+         When: User GET a thread with a given thread_id
+         Then: Server must respond with the thread data
+          And: Server must respond with 200 OK
+
+        But:
+          When: User GET a thread that does not exist
+          Then: Server must respond with 404 NOT FOUND
+        """
+
+        headers, _ = self.login_routine()
+        headers["accept"]: "application/json"
+
+        test_response = self.client.get("http://127.0.0.1:8000/user/thread/1", headers=headers)
+        self.assertTrue(test_response.ok)
+
+        test_response = self.client.get("http://127.0.0.1:8000/user/thread/99", headers=headers)
+        self.assertEqual(test_response.status_code, 404)
+
+    def test_thread_comment(self) -> None:
+        """Test POST thread comment.
+
+        Given: User is logged in
+         When: A user POST a comment to a thread
+         Then: Server must respond with 200 OK
+
+        But:
+         When: User POST a comment to a thread that does not exist
+         Then: Server must respond with 404 NOT FOUND
+
+        """
+        headers, _ = self.login_routine()
+        headers["accept"]: "application/json"
+
+        test_data = {"content": "Test Comment"}
+
+        test_response = self.client.post(
+            "http://127.0.0.1:8000/user/thread/1/comment/", headers=headers, json=test_data
+        )
+        self.assertTrue(test_response.ok)
+
+        test_response = self.client.post(
+            "http://127.0.0.1:8000/user/thread/99/comment/", headers=headers, json=test_data
+        )
+        self.assertEqual(test_response.status_code, 404)
+
+    def test_get_thread_list(self) -> None:
+        """Test GET thread list.
+
+        Given: User is logged in
+         When: User GET all thread
+         With: given limit
+         Then: Server must respond with list of threads
+          And: Length of list must be within limit given
+          And: Server must respond with 200 OK
+        """
+        headers, _ = self.login_routine()
+        headers["accept"]: "application/json"
+
+        test_limit = 5
+        test_response = self.client.get(
+            f"http://127.0.0.1:8000/user/thread/0/?limit={test_limit}", headers=headers
+        )
+        self.assertTrue(test_response.ok)
+        self.assertLessEqual(len(test_response.json()), test_limit)
 
 
 if __name__ == "__main__":
