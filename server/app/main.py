@@ -509,6 +509,7 @@ async def get_membership_profile_list(
                 firstname=user.firstname,
                 lastname=user.lastname,
                 email=user.email,
+                type=membership.type,
                 status=membership.status,
             )
         )
