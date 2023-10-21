@@ -67,12 +67,13 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # temporary file where all files will be stored
 temp_file_storage: TemporaryDirectory = None
 
+
 @app.on_event("startup")
 async def startup() -> None:
     """Routine at application startup."""
     global temp_file_storage
     log.info("Startup routine")
-    temp_file_storage = TemporaryDirectory(dir=".") 
+    temp_file_storage = TemporaryDirectory(dir=".")
 
 
 @app.on_event("shutdown")
@@ -206,12 +207,12 @@ async def membership_register_route(
     """New Membership Request."""
     try:
         # the api field is not a json field but raw string, parse...
-        membership_api: MembershipRegisterApi = MembershipRegisterApi.model_validate_json(membership_api)
+        membership_api: MembershipRegisterApi = MembershipRegisterApi.model_validate_json(
+            membership_api
+        )
         if not files:
             # no files attached
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST, detail="Failed to attach files."
-            )
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Failed to attach files.")
         user_model = await UserModel.get(email=user.email)
         for file in files:
             p = Path(temp_file_storage.name).joinpath(str(user_model.id))
@@ -223,9 +224,9 @@ async def membership_register_route(
             p.joinpath(file.filename).write_bytes(await file.read())
         # create a new membership request
         new_membership_req = MembershipModel(
-            user = user_model,
-            type = membership_api.membership_type,
-            status = MembershipStatus.PENDING, 
+            user=user_model,
+            type=membership_api.membership_type,
+            status=MembershipStatus.PENDING,
         )
         await new_membership_req.save()
     except ValidationError as exc:
@@ -243,10 +244,12 @@ async def membership_cancel_route(
     # check first if membership exists for this user
     membership_profile: MembershipModel = MembershipModel.get(user=user_model)
     if membership_profile is None:
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND, detail="Membership profile not found."
-        )
-    if membership_profile.status in (MembershipStatus.ACTIVE, MembershipStatus.PENDING, MembershipStatus.EXPIRED):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Membership profile not found.")
+    if membership_profile.status in (
+        MembershipStatus.ACTIVE,
+        MembershipStatus.PENDING,
+        MembershipStatus.EXPIRED,
+    ):
         # only cancel membership that are either
         # currently active, expired or pending to be approved
         membership_profile.status = MembershipStatus.CANCELLED
@@ -274,7 +277,7 @@ async def signup_route(user: UserApi) -> Any:
             birthday=datetime(year=1900, month=1, day=1).isoformat(),
         )
         await user.save()
-        # create a folder space for the user, this will serve as 
+        # create a folder space for the user, this will serve as
         # file storage path where all files user uploads will be stored.
         Path(temp_file_storage.name).joinpath(str(user.id)).mkdir(exist_ok=True)
     except IntegrityError as err:
@@ -307,7 +310,7 @@ async def update_profile(
 
 
 @app.post("/user/thread/submit")
-async def new_thread(thread_request: ThreadRequestApi, user: UserSchema = Depends(get_current_user)) -> Any:
+async def thread_submit(thread_request: ThreadRequestApi, user: UserSchema = Depends(get_current_user)) -> Any:
     """User create and submits a new thread."""
     poster = await UserModel.get(email=user.email)
     await ThreadModel(
@@ -318,7 +321,7 @@ async def new_thread(thread_request: ThreadRequestApi, user: UserSchema = Depend
 
 
 @app.post("/user/thread/{thread_id}/comment")
-async def comment_thread(thread_id: int, thread_comment: ThreadCommentApi, user: UserSchema = Depends(get_current_user)) -> Any:
+async def thread_comment(thread_id: int, thread_comment: ThreadCommentApi, user: UserSchema = Depends(get_current_user)) -> Any:
     """A User comment to a thread"""
     thread = ThreadModel.get(id=thread_id)
     if thread is not None:
@@ -334,6 +337,64 @@ async def comment_thread(thread_id: int, thread_comment: ThreadCommentApi, user:
 @app.get("/user/thread/{thread_id}")
 async def get_thread(user: UserSchema = Depends(get_current_user)) -> Any:
     """A User comment to a thread"""
+
+
+@app.get("/user/thread/{page}")
+async def get_thread_list(page: int, limit: int=5, user: UserSchema = Depends(get_current_user)) -> None:
+    """Get thread list base on page."""
+
+
+@app.get("/user/appointments/{year}/{month}")
+async def get_appointment_list(
+    year: str, month: str, user: UserSchema = Depends(get_current_user)
+) -> Optional[List[AppointmentBlockedSlot]]:
+    log.info("get all available appointments %s %s", year, month)
+    try:
+        date = datetime.fromisoformat(f"{year}-{month}-01")
+    except ValueError:
+        # invalid filter value, expect iso format month
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, f"Invalid param {year}/{month}, expected Iso"
+        )
+    avail_apmnts: List[Appointment] = await Appointment.get_by_month(date)
+    if avail_apmnts:
+        return [
+            AppointmentBlockedSlot(
+                start_time=ap.start_time.isoformat(), end_time=ap.end_time.isoformat()
+            )
+            for ap in avail_apmnts
+        ]
+    return []
+
+
+@app.post("/user/appointment/")
+async def set_appointment_list(
+    appointment: AppointmentApi, user: UserSchema = Depends(get_current_user)
+) -> None:
+    # validate field
+    try:
+        start_time = datetime.fromisoformat(appointment.start_time)
+        end_time = datetime.fromisoformat(appointment.end_time)
+    except ValueError as exc:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, detail="Time expect to be in ISO Format"
+        ) from exc
+
+    # check if there is already an appointment for this time slot
+    appointment: Appointment = await Appointment.get_by_datetime(start_time, end_time)
+    if appointment:
+        # appointment is taken
+        raise HTTPException(status.HTTP_409_CONFLICT, detail="Slot is already taken")
+
+    user_db = await UserModel.get(email=user.email)
+    # TODO: refactor this later.
+    # does not exist in database
+    log.info("creating new appointment")
+    new_appointment = Appointment(
+        patient=user_db, start_time=start_time, end_time=end_time, status=AppointmentStatus.PENDING
+    )
+    log.info("saving appointment %s...", new_appointment)
+    await new_appointment.save()
 
 
 def run() -> None:
