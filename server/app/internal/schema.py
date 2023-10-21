@@ -27,18 +27,18 @@ class MoodListResponse(BaseModel):
     Supported Method: GET
     """
 
-    percentage: int
+    percentages: List[int]
     mood_list: List[MoodLog]
 
 
-class AppointmentApi(BaseModel):
+class AppointmentInfoApi(BaseModel):
     """API model of appointment.
 
     Supported Method: POST
     """
 
     id: int
-    patient: int
+    patient_id: int
     center: str
     start_time: str
     end_time: str
@@ -141,9 +141,9 @@ class ThreadCommentApi(BaseModel):
 
 
 class ThreadRequestApi(BaseModel):
-    thread_id: int
     topic: str
     content: str
+    thread_id: int = 0
     creator: str = ""
     date_created: str = ""
     comments: List[ThreadCommentApi] = Field(default_factory=list)

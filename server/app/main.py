@@ -222,25 +222,36 @@ async def mood_get(month: str, user: UserSchema = Depends(get_current_user)) -> 
     list of all moods log in a given month."""
     try:
         month = datetime.fromisoformat(month)
-        response = MoodListResponse(percentage=0, mood_list=[])
-        total = 0
-        for mood_db_data in await MoodModel.get_all_by_month(user.email, month):
-            total += mood_db_data.mood
-            response.mood_list += [
-            MoodLog(
-                    mood=mood_db_data.mood,
-                    note=mood_db_data.note,
-                    date=mood_db_data.date.isoformat(),
-                )
-            ]
-        response.percentage = 100 - int(100 * (total / len(response.mood_list)) / max([m for m in MoodId]))
-        return response
     except ValueError as exc:  # wrong datetime isoformat
         log.error("Receive Invalid Month %s", month)
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"given month {month} is not a valid isoformat",
         ) from exc
+
+    response = MoodListResponse(percentages=[0] * (MoodId.NUM_MOODS - 1), mood_list=[])
+    for mood_db_data in await MoodModel.get_all_by_month(user.email, month):
+        response.percentages[mood_db_data.mood - 1] += 1
+        response.mood_list += [
+            MoodLog(
+                mood=mood_db_data.mood,
+                note=mood_db_data.note,
+                date=mood_db_data.date.isoformat(),
+            )
+        ]
+    response.percentages = [int(100 * p / len(response.mood_list)) for p in response.percentages]
+    return response
+
+
+@app.get("/user/mood/today", response_model=MoodLog)
+async def mood_get(user: UserSchema = Depends(get_current_user)) -> MoodLog:
+    """This handles the mood log request. This will return a response that contains
+    list of all moods log in a given month."""
+    mood_db: MoodModel = await MoodModel.get_today(user.email)
+    if mood_db:
+        return MoodLog(mood=mood_db.mood, note=mood_db.note, date=mood_db.date.isoformat())
+    else:
+        return MoodLog(mood=MoodId.UNDEFINED, note="", date=datetime.today().date().isoformat())
 
 
 @app.post("/user/membership/register")
@@ -440,7 +451,7 @@ async def get_thread_list(
     return thread_req
 
 
-@app.get("/user/appointments/{year}/{month}")
+@app.get("/user/appointment/{year}/{month}")
 async def get_appointment_list(
     year: str, month: str, user: UserSchema = Depends(get_current_user)
 ) -> Optional[List[AppointmentBlockedSlot]]:
@@ -463,8 +474,8 @@ async def get_appointment_list(
     return []
 
 
-@app.post("/user/appointment/")
-async def set_appointment_list(
+@app.post("/user/appointment/set")
+async def set_appointment(
     appointment: AppointmentApi, user: UserSchema = Depends(get_current_user)
 ) -> None:
     # validate field
@@ -496,7 +507,7 @@ async def set_appointment_list(
     await new_appointment.save()
 
 
-@app.get("/user/membership/requests/")
+@app.get("/admin/membership/requests/")
 async def get_membership_profile_list(
     admin: UserSchema = Depends(get_admin_user),
 ) -> List[MembershipProfileApi]:
@@ -519,7 +530,7 @@ async def get_membership_profile_list(
     return mem_profile_list
 
 
-@app.post("/user/membership/{membership_id}/set")
+@app.post("/admin/membership/{membership_id}/set")
 async def set_membership_status(
     membership_id: int,
     membership_status: MembershipSetStatusApi,
@@ -552,6 +563,46 @@ async def set_membership_status(
             end_year, membership.start_time.month, membership.start_time.day
         )
     await membership.save()
+
+
+@app.get("/admin/appointment/")
+async def admin_get_appointments(
+    admin: UserSchema = Depends(get_admin_user),
+) -> List[AppointmentInfoApi]:
+    ap: Appointment
+    appointment_list = []
+    for ap in await Appointment.all():
+        p: UserModel = await ap.patient
+        appointment_list += [
+            AppointmentInfoApi(
+                id=ap.id,
+                patient_id=p.id,
+                center="",
+                start_time=ap.start_time.isoformat(),
+                end_time=ap.end_time.isoformat(),
+                status=ap.status.value,
+            )
+        ]
+    return appointment_list
+
+
+@app.post("/admin/appointment/{appointment_id}/update")
+async def admin_update_appointment(
+    appointment_id: int, update_status: str, admin: UserSchema = Depends(get_admin_user)
+) -> None:
+    if update_status not in [s for s in AppointmentStatus]:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=f"invalid param {update_status}")
+    try:
+        ap: Appointment = await Appointment.get(id=appointment_id)
+        if update_status == AppointmentStatus.CANCELLED:
+            await ap.delete()
+        else:
+            ap.status = update_status
+            await ap.save()
+    except DoesNotExist as exc:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail="Appointment {appointment_id} invalid"
+        )
 
 
 def run() -> None:
