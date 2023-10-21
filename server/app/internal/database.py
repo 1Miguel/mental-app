@@ -104,6 +104,13 @@ class AppointmentStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
+class AppointmentServices(str, Enum):
+    OCCUPATIONAL_THERAPY = "OCCUPATIONAL_THERAPY"
+    PSYCHIATRIC_CONSULTATION = "PSYCHIATRIC_CONSULTATION"
+    COUNSELING = "COUNSELING"
+    PSYCHOLOGICAL_ASSESMENT = "PSYCHOLOGICAL_ASSESMENT"
+
+
 class MoodModel(Model):
     """Mood model."""
 
@@ -209,6 +216,7 @@ class Appointment(Model):
 
     id = IntField(pk=True)
     patient = ForeignKeyField("models.UserModel")
+    service = CharEnumField(AppointmentServices, max_length=64)
     # doctor = ForeignKeyField("models.Doctor")
     # center = ForeignKeyField("models.HealthCenter")
     start_time = DatetimeField()
@@ -227,3 +235,8 @@ class Appointment(Model):
             Q(start_time__startswith=start_time.isoformat())
             | Q(end_time__startswith=end_time.isoformat())
         ).all()
+
+    @classmethod
+    async def get_upcoming(cls) -> List[Self]:
+        date = datetime.now()
+        return await cls.filter(Q(start_time__gt = date)).all()
