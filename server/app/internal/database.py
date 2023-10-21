@@ -64,9 +64,8 @@ class MembershipType(IntEnum):
     SUSTAINING = auto()
     CORPORATE = auto()
     CONTRIBUTING = auto()
-    ASSOCIATE = auto()
-    SENIOR_HS = auto()
-    JUNIOR_HS = auto()
+    LIFE = auto()
+    STUDENT = auto()
 
 
 class UserModel(Model):
@@ -88,6 +87,11 @@ class UserModel(Model):
 
     def verify_password(self, password) -> bool:
         return bcrypt.verify(password, self.password_hash)
+
+
+class AdminModel(Model):
+    id = IntField(pk=True)
+    admin_user = ForeignKeyField("models.UserModel")
 
 
 class AppointmentStatus(str, Enum):
