@@ -97,7 +97,7 @@ async def startup() -> None:
             birthday=datetime(year=1900, month=1, day=1).isoformat(),
         )
         await user.save()
-        await AdminModel(admin_user = user).save()
+        await AdminModel(admin_user=user).save()
     except:
         pass
 
@@ -495,9 +495,59 @@ async def set_appointment_list(
 
 @app.get("/user/membership/requests/")
 async def get_membership_profile_list(
-    limit: Optional[int]=None, admin: UserSchema = Depends(get_admin_user)
+    admin: UserSchema = Depends(get_admin_user),
 ) -> List[MembershipProfileApi]:
-    return [MembershipProfileApi(id=0, user=0, firstname="", lastname="", email="", status="")]
+    membership: MembershipModel
+
+    mem_profile_list = []
+    for membership in await MembershipModel.all():
+        user = await membership.user
+        mem_profile_list.append(
+            MembershipProfileApi(
+                id=membership.id,
+                user=user.id,
+                firstname=user.firstname,
+                lastname=user.lastname,
+                email=user.email,
+                status=membership.status,
+            )
+        )
+    return mem_profile_list
+
+
+@app.post("/user/membership/{membership_id}/set")
+async def set_membership_status(
+    membership_id: int,
+    membership_status: MembershipSetStatusApi,
+    admin: UserSchema = Depends(get_admin_user),
+) -> None:
+    """Admin - Set Membership Status."""
+    try:
+        membership: MembershipModel = await MembershipModel.get(id=membership_id)
+    except DoesNotExist:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail="{membership_id} not found or does not exist."
+        )
+
+    if (
+        membership.status != membership_status.status
+        and membership_status.status == MembershipStatus.ACTIVE.value
+    ):
+        # if approve, it will be activated, the start is now
+        membership.start_time = datetime.now()
+        # NOTE: Expiration has only two choices, by default 1 year unless
+        # the type of membership user is applying is LIFE which means lifetime
+        # membership. This is a quick fix.
+        # TODO: this must be refactored, the duration must be within the database.
+        end_year = membership.start_time.year
+        if membership.type == MembershipType.LIFE:
+            end_year += 99
+        else:
+            end_year += 1
+        membership.end_time = datetime(
+            end_year, membership.start_time.month, membership.start_time.day
+        )
+    await membership.save()
 
 
 def run() -> None:

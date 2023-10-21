@@ -64,9 +64,8 @@ class MembershipType(IntEnum):
     SUSTAINING = auto()
     CORPORATE = auto()
     CONTRIBUTING = auto()
-    ASSOCIATE = auto()
-    SENIOR_HS = auto()
-    JUNIOR_HS = auto()
+    LIFE = auto()
+    STUDENT = auto()
 
 
 class UserModel(Model):

@@ -108,17 +108,24 @@ class MembershipCancelApi(BaseModel):
     reason: str
     suggestion: str
 
+
 class MembershipProfileApi(BaseModel):
     """API model for accessing membership profile
-    
+
     Supported Method: GET
     """
+
     id: int
     user: int
     firstname: str
     lastname: str
     email: str
     status: str
+
+
+class MembershipSetStatusApi(BaseModel):
+    status: str
+
 
 class ThreadCommentApi(BaseModel):
     """API model for posting a comment to a thread.
