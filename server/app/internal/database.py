@@ -18,6 +18,7 @@ from tortoise.fields import (
     CharField,
     ForeignKeyField,
     CharEnumField,
+    ReverseRelation,
 )
 
 
@@ -146,6 +147,23 @@ class MembershipModel(Model):
     status = CharEnumField(MembershipStatus, max_length=64)
     cancel_reason = CharField(max_length=160, default="")
     cancel_suggestion = CharField(max_length=160, default="")
+
+
+class ThreadModel(Model):
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    created = DatetimeField(auto_now=True)
+    topic = CharField(max_length=160)
+    content = CharField(max_length=1024)
+    comments = ReverseRelation["ThreadCommentModel"]
+
+
+class ThreadCommentModel(Model):
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    thread = ForeignKeyField("models.ThreadModel")
+    created = DatetimeField(auto_now=True)
+    content = CharField(max_length=1024)
 
 
 class Doctor(Model):
