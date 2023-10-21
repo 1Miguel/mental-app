@@ -203,10 +203,10 @@ async def mood_log(mood: MoodLog, user: UserSchema = Depends(get_current_user)) 
     """Daily Mood Logging. if mood score has been log for today, dont lot anymore
     and return an HTTP_409_CONFLICT error."""
     user = await UserModel.get(email=user.email)
-    today = datetime.today().date()
+    today = datetime.today().date() if not mood.date else mood.date
     try:
         mood_id = MoodId(mood.mood)
-        mood_db = await MoodModel.get(date=datetime.today().date())
+        mood_db = await MoodModel.get(date=today)
         mood_db.mood = mood_id
         mood_db.note = mood.note
     except DoesNotExist:  # no data log today, create a new data to save
@@ -222,15 +222,18 @@ async def mood_get(month: str, user: UserSchema = Depends(get_current_user)) -> 
     list of all moods log in a given month."""
     try:
         month = datetime.fromisoformat(month)
-        response = MoodListResponse(mood_list=[])
+        response = MoodListResponse(percentage=0, mood_list=[])
+        total = 0
         for mood_db_data in await MoodModel.get_all_by_month(user.email, month):
+            total += mood_db_data.mood
             response.mood_list += [
-                MoodLog(
-                    mood=mood_db_data.id,
+            MoodLog(
+                    mood=mood_db_data.mood,
                     note=mood_db_data.note,
                     date=mood_db_data.date.isoformat(),
                 )
             ]
+        response.percentage = 100 - int(100 * (total / len(response.mood_list)) / max([m for m in MoodId]))
         return response
     except ValueError as exc:  # wrong datetime isoformat
         log.error("Receive Invalid Month %s", month)
