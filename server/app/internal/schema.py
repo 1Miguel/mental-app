@@ -5,9 +5,9 @@ uses pydantic base model.
 
 date: 10/07/2023
 """
-from typing import List
+from typing import List, Tuple, Dict
 from pydantic import BaseModel
-from internal.database import MembershipType, MembershipStatus
+from internal.database import MembershipType, MembershipStatus, AppointmentStatus
 
 
 class MoodLog(BaseModel):
@@ -28,6 +28,35 @@ class MoodListResponse(BaseModel):
     """
 
     mood_list: List[MoodLog]
+
+
+class AppointmentApi(BaseModel):
+    """API model of appointment.
+
+    Supported Method: POST
+    """
+
+    id: int
+    patient: int
+    center: str
+    start_time: str
+    end_time: str
+    status: AppointmentStatus
+
+
+class AppointmentBlockedSlot(BaseModel):
+    start_time: str
+    end_time: str
+
+
+class AppointmentApi(BaseModel):
+    """API model for appointment booking.
+
+    Supported Method: POST
+    """
+
+    start_time: str
+    end_time: str
 
 
 class UserApi(BaseModel):
@@ -60,17 +89,19 @@ class UserProfileApi(BaseModel):
     membership_type: MembershipType = MembershipType.NONE
     membership_status: MembershipStatus = MembershipStatus.NULL
 
+
 class MembershipRegisterApi(BaseModel):
     """API model of a user membership.
-    
+
     Supported Method: POST
     """
 
     membership_type: MembershipType
 
+
 class MembershipCancelApi(BaseModel):
     """API model of a user membership cancellation.
-    
+
     Supported Method: POST
     """
 

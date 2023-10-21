@@ -151,8 +151,7 @@ class TestServer(unittest.TestCase):
         """
 
     def test_membership_registration(self) -> None:
-        """Test User Membership Registration
-        """
+        """Test User Membership Registration"""
         headers, _ = self.login_routine()
         headers["accept"]: "application/json"
         with open("./test_file.txt", "rb") as file, open("./test_file_2.txt", "rb") as file_2:
@@ -163,9 +162,10 @@ class TestServer(unittest.TestCase):
                 files=[("files", file), ("files", file_2)],
                 data={
                     "membership_api": json.dumps({"membership_type": 0}),
-                }
+                },
             )
             self.assertTrue(test_response.ok)
+
 
 if __name__ == "__main__":
     unittest.main()
