@@ -129,13 +129,18 @@ async def get_authenticated_user(email: str, password: str) -> UserModel:
     return user
 
 
-async def is_user_admin(user: UserModel) -> None:
-    """Validate if this is an admin user."""
+async def get_admin_user(token: str = Depends(oauth2_scheme)) -> Any:
     try:
-        await AdminModel.get(admin_user=user)
-    except DoesNotExist:
-        return False
-    return True
+        payload = jwt.decode(token, _JWT_SECRET, algorithms="HS256")
+        user = await UserModel.get(email=payload.get("email"))
+        # if this failes, user is not in the admin list, unauthorized
+        admin = await AdminModel.get(admin_user=user)
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
+    return await UserSchema.from_tortoise_orm(user)
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> Any:
@@ -486,6 +491,13 @@ async def set_appointment_list(
     )
     log.info("saving appointment %s...", new_appointment)
     await new_appointment.save()
+
+
+@app.get("/user/membership/requests/")
+async def get_membership_profile_list(
+    limit: Optional[int]=None, admin: UserSchema = Depends(get_admin_user)
+) -> List[MembershipProfileApi]:
+    return [MembershipProfileApi(id=0, user=0, firstname="", lastname="", email="", status="")]
 
 
 def run() -> None:
