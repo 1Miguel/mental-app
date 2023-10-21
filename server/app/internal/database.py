@@ -239,4 +239,4 @@ class Appointment(Model):
     @classmethod
     async def get_upcoming(cls) -> List[Self]:
         date = datetime.now()
-        return await cls.filter(Q(start_time__gt = date)).all()
+        return await cls.filter(Q(start_time__gt=date)).all()

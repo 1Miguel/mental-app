@@ -498,7 +498,7 @@ async def set_appointment(
     # does not exist in database
     log.info("creating new appointment")
     new_appointment = Appointment(
-        service = appointment_api.service,
+        service=appointment_api.service,
         patient=user_db,
         start_time=start_time,
         end_time=end_time,
@@ -509,11 +509,25 @@ async def set_appointment(
 
 
 @app.get("/user/appointment/upcoming")
-async def get_upcoming_appointment(user: UserSchema = Depends(get_current_user)) -> Optional[List[AppointmentBlockedSlot]]:
-    print(await Appointment.get_upcoming())
+async def get_upcoming_appointment(
+    user: UserSchema = Depends(get_current_user),
+) -> Optional[List[AppointmentApi]]:
+    ap_list = []
+    for ap in await Appointment.get_upcoming():
+        ap_list = [
+            AppointmentApi(
+                service=ap.service,
+                start_time=ap.start_time.isoformat(),
+                end_time=ap.end_time.isoformat(),
+            )
+        ]
+    return ap_list
+
 
 @app.get("/admin/membership/requests/")
-async def get_membership_profile_list(admin: UserSchema = Depends(get_admin_user)) -> List[MembershipProfileApi]:
+async def get_membership_profile_list(
+    admin: UserSchema = Depends(get_admin_user),
+) -> List[MembershipProfileApi]:
     membership: MembershipModel
 
     mem_profile_list = []
