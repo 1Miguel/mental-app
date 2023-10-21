@@ -518,29 +518,29 @@ class LoginMainView extends StatelessWidget {
                       MaterialPageRoute(builder: ((context) => SignupPage())));
                 },
               ),
-              kIsWeb
-                  ? FilledButton(
-                      onPressed: () {
-                        if (kIsWeb) {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: ((context) => AdminApp())));
-                        }
-                      },
-                      style: ButtonStyle(
-                          minimumSize:
-                              MaterialStateProperty.all<Size>(Size(200, 50)),
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              primaryLightBlue)),
-                      child: Text(
-                        'ADMIN (TEMP DEBUG ONLY)',
-                        style: TextStyle(
-                            fontFamily: 'Open Sans',
-                            fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  : SizedBox(height: 10),
+              // kIsWeb
+              //     ? FilledButton(
+              //         onPressed: () {
+              //           if (kIsWeb) {
+              //             Navigator.push(
+              //                 context,
+              //                 MaterialPageRoute(
+              //                     builder: ((context) => AdminApp())));
+              //           }
+              //         },
+              //         style: ButtonStyle(
+              //             minimumSize:
+              //                 MaterialStateProperty.all<Size>(Size(200, 50)),
+              //             backgroundColor: MaterialStateProperty.all<Color>(
+              //                 primaryLightBlue)),
+              //         child: Text(
+              //           'ADMIN (TEMP DEBUG ONLY)',
+              //           style: TextStyle(
+              //               fontFamily: 'Open Sans',
+              //               fontWeight: FontWeight.bold),
+              //         ),
+              //       )
+              //     : SizedBox(height: 10),
             ],
           ),
         ],

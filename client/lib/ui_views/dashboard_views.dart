@@ -6,6 +6,7 @@ import 'package:flutter_intro/ui_views/login_views.dart';
 import 'package:flutter_intro/ui_views/book_appointment.dart';
 import 'package:flutter_intro/ui_views/mood_views.dart';
 import 'package:flutter_intro/model/user.dart';
+import 'package:flutter_intro/ui_views/talktous_views.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'membership_views.dart';
 
@@ -410,7 +411,13 @@ class DashboardPage extends StatelessWidget {
                             title: 'Talk To Us',
                             imageIcon: 'images/dashboard_category_talk.png',
                             icon: Icons.question_answer,
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          TalkToUsIntroPage())));
+                            },
                           ),
                           DashboardCategoryButtons(
                             title: 'Discover',
