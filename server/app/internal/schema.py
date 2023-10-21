@@ -120,6 +120,7 @@ class MembershipProfileApi(BaseModel):
     firstname: str
     lastname: str
     email: str
+    type: str
     status: str
 
 
