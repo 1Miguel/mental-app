@@ -222,25 +222,36 @@ async def mood_get(month: str, user: UserSchema = Depends(get_current_user)) -> 
     list of all moods log in a given month."""
     try:
         month = datetime.fromisoformat(month)
-        response = MoodListResponse(percentage=0, mood_list=[])
-        total = 0
-        for mood_db_data in await MoodModel.get_all_by_month(user.email, month):
-            total += mood_db_data.mood
-            response.mood_list += [
-            MoodLog(
-                    mood=mood_db_data.mood,
-                    note=mood_db_data.note,
-                    date=mood_db_data.date.isoformat(),
-                )
-            ]
-        response.percentage = 100 - int(100 * (total / len(response.mood_list)) / max([m for m in MoodId]))
-        return response
     except ValueError as exc:  # wrong datetime isoformat
         log.error("Receive Invalid Month %s", month)
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"given month {month} is not a valid isoformat",
         ) from exc
+
+    response = MoodListResponse(percentages=[0] * (MoodId.NUM_MOODS - 1), mood_list=[])
+    for mood_db_data in await MoodModel.get_all_by_month(user.email, month):
+        response.percentages[mood_db_data.mood - 1] += 1
+        response.mood_list += [
+            MoodLog(
+                mood=mood_db_data.mood,
+                note=mood_db_data.note,
+                date=mood_db_data.date.isoformat(),
+            )
+        ]
+    response.percentages = [int(100 * p / len(response.mood_list)) for p in response.percentages]
+    return response
+
+
+@app.get("/user/mood/today", response_model=MoodLog)
+async def mood_get(user: UserSchema = Depends(get_current_user)) -> MoodLog:
+    """This handles the mood log request. This will return a response that contains
+    list of all moods log in a given month."""
+    mood_db: MoodModel = await MoodModel.get_today(user.email)
+    if mood_db:
+        return MoodLog(mood=mood_db.mood, note=mood_db.note, date=mood_db.date.isoformat())
+    else:
+        return MoodLog(mood=MoodId.UNDEFINED, note="", date=datetime.today().date().isoformat())
 
 
 @app.post("/user/membership/register")
