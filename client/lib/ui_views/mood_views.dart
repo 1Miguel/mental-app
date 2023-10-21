@@ -134,7 +134,8 @@ class MoodModalPage extends StatelessWidget {
                           moodName: "Happy",
                           moodInfo: moodMessageList['Happy'],
                           onTap: () {
-                            moodController.logMood(MoodId.HAPPY.index);
+                            print(MoodId.HAPPY.index);
+                            moodController.logMood(MoodId.HAPPY.index, "");
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -151,7 +152,7 @@ class MoodModalPage extends StatelessWidget {
                           moodName: "Sad",
                           moodInfo: moodMessageList['Sad'],
                           onTap: () {
-                            moodController.logMood(MoodId.SAD.index);
+                            moodController.logMood(MoodId.SAD.index, "");
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -168,7 +169,7 @@ class MoodModalPage extends StatelessWidget {
                           moodName: "Confused",
                           moodInfo: moodMessageList['Confused'],
                           onTap: () {
-                            moodController.logMood(MoodId.CONFUSED.index);
+                            moodController.logMood(MoodId.CONFUSED.index, "");
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -190,7 +191,8 @@ class MoodModalPage extends StatelessWidget {
                           moodName: "Angry",
                           moodInfo: moodMessageList['Angry'],
                           onTap: () {
-                            moodController.logMood(MoodId.SAD.index);
+                            print(MoodId.ANGRY.index);
+                            moodController.logMood(MoodId.ANGRY.index, "");
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -207,7 +209,7 @@ class MoodModalPage extends StatelessWidget {
                           moodName: "Scared",
                           moodInfo: moodMessageList['Scared'],
                           onTap: () {
-                            moodController.logMood(MoodId.SCARED.index);
+                            moodController.logMood(MoodId.SCARED.index, "");
                             Navigator.push(
                               context,
                               MaterialPageRoute(

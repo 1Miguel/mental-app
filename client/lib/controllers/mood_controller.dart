@@ -45,7 +45,7 @@ class MoodController extends GetxController {
     }
   }
 
-  Future<List<Mood>?> fetchMoodHistory(DateTime dateTime) async {
+  Future<List<Mood>> fetchMoodHistory(DateTime dateTime) async {
     String? token = await getToken();
     String? token_type = await getTokenType();
 
@@ -107,10 +107,11 @@ class MoodController extends GetxController {
               children: [Text(e.toString())],
             );
           });
+      throw "Unknown Error Occurred";
     }
   }
 
-  Future<void> logMood(int mood) async {
+  Future<void> logMood(int mood, String note) async {
     String? token = await getToken();
     String? token_type = await getTokenType();
 
@@ -123,8 +124,8 @@ class MoodController extends GetxController {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          "mood": 0,
-          "note": "Feeling Sad",
+          "mood": mood,
+          "note": note,
         }),
       );
 

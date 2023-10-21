@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/model/thread.dart';
 import 'package:flutter_intro/ui_views/comment_box_app.dart';
 
 // Local import
 import 'package:flutter_intro/utils/colors_scheme.dart';
+import 'package:flutter_intro/controllers/thread_controller.dart';
+
+import 'package:get/get.dart';
 
 class CommunityIntroPage extends StatelessWidget {
   @override
@@ -62,7 +66,7 @@ class CommunityIntroPage extends StatelessWidget {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: ((context) => CommunityMainPage())));
+                          builder: ((context) => CommunityMainpage())));
                 },
                 style: ButtonStyle(
                     minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
@@ -78,7 +82,63 @@ class CommunityIntroPage extends StatelessWidget {
   }
 }
 
-class CommunityMainPage extends StatelessWidget {
+class CommunityMainpage extends StatefulWidget {
+  @override
+  State<CommunityMainpage> createState() => _CommunityMainPageState();
+}
+
+class _CommunityMainPageState extends State<CommunityMainpage> {
+  List<Thread> threads = getThreads();
+  late Future<List<Thread>> futureThreadList;
+  ThreadController threadController = Get.put(ThreadController());
+
+  static List<Thread> getThreads() {
+    const data = [
+      {
+        "thread_id": 1,
+        "topic": "How to Overcome depression",
+        "content":
+            "I have been depressed for over a month now, would you guys help me out",
+        "creator": "/user001",
+        "date_created": "2023-10-20",
+        "comments": [],
+      },
+      {
+        "thread_id": 2,
+        "topic": "Does having a pet help me overcome stress?",
+        "content":
+            "I'm going to get me dog as soon as next week, would it help me to deal with my stress?",
+        "creator": "/user002",
+        "date_created": "2023-10-20",
+        "comments": [],
+      },
+      {
+        "thread_id": 3,
+        "topic": "Most Common Health Problems",
+        "content":
+            "I'm wondering what are the most common mental health related problems people face today",
+        "creator": "/user003",
+        "date_created": "2023-10-20",
+        "comments": [],
+      },
+      {
+        "thread_id": 4,
+        "topic": "How to overcome anger",
+        "content": "How to start with anger management?",
+        "creator": "/user004",
+        "date_created": "2023-10-20",
+        "comments": [],
+      }
+    ];
+    return data.map<Thread>(Thread.fromJson).toList();
+  }
+
+  Future<List<Thread>> fetchThreads() async {
+    futureThreadList = threadController.fetchThreads(0);
+    print(futureThreadList);
+    return futureThreadList;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,37 +216,48 @@ class CommunityMainPage extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  height: 500,
-                  child: ListView(
-                    children: [
-                      PostCard(
-                        title: 'How to Overcome depression',
-                        username: '/user001',
-                        content:
-                            'I have been depressed for over a month now, would you guys help me out',
-                        count: 45,
-                        onTap: () {},
-                      ),
-                      Divider(),
-                      PostCard(
-                        title: 'Does having a pet help me overcome stress?',
-                        username: '/user002',
-                        content:
-                            "I'm going to get me dog as soon as next week, would it help me to deal with my stress?",
-                        count: 5,
-                        onTap: () {},
-                      ),
-                      Divider(),
-                      PostCard(
-                        title: 'Most Common Health Problems',
-                        username: '/user003',
-                        content:
-                            "I'm wondering what are the most common mental health related problems people face today",
-                        count: 2,
-                        onTap: () {},
-                      ),
-                    ],
+                  height: 550,
+                  child: FutureBuilder<List<Thread>>(
+                    future: fetchThreads(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final threads = snapshot.data!;
+                        return buildThreads(threads);
+                      } else {
+                        return const Text('No topics available');
+                      }
+                    },
                   ),
+                  // child: ListView(
+                  //   children: [
+                  //     PostCard(
+                  //       title: 'How to Overcome depression',
+                  //       username: '/user001',
+                  //       content:
+                  //           'I have been depressed for over a month now, would you guys help me out',
+                  //       count: 45,
+                  //       onTap: () {},
+                  //     ),
+                  //     Divider(),
+                  //     PostCard(
+                  //       title: 'Does having a pet help me overcome stress?',
+                  //       username: '/user002',
+                  //       content:
+                  //           "I'm going to get me dog as soon as next week, would it help me to deal with my stress?",
+                  //       count: 5,
+                  //       onTap: () {},
+                  //     ),
+                  //     Divider(),
+                  //     PostCard(
+                  //       title: 'Most Common Health Problems',
+                  //       username: '/user003',
+                  //       content:
+                  //           "I'm wondering what are the most common mental health related problems people face today",
+                  //       count: 2,
+                  //       onTap: () {},
+                  //     ),
+                  //   ],
+                  // ),
                 ),
                 FilledButton(
                   onPressed: () {
@@ -211,6 +282,21 @@ class CommunityMainPage extends StatelessWidget {
       ),
     );
   }
+
+  Widget buildThreads(List<Thread> threads) => ListView.builder(
+        itemCount: threads.length,
+        itemBuilder: (context, index) {
+          final thread = threads[index];
+          return PostCard(
+            id: thread.threadId,
+            title: thread.topic,
+            username: thread.creator,
+            content: thread.content,
+            count: 1,
+            onTap: () {},
+          );
+        },
+      );
 }
 
 class PostTitle extends StatelessWidget {
@@ -276,6 +362,7 @@ class PostContent extends StatelessWidget {
 }
 
 class PostCard extends StatelessWidget {
+  final int id;
   final String title;
   final String username;
   final String content;
@@ -284,6 +371,7 @@ class PostCard extends StatelessWidget {
 
   const PostCard({
     super.key,
+    required this.id,
     required this.title,
     required this.username,
     required this.content,
@@ -300,6 +388,7 @@ class PostCard extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: ((context) => TopicThread(
+                  topicId: id,
                   topicName: title,
                   content: content,
                 )),
@@ -392,9 +481,13 @@ class CreatePost extends StatefulWidget {
 
 class _CreatePostState extends State<CreatePost> {
   bool anonymous = true;
+  final _formKey = GlobalKey<FormState>();
+  ThreadController threadController = Get.put(ThreadController());
 
   @override
   Widget build(BuildContext context) {
+    threadController.topicController.clear();
+    threadController.contentController.clear();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -440,116 +533,121 @@ class _CreatePostState extends State<CreatePost> {
         width: MediaQuery.sizeOf(context).width,
         child: ListView(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: SizedBox(
-                width: MediaQuery.sizeOf(context).width,
-                child: Text(
-                  'Title',
-                  style: TextStyle(
-                    fontFamily: 'Open Sans',
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-            ),
-            TextFormField(
-              minLines: 1,
-              maxLines: 2,
-              keyboardType: TextInputType.multiline,
-              //controller: _Textcontroller,
-              style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87),
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.all(10),
-              ),
-              onSaved: (String? value) {
-                // This optional block of code can be used to run
-                // code when the user saves the form.
-              },
-              validator: (String? value) {
-                return (value != null && value.contains('@'))
-                    ? 'Do not use the @ char.'
-                    : null;
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: SizedBox(
-                width: MediaQuery.sizeOf(context).width,
-                child: Text(
-                  'Description',
-                  style: TextStyle(
-                    fontFamily: 'Open Sans',
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-            ),
-            TextFormField(
-              minLines: 5,
-              maxLines: 6,
-              keyboardType: TextInputType.multiline,
-              //controller: _Textcontroller,
-              style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                  color: primaryGrey),
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.all(10),
-              ),
-              onSaved: (String? value) {
-                // This optional block of code can be used to run
-                // code when the user saves the form.
-              },
-              validator: (String? value) {
-                return (value != null && value.contains('@'))
-                    ? 'Do not use the @ char.'
-                    : null;
-              },
-            ),
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 20.0, right: 10),
-                  child: Text(
-                    'Anonymous: ',
-                    style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontSize: 15,
-                      fontWeight: FontWeight.normal,
-                      color: primaryGrey,
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: Text(
+                        'Title',
+                        style: TextStyle(
+                          fontFamily: 'Open Sans',
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                Switch(
-                  // This bool value toggles the switch.
-                  value: anonymous,
-                  activeColor: Colors.green,
-                  onChanged: (bool value) {
-                    // This is called when the user toggles the switch.
-                    setState(() {
-                      anonymous = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-            SizedBox(
-              child: MaterialButton(
-                color: primaryLightBlue,
-                child: Text("Create Post",
+                  TextFormField(
+                    minLines: 1,
+                    maxLines: 2,
+                    keyboardType: TextInputType.multiline,
+                    controller: threadController.topicController,
+                    initialValue: null,
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
-                onPressed: () {
-                  //getImageFromGallery();
-                },
+                        fontFamily: 'Roboto',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87),
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.all(10),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a topic title';
+                      }
+                      return null;
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: Text(
+                        'Description',
+                        style: TextStyle(
+                          fontFamily: 'Open Sans',
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ),
+                  TextFormField(
+                    minLines: 5,
+                    maxLines: 6,
+                    keyboardType: TextInputType.multiline,
+                    controller: threadController.contentController,
+                    style: TextStyle(
+                        fontFamily: 'Roboto',
+                        fontSize: 20,
+                        fontWeight: FontWeight.normal,
+                        color: primaryGrey),
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.all(10),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter content description';
+                      }
+                      return null;
+                    },
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 20.0, right: 10),
+                        child: Text(
+                          'Anonymous: ',
+                          style: TextStyle(
+                            fontFamily: 'Roboto',
+                            fontSize: 15,
+                            fontWeight: FontWeight.normal,
+                            color: primaryGrey,
+                          ),
+                        ),
+                      ),
+                      Switch(
+                        // This bool value toggles the switch.
+                        value: anonymous,
+                        activeColor: Colors.green,
+                        onChanged: (bool value) {
+                          // This is called when the user toggles the switch.
+                          setState(() {
+                            anonymous = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    child: MaterialButton(
+                      color: primaryLightBlue,
+                      child: Text("Create Post",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          threadController.createPost();
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

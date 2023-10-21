@@ -1,8 +1,97 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/controllers/mood_controller.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
+// Local import
+import 'package:flutter_intro/model/mood.dart';
+
+// Third-party import
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
+
 class MoodTimeline extends StatelessWidget {
+  MoodController moodController = Get.put(MoodController());
+  late Future<List<Mood>> futureMoodHistory;
+  // List<Mood> moods = getMoods();
+
+  // static List<Mood> getMoods() {
+  //   const data = [
+  //     {
+  //       "mood": 1,
+  //       "note": "This is my mood today",
+  //       "date": "2023-10-01",
+  //     },
+  //     {
+  //       "mood": 2,
+  //       "note": "I'm feeling super sad toady",
+  //       "date": "2023-10-02",
+  //     },
+  //     {
+  //       "mood": 3,
+  //       "note": "I'm feeling just meeeh",
+  //       "date": "2023-10-03",
+  //     },
+  //     {
+  //       "mood": 3,
+  //       "note": "I'm feeling just meeeh",
+  //       "date": "2023-10-03",
+  //     },
+  //     {
+  //       "mood": 3,
+  //       "note": "I'm feeling just meeeh",
+  //       "date": "2023-10-03",
+  //     },
+  //     {
+  //       "mood": 3,
+  //       "note": "I'm feeling just meeeh",
+  //       "date": "2023-10-03",
+  //     },
+  //     {
+  //       "mood": 1,
+  //       "note": "This is my mood today",
+  //       "date": "2023-10-01",
+  //     },
+  //     {
+  //       "mood": 1,
+  //       "note": "This is my mood today",
+  //       "date": "2023-10-01",
+  //     },
+  //     {
+  //       "mood": 1,
+  //       "note": "This is my mood today",
+  //       "date": "2023-10-01",
+  //     },
+  //     {
+  //       "mood": 1,
+  //       "note": "This is my mood today",
+  //       "date": "2023-10-01",
+  //     },
+  //     {
+  //       "mood": 1,
+  //       "note": "This is my mood today",
+  //       "date": "2023-10-01",
+  //     },
+  //     {
+  //       "mood": 1,
+  //       "note": "This is my mood today",
+  //       "date": "2023-10-01",
+  //     },
+  //     {
+  //       "mood": 1,
+  //       "note": "This is my mood today",
+  //       "date": "2023-10-01",
+  //     },
+  //   ];
+  //   return data.map<Mood>(Mood.fromJson).toList();
+  // }
+
+  Future<List<Mood>> getMoodHistory() async {
+    futureMoodHistory = moodController.fetchMoodHistory(DateTime.now());
+    print(futureMoodHistory);
+    return futureMoodHistory;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -23,6 +112,7 @@ class MoodTimeline extends StatelessWidget {
           appBar: _buildAppBar(),
           body: ListView(
             children: <Widget>[
+              //SizedBox(height: 30),
               TimelineTile(
                 alignment: TimelineAlign.manual,
                 lineXY: 0.3,
@@ -36,84 +126,141 @@ class MoodTimeline extends StatelessWidget {
                     LineStyle(color: Colors.white.withOpacity(0.7)),
                 endChild: _ContainerHeader(),
               ),
-              _buildTimelineTile(
-                indicator: _IconIndicator(
-                  iconData: Icons.sentiment_dissatisfied,
-                  size: 20,
-                ),
-                date: 'Oct 01',
-                mood: 'Sad',
-                phrase:
-                    "It's quite a bit sad day today. It's quite a bit sad day today.",
+              Expanded(
+                child: SizedBox(
+                    height: MediaQuery.sizeOf(context).height - 100,
+                    child: FutureBuilder<List<Mood>>(
+                        future: getMoodHistory(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final moods = snapshot.data!;
+                            return buildThreads(moods);
+                          } else {
+                            return const Text("No Mood Data");
+                          }
+                        })),
               ),
-              _buildTimelineTile(
-                indicator: _IconIndicator(
-                  iconData: Icons.sentiment_dissatisfied,
-                  size: 20,
-                ),
-                date: 'Oct 02',
-                mood: 'Happy',
-                //temperature: 'quite a pleasant day',
-                phrase:
-                    "It's quite a bit happy day today. It's quite a bit happy day today.",
-              ),
-              _buildTimelineTile(
-                indicator: _IconIndicator(
-                  iconData: Icons.sentiment_satisfied,
-                  size: 20,
-                ),
-                date: 'Oct 03',
-                mood: 'Sad',
-                phrase:
-                    "It's quite a bit sad day today. It's quite a bit sad day today.",
-              ),
-              _buildTimelineTile(
-                indicator: _IconIndicator(
-                  iconData: Icons.sentiment_neutral,
-                  size: 20,
-                ),
-                date: 'Oct 04',
-                mood: 'Sad',
-                phrase:
-                    "It's quite a bit sad day today. It's quite a bit sad day today.",
-              ),
-              _buildTimelineTile(
-                indicator: _IconIndicator(
-                  iconData: Icons.sentiment_neutral,
-                  size: 20,
-                ),
-                date: 'Oct 05',
-                mood: 'Sad',
-                phrase:
-                    "It's quite a bit sad day today. It's quite a bit sad day today.",
-              ),
-              _buildTimelineTile(
-                indicator: _IconIndicator(
-                  iconData: Icons.sentiment_neutral,
-                  size: 20,
-                ),
-                date: 'Oct 06',
-                mood: 'Sad',
-                phrase:
-                    "It's quite a bit sad day today. It's quite a bit sad day today.",
-              ),
-              _buildTimelineTile(
-                indicator: _IconIndicator(
-                  iconData: Icons.sentiment_neutral,
-                  size: 20,
-                ),
-                date: 'Oct 07',
-                mood: 'Sad',
-                phrase:
-                    "It's quite a bit sad day today. It's quite a bit sad day today.",
-                isLast: true,
-              ),
+              // SizedBox(
+              //   height: 800,
+              //   child:
+              // ),
+              // _buildTimelineTile(
+              //   indicator: _IconIndicator(
+              //     iconData: Icons.sentiment_dissatisfied,
+              //     size: 20,
+              //   ),
+              //   date: 'Oct 01',
+              //   mood: 'Sad',
+              //   phrase:
+              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
+              // ),
+              // _buildTimelineTile(
+              //   indicator: _IconIndicator(
+              //     iconData: Icons.sentiment_dissatisfied,
+              //     size: 20,
+              //   ),
+              //   date: 'Oct 02',
+              //   mood: 'Happy',
+              //   //temperature: 'quite a pleasant day',
+              //   phrase:
+              //       "It's quite a bit happy day today. It's quite a bit happy day today.",
+              // ),
+              // _buildTimelineTile(
+              //   indicator: _IconIndicator(
+              //     iconData: Icons.sentiment_satisfied,
+              //     size: 20,
+              //   ),
+              //   date: 'Oct 03',
+              //   mood: 'Sad',
+              //   phrase:
+              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
+              // ),
+              // _buildTimelineTile(
+              //   indicator: _IconIndicator(
+              //     iconData: Icons.sentiment_neutral,
+              //     size: 20,
+              //   ),
+              //   date: 'Oct 04',
+              //   mood: 'Sad',
+              //   phrase:
+              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
+              // ),
+              // _buildTimelineTile(
+              //   indicator: _IconIndicator(
+              //     iconData: Icons.sentiment_neutral,
+              //     size: 20,
+              //   ),
+              //   date: 'Oct 05',
+              //   mood: 'Sad',
+              //   phrase:
+              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
+              // ),
+              // _buildTimelineTile(
+              //   indicator: _IconIndicator(
+              //     iconData: Icons.sentiment_neutral,
+              //     size: 20,
+              //   ),
+              //   date: 'Oct 06',
+              //   mood: 'Sad',
+              //   phrase:
+              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
+              // ),
+              // _buildTimelineTile(
+              //   indicator: _IconIndicator(
+              //     iconData: Icons.sentiment_neutral,
+              //     size: 20,
+              //   ),
+              //   date: 'Oct 07',
+              //   mood: 'Sad',
+              //   phrase:
+              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
+              //   isLast: true,
+              // ),
             ],
           ),
         ),
       ),
     );
   }
+
+  Widget buildThreads(List<Mood> moods) => ListView.builder(
+        itemCount: moods.length,
+        itemBuilder: (context, index) {
+          print(moods);
+          print('buildThreads');
+          print(moods[index].mood);
+          print(moods[index].date);
+          print(moods[index].note);
+          bool last = false;
+          final thread = moods[index];
+          IconData moodIcon = Icons.sentiment_satisfied;
+          String moodName = "HAPPY";
+          if (moods[index].mood == 1) {
+            moodIcon = Icons.sentiment_dissatisfied;
+            moodName = "SAD";
+          } else if (moods[index].mood == 2) {
+            moodIcon = Icons.sentiment_neutral;
+            moodName = "CONFUSED";
+          } else if (moods[index].mood == 3) {
+            moodIcon = Icons.sentiment_very_dissatisfied;
+            moodName = "SCARED";
+          } else if (moods[index].mood == 4) {
+            moodIcon = Icons.sentiment_very_dissatisfied;
+            moodName = "ANGRY";
+          }
+
+          return _buildTimelineTile(
+            indicator: _IconIndicator(
+              iconData: moodIcon,
+              size: 20,
+            ),
+            date: moods[index].date,
+            mood: moodName,
+            phrase: moods[index].note,
+            isLast: last,
+          );
+        },
+      );
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -154,7 +301,7 @@ class MoodTimeline extends StatelessWidget {
           child: Text(
             date,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 14,
               color: Colors.white.withOpacity(0.6),
               fontWeight: FontWeight.w800,
             ),

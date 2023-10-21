@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/model/user.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:checkbox_formfield/checkbox_formfield.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TitleText extends StatelessWidget {
   final String title;
@@ -1782,6 +1785,23 @@ class _MembershipPaymentFormState extends State<MembershipPaymentForm> {
   final String amount;
   File? _image;
   final picker = ImagePicker();
+  User emptyUser = User(
+    id: 0,
+    email: "",
+    password_hash: "",
+    firstname: "",
+    lastname: "",
+    address: "",
+    age: 0,
+    occupation: "",
+    contact_number: "",
+  );
+
+  getUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    return prefs.getString('user_data') ?? jsonEncode(emptyUser).toString();
+  }
 
   _MembershipPaymentFormState({
     required this.amount,
@@ -1804,340 +1824,387 @@ class _MembershipPaymentFormState extends State<MembershipPaymentForm> {
     return Container(
       width: MediaQuery.sizeOf(context).width,
       color: backgroundColor,
-      child: ListView(
-        children: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TitleSubHeadingText(title: 'MEMBERSHIP'),
-            ),
-          ),
-          Divider(),
-          SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.only(left: 20.0),
-            child: Text(
-              'Personal Info',
-              style: TextStyle(
-                  fontFamily: 'Asap',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: primaryBlue),
-            ),
-          ),
-          SizedBox(height: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: 5.0, left: 40.0),
-                child: InputDescription(desc: 'First Name'),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 40.0, right: 20.0),
-                child: SizedBox(
-                  width: MediaQuery.sizeOf(context).width - 40.0,
-                  child: TextFormField(
-                    autofocus: true,
-                    initialValue: 'Anna Rodina',
-                    enabled: true,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.person),
-                    ),
-                    onSaved: (String? value) {
-                      // This optional block of code can be used to run
-                      // code when the user saves the form.
-                    },
-                    validator: (String? value) {
-                      return (value != null && value.contains('@'))
-                          ? 'Do not use the @ char.'
-                          : null;
-                    },
-                  ),
+      child: FutureBuilder(
+          future: getUserData(),
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.deepPurpleAccent,
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 5.0, left: 40.0),
-                child: InputDescription(desc: 'Last Name'),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 40.0, right: 20.0),
-                child: SizedBox(
-                  width: MediaQuery.sizeOf(context).width - 40.0,
-                  child: TextFormField(
-                    autofocus: true,
-                    initialValue: 'Marte',
-                    enabled: true,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.person),
-                    ),
-                    onSaved: (String? value) {
-                      // This optional block of code can be used to run
-                      // code when the user saves the form.
-                    },
-                    validator: (String? value) {
-                      return (value != null && value.contains('@'))
-                          ? 'Do not use the @ char.'
-                          : null;
-                    },
+              );
+            }
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'An ${snapshot.error} occurred',
+                    style: const TextStyle(fontSize: 18, color: Colors.red),
                   ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 5.0, left: 40.0),
-                child: InputDescription(desc: 'Address'),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 40.0, right: 20.0),
-                child: SizedBox(
-                  width: MediaQuery.sizeOf(context).width - 40.0,
-                  child: TextFormField(
-                    autofocus: true,
-                    initialValue: 'Puerto Princesa Palawan',
-                    enabled: true,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.person),
-                    ),
-                    onSaved: (String? value) {
-                      // This optional block of code can be used to run
-                      // code when the user saves the form.
-                    },
-                    validator: (String? value) {
-                      return (value != null && value.contains('@'))
-                          ? 'Do not use the @ char.'
-                          : null;
-                    },
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 5.0, left: 40.0),
-                child: InputDescription(desc: 'Contact Number'),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 40.0, right: 20.0),
-                child: SizedBox(
-                  width: MediaQuery.sizeOf(context).width - 40.0,
-                  child: TextFormField(
-                    autofocus: true,
-                    enabled: true,
-                    decoration: const InputDecoration(
-                      hintText: "Mobile Number",
-                      icon: Icon(Icons.person),
-                    ),
-                    onSaved: (String? value) {
-                      // This optional block of code can be used to run
-                      // code when the user saves the form.
-                    },
-                    validator: (String? value) {
-                      return (value != null && value.contains('@'))
-                          ? 'Do not use the @ char.'
-                          : null;
-                    },
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 5.0, left: 40.0),
-                child: InputDescription(desc: 'Email Address'),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 40.0, right: 20.0),
-                child: SizedBox(
-                  width: MediaQuery.sizeOf(context).width - 40.0,
-                  child: TextFormField(
-                    autofocus: true,
-                    enabled: false,
-                    initialValue: "anna@gmail.com",
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.person),
-                    ),
-                    onSaved: (String? value) {
-                      // This optional block of code can be used to run
-                      // code when the user saves the form.
-                    },
-                    validator: (String? value) {
-                      return (value != null && value.contains('@'))
-                          ? 'Do not use the @ char.'
-                          : null;
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
+                );
+              } else if (snapshot.hasData) {
+                final data = snapshot.data;
+                String mystring = data.toString();
+                //Map<String, dynamic> myjson = jsonDecode(mystring);
+                User userdata = User.fromJson(jsonDecode(mystring));
+                String firstname = userdata.firstname;
+                String lastname = userdata.lastname;
+                String email = userdata.email;
+                String address = userdata.address;
+                String mobile = userdata.contact_number;
 
-          SizedBox(height: 20),
-          // SizedBox(
-          //   width: 100,
-          //   height: 50,
-          //   child: TextFormField(
-          //     decoration: const InputDecoration(
-          //       icon: Icon(Icons.person),
-          //       labelText: 'Name *',
-          //     ),
-          //     onSaved: (String? value) {
-          //       // This optional block of code can be used to run
-          //       // code when the user saves the form.
-          //     },
-          //     validator: (String? value) {
-          //       return (value != null && value.contains('@'))
-          //           ? 'Do not use the @ char.'
-          //           : null;
-          //     },
-          //   ),
-          // ),
-          Divider(),
-          SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.only(left: 20.0),
-            child: Text(
-              'Membership Fee',
-              style: TextStyle(
-                  fontFamily: 'Asap',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: primaryBlue),
-            ),
-          ),
-          SizedBox(height: 15),
-          Row(children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 40.0, bottom: 10),
-              child: SizedBox(
-                height: 30,
-                child: Row(
+                return ListView(
                   children: [
-                    Text(
-                      'Amount',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 15,
-                          color: Colors.black87),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                        child: TitleSubHeadingText(title: 'MEMBERSHIP'),
+                      ),
                     ),
-                    Text(
-                      ' * ',
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 15,
-                          color: Colors.red),
+                    Divider(),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0),
+                      child: Text(
+                        'Personal Info',
+                        style: TextStyle(
+                            fontFamily: 'Asap',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: primaryBlue),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 5.0, left: 40.0),
+                          child: InputDescription(desc: 'First Name'),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 40.0, right: 20.0),
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 40.0,
+                            child: TextFormField(
+                              autofocus: false,
+                              initialValue: firstname,
+                              enabled: true,
+                              decoration: const InputDecoration(
+                                icon: Icon(Icons.person),
+                              ),
+                              onSaved: (String? value) {
+                                // This optional block of code can be used to run
+                                // code when the user saves the form.
+                              },
+                              validator: (String? value) {
+                                return (value != null && value.contains('@'))
+                                    ? 'Do not use the @ char.'
+                                    : null;
+                              },
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 5.0, left: 40.0),
+                          child: InputDescription(desc: 'Last Name'),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 40.0, right: 20.0),
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 40.0,
+                            child: TextFormField(
+                              autofocus: false,
+                              initialValue: lastname,
+                              enabled: true,
+                              decoration: const InputDecoration(
+                                icon: Icon(Icons.person),
+                              ),
+                              onSaved: (String? value) {
+                                // This optional block of code can be used to run
+                                // code when the user saves the form.
+                              },
+                              validator: (String? value) {
+                                return (value != null && value.contains('@'))
+                                    ? 'Do not use the @ char.'
+                                    : null;
+                              },
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 5.0, left: 40.0),
+                          child: InputDescription(desc: 'Address'),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 40.0, right: 20.0),
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 40.0,
+                            child: TextFormField(
+                              autofocus: false,
+                              initialValue: address,
+                              enabled: true,
+                              decoration: const InputDecoration(
+                                icon: Icon(Icons.person),
+                              ),
+                              onSaved: (String? value) {
+                                // This optional block of code can be used to run
+                                // code when the user saves the form.
+                              },
+                              validator: (String? value) {
+                                return (value != null && value.contains('@'))
+                                    ? 'Do not use the @ char.'
+                                    : null;
+                              },
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 5.0, left: 40.0),
+                          child: InputDescription(desc: 'Contact Number'),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 40.0, right: 20.0),
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 40.0,
+                            child: TextFormField(
+                              autofocus: false,
+                              enabled: true,
+                              initialValue: mobile,
+                              decoration: const InputDecoration(
+                                //hintText: "Mobile Number",
+                                icon: Icon(Icons.person),
+                              ),
+                              onSaved: (String? value) {
+                                // This optional block of code can be used to run
+                                // code when the user saves the form.
+                              },
+                              validator: (String? value) {
+                                return (value != null && value.contains('@'))
+                                    ? 'Do not use the @ char.'
+                                    : null;
+                              },
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 5.0, left: 40.0),
+                          child: InputDescription(desc: 'Email Address'),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(left: 40.0, right: 20.0),
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 40.0,
+                            child: TextFormField(
+                              autofocus: true,
+                              enabled: false,
+                              initialValue: email,
+                              decoration: const InputDecoration(
+                                icon: Icon(Icons.person),
+                              ),
+                              onSaved: (String? value) {
+                                // This optional block of code can be used to run
+                                // code when the user saves the form.
+                              },
+                              validator: (String? value) {
+                                return (value != null && value.contains('@'))
+                                    ? 'Do not use the @ char.'
+                                    : null;
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 20),
+                    // SizedBox(
+                    //   width: 100,
+                    //   height: 50,
+                    //   child: TextFormField(
+                    //     decoration: const InputDecoration(
+                    //       icon: Icon(Icons.person),
+                    //       labelText: 'Name *',
+                    //     ),
+                    //     onSaved: (String? value) {
+                    //       // This optional block of code can be used to run
+                    //       // code when the user saves the form.
+                    //     },
+                    //     validator: (String? value) {
+                    //       return (value != null && value.contains('@'))
+                    //           ? 'Do not use the @ char.'
+                    //           : null;
+                    //     },
+                    //   ),
+                    // ),
+                    Divider(),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0),
+                      child: Text(
+                        'Membership Fee',
+                        style: TextStyle(
+                            fontFamily: 'Asap',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: primaryBlue),
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    Row(children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 40.0, bottom: 10),
+                        child: SizedBox(
+                          height: 30,
+                          child: Row(
+                            children: [
+                              Text(
+                                'Amount',
+                                style: TextStyle(
+                                    fontFamily: 'Roboto',
+                                    fontSize: 15,
+                                    color: Colors.black87),
+                              ),
+                              Text(
+                                ' * ',
+                                style: TextStyle(
+                                    fontFamily: 'Roboto',
+                                    fontSize: 15,
+                                    color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0, left: 10),
+                        child: SizedBox(
+                          width: 120,
+                          height: 30,
+                          child: TextField(
+                            enabled: false,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              filled: true,
+                              fillColor: unselectedGray,
+                              border: OutlineInputBorder(),
+                              labelText: amount,
+                              disabledBorder: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(30)),
+                                borderSide: BorderSide(
+                                  color: primaryLightBlue,
+                                  width: 1.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]),
+                    SizedBox(height: 20),
+                    Divider(),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0),
+                      child: Text(
+                        'Payment',
+                        style: TextStyle(
+                            fontFamily: 'Asap',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: primaryBlue),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20.0, top: 5.0),
+                          child: Text(
+                            'Gcash/Bank Transfer',
+                            style: TextStyle(
+                                fontFamily: 'Asap',
+                                fontSize: 14,
+                                color: mainLightGreen),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: SizedBox(
+                            width: 180,
+                            height: 34,
+                            child: MaterialButton(
+                              color: Colors.blue,
+                              child: const Text("Upload from Gallery",
+                                  style: TextStyle(
+                                      color: Colors.white70,
+                                      fontWeight: FontWeight.bold)),
+                              onPressed: () {
+                                getImageFromGallery();
+                              },
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                      ],
+                    ),
+                    Column(children: [
+                      const SizedBox(
+                        height: 20,
+                        width: 30,
+                      ),
+                      _image != null
+                          ? Image.file(
+                              _image!,
+                              width: 50,
+                              height: 70,
+                              fit: BoxFit.fitWidth,
+                            )
+                          : const Text('Please select an image'),
+                    ]),
+                    Divider(),
+                    Column(
+                      children: [
+                        SizedBox(height: 50),
+                        SizedBox(
+                          width: 200,
+                          child: FilledButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: ((context) =>
+                                      MembershipSuccessPage()),
+                                ),
+                              );
+                            },
+                            style: ButtonStyle(
+                                minimumSize: MaterialStateProperty.all<Size>(
+                                    Size(200, 50)),
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        primaryLightBlue)),
+                            child: Text('PAY NOW'),
+                          ),
+                        ),
+                        SizedBox(height: 100),
+                      ],
                     ),
                   ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10.0, left: 10),
-              child: SizedBox(
-                width: 120,
-                height: 30,
-                child: TextField(
-                  enabled: false,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    filled: true,
-                    fillColor: unselectedGray,
-                    border: OutlineInputBorder(),
-                    labelText: amount,
-                    disabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                      borderSide: BorderSide(
-                        color: primaryLightBlue,
-                        width: 1.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ]),
-          SizedBox(height: 20),
-          Divider(),
-          SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.only(left: 20.0),
-            child: Text(
-              'Payment',
-              style: TextStyle(
-                  fontFamily: 'Asap',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: primaryBlue),
-            ),
-          ),
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 20.0, top: 5.0),
-                child: Text(
-                  'Gcash/Bank Transfer',
-                  style: TextStyle(
-                      fontFamily: 'Asap', fontSize: 14, color: mainLightGreen),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20.0),
-                child: SizedBox(
-                  width: 180,
-                  height: 34,
-                  child: MaterialButton(
-                    color: Colors.blue,
-                    child: const Text("Upload from Gallery",
-                        style: TextStyle(
-                            color: Colors.white70,
-                            fontWeight: FontWeight.bold)),
-                    onPressed: () {
-                      getImageFromGallery();
-                    },
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-            ],
-          ),
-          Column(children: [
-            const SizedBox(
-              height: 20,
-              width: 30,
-            ),
-            _image != null
-                ? Image.file(
-                    _image!,
-                    width: 50,
-                    height: 70,
-                    fit: BoxFit.fitWidth,
-                  )
-                : const Text('Please select an image'),
-          ]),
-          Divider(),
-          Column(
-            children: [
-              SizedBox(height: 50),
-              SizedBox(
-                width: 200,
-                child: FilledButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: ((context) => MembershipSuccessPage()),
-                      ),
-                    );
-                  },
-                  style: ButtonStyle(
-                      minimumSize:
-                          MaterialStateProperty.all<Size>(Size(200, 50)),
-                      backgroundColor:
-                          MaterialStateProperty.all<Color>(primaryLightBlue)),
-                  child: Text('PAY NOW'),
-                ),
-              ),
-              SizedBox(height: 100),
-            ],
-          ),
-        ],
-      ),
+                );
+              }
+            }
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }),
     );
   }
 }
