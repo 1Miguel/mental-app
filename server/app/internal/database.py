@@ -5,7 +5,7 @@ date: 10/07/2023
 """
 from enum import IntEnum, Enum, auto
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from typing_extensions import Self
 from passlib.hash import bcrypt
 from tortoise.expressions import Q
@@ -39,11 +39,13 @@ def is_iso_month(month: str) -> bool:
 class MoodId(IntEnum):
     """Mood Score Ids."""
 
-    HAPPY = 0
+    UNDEFINED = 0
+    HAPPY = auto()
     SAD = auto()
     CONFUSED = auto()
     SCARED = auto()
     ANGRY = auto()
+    NUM_MOODS = auto()
 
 
 class MembershipStatus(str, Enum):
@@ -126,6 +128,23 @@ class MoodModel(Model):
         return await cls.filter(
             user__email=user_email, date__startswith=month.date().isoformat()[:7]
         ).all()
+
+    @classmethod
+    async def get_today(cls, user_email: str) -> Optional[Self]:
+        """Get all mood data filtered by month.
+
+        Args:
+            month (datetime): Month datetime filter.
+
+        Returns:
+            List[Self]: List of data filtered by month
+        """
+        # the month is in datetime isoformat YYYY-MM-DD to get only the
+        # year and month, we need to cut the string
+        q = await cls.filter(
+            user__email=user_email, date__startswith=datetime.today().date().isoformat()
+        ).all()
+        return q[0] if q else None
 
 
 class MembershipModel(Model):

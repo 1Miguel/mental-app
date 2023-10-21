@@ -172,6 +172,23 @@ class TestServer(unittest.TestCase):
         )
         self.assertTrue(test_response.ok)
 
+    def test_set_scheduling_appointment_month(self) -> None:
+        """Test Scheduling appointments for a given month.
+
+        Given: Logged in
+         When: Mood log list is requested with a given date
+         Then: Server response must be ok
+          And: Data must be returned.
+        """
+        headers, _ = self.login_routine()
+        headers["accept"]: "application/json"
+        test_params = {"month": "2023-10-11"}
+
+        test_response = self.client.get(
+            "http://127.0.0.1:8000/user/mood/", headers=headers, params=test_params
+        )
+        self.assertTrue(test_response.ok)
+
     def test_user_logout(self) -> None:
         """Test User logout.
 

@@ -27,7 +27,7 @@ class MoodListResponse(BaseModel):
     Supported Method: GET
     """
 
-    percentage: int
+    percentages: List[int]
     mood_list: List[MoodLog]
 
 
