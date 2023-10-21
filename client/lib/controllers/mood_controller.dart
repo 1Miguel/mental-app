@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class MoodController extends GetxController {
+  TextEditingController noteController = TextEditingController();
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String baseUrl = ApiEndPoints.checkPlatform();
 
@@ -30,18 +31,81 @@ class MoodController extends GetxController {
     return token_type;
   }
 
-  Future<Mood> fetchAlbum() async {
-    final response = await http
-        .get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
+  Future<Mood> fetchMoodToday(DateTime dateTime) async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
 
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      return Mood.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load album');
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/mood/today'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> myMap = json.decode(response.body);
+        print(myMap);
+        return Mood.fromJson(myMap);
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+      throw "Unknown Error Occurred";
+    }
+  }
+
+  Future<List> fetchMoodAverage(DateTime dateTime) async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/mood/?month=2023-10-01'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> myMap = json.decode(response.body);
+        List<dynamic> mood_list = myMap["percentages"];
+
+        print(mood_list);
+        return mood_list;
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+      throw "Unknown Error Occurred";
     }
   }
 
@@ -114,6 +178,9 @@ class MoodController extends GetxController {
   Future<void> logMood(int mood, String note) async {
     String? token = await getToken();
     String? token_type = await getTokenType();
+
+    print("logmood");
+    print(note);
 
     try {
       final response = await http.post(

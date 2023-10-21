@@ -790,9 +790,18 @@ class MoodHistoryPage extends StatelessWidget {
 }
 
 class MonthlyMoodSummary extends StatelessWidget {
-  const MonthlyMoodSummary({
+  late Future<List> futureMoodSummary;
+  MoodController moodController = Get.put(MoodController());
+
+  MonthlyMoodSummary({
     super.key,
   });
+
+  Future<List> getMoodSummary() async {
+    futureMoodSummary = moodController.fetchMoodAverage(DateTime.now());
+    print(futureMoodSummary);
+    return futureMoodSummary;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -840,56 +849,107 @@ class MonthlyMoodSummary extends StatelessWidget {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-            child: MoodBar(
-              moodLogo: 'images/happy_emoji.png',
-              moodName: 'Happy',
-              moodColor: Colors.pinkAccent,
-              moodPercent: '50%',
-            ),
+          SizedBox(
+            height: 300,
+            child: FutureBuilder<List>(
+                future: getMoodSummary(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final moodAve = snapshot.data!;
+                    return buildSummary(moodAve);
+                  } else {
+                    return const Text("No available Data");
+                  }
+                }),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-            child: MoodBar(
-              moodLogo: 'images/sad_emoji.png',
-              moodName: 'Sad',
-              moodColor: Colors.blueAccent,
-              moodPercent: '40%',
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-            child: MoodBar(
-              moodLogo: 'images/confused_emoji.png',
-              moodName: 'Confused',
-              moodColor: Colors.orangeAccent,
-              moodPercent: '30%',
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-            child: MoodBar(
-              moodLogo: 'images/angry_emoji.png',
-              moodName: 'Angry',
-              moodColor: Colors.redAccent,
-              moodPercent: '20%',
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-            child: MoodBar(
-              moodLogo: 'images/scared_emoji.png',
-              moodName: 'Scared',
-              moodColor: Colors.deepPurpleAccent,
-              moodPercent: '10%',
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+          //   child: MoodBar(
+          //     moodLogo: 'images/happy_emoji.png',
+          //     moodName: 'Happy',
+          //     moodColor: Colors.pinkAccent,
+          //     moodPercent: '50%',
+          //   ),
+          // ),
+          // Padding(
+          //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+          //   child: MoodBar(
+          //     moodLogo: 'images/sad_emoji.png',
+          //     moodName: 'Sad',
+          //     moodColor: Colors.blueAccent,
+          //     moodPercent: '40%',
+          //   ),
+          // ),
+          // Padding(
+          //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+          //   child: MoodBar(
+          //     moodLogo: 'images/confused_emoji.png',
+          //     moodName: 'Confused',
+          //     moodColor: Colors.orangeAccent,
+          //     moodPercent: '30%',
+          //   ),
+          // ),
+          // Padding(
+          //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+          //   child: MoodBar(
+          //     moodLogo: 'images/angry_emoji.png',
+          //     moodName: 'Angry',
+          //     moodColor: Colors.redAccent,
+          //     moodPercent: '20%',
+          //   ),
+          // ),
+          // Padding(
+          //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+          //   child: MoodBar(
+          //     moodLogo: 'images/scared_emoji.png',
+          //     moodName: 'Scared',
+          //     moodColor: Colors.deepPurpleAccent,
+          //     moodPercent: '10%',
+          //   ),
+          // ),
           SizedBox(height: 20),
         ],
       ),
     );
   }
+
+  Widget buildSummary(List moodAverage) => ListView.builder(
+        itemCount: moodAverage.length,
+        itemBuilder: (context, index) {
+          final average = moodAverage[index];
+          String moodLogo = 'images/happy_emoji.png';
+          Color moodColor = Colors.pinkAccent;
+          String moodName = "HAPPY";
+
+          if (index == 1) {
+            moodLogo = 'images/sad_emoji.png';
+            moodColor = Colors.blueAccent;
+            moodName = "SAD";
+          } else if (index == 2) {
+            moodLogo = 'images/confused_emoji.png';
+            moodColor = Colors.orangeAccent;
+            moodName = "CONFUSED";
+          } else if (index == 3) {
+            moodLogo = 'images/scared_emoji.png';
+            moodColor = Colors.redAccent;
+            moodName = "SCARED";
+          } else if (index == 4) {
+            moodLogo = 'images/angry_emoji.png';
+            moodColor = Colors.deepPurple;
+            moodName = "ANGRY";
+          }
+
+          return Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: MoodBar(
+              moodLogo: moodLogo,
+              moodName: moodName,
+              moodColor: moodColor,
+              moodPercent: '$average%',
+            ),
+          );
+        },
+      );
 }
 
 class MoodBar extends StatelessWidget {
@@ -958,98 +1018,163 @@ class MoodBar extends StatelessWidget {
 }
 
 class TodayMoodInfo extends StatelessWidget {
-  const TodayMoodInfo({
+  MoodController moodController = Get.put(MoodController());
+  late Future<Mood> futureMood;
+  final _formKey = GlobalKey<FormState>();
+
+  TodayMoodInfo({
     super.key,
   });
 
+  Future<Mood> getMoodToday() async {
+    futureMood = moodController.fetchMoodToday(DateTime.now());
+    print(futureMood);
+    return futureMood;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomLeft,
-            colors: <Color>[primaryLightBlue, primaryBlue]),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Padding(
-                //   padding: const EdgeInsets.only(left: 25.0),
-                //   child: SizedBox(
-                //       child: Text("My Mood Today",
-                //           style: TextStyle(
-                //               fontWeight: FontWeight.bold, fontSize: 18))),
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.only(right: 25.0),
-                //   child: Row(
-                //     children: [
-                //       SizedBox(
-                //         child: IconButton(
-                //           icon: Icon(
-                //             Icons.note,
-                //             size: 30,
-                //             color: Colors.black87,
-                //           ),
-                //           onPressed: () {},
-                //         ),
-                //       ),
-                //       // SizedBox(
-                //       //   child: IconButton(
-                //       //     icon: Icon(
-                //       //       Icons.edit,
-                //       //       size: 30,
-                //       //       color: primaryGrey,
-                //       //     ),
-                //       //     onPressed: () {},
-                //       //   ),
-                //       // ),
-                //     ],
-                //   ),
-                // ),
-              ],
-            ),
-          ),
-          SizedBox(height: 20),
-          SizedBox(
-            width: 150,
-            height: 150,
-            child: Image.asset(
-              'images/happy_emoji.png',
-            ),
-          ),
-          SizedBox(
-            width: MediaQuery.sizeOf(context).width,
-            child: Text(
-              'HAPPY',
-              textAlign: TextAlign.center,
-            ),
-          ),
-          SizedBox(
-            width: MediaQuery.sizeOf(context).width - 40.0,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextField(
-                maxLines: 3,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: unselectedLightBlue,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                  ),
-                  hintText: 'Tell us how you feel...',
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 30),
-        ],
+    return Form(
+      key: _formKey,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomLeft,
+              colors: <Color>[primaryLightBlue, primaryBlue]),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: FutureBuilder<Mood>(
+            future: getMoodToday(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final todayMood = snapshot.data!;
+                String moodLogo = 'images/happy_emoji.png';
+                String moodName = "HAPPY";
+
+                if (todayMood.mood == 1) {
+                  moodLogo = 'images/sad_emoji.png';
+                  moodName = "SAD";
+                } else if (todayMood.mood == 2) {
+                  moodLogo = 'images/confused_emoji.png';
+                  moodName = "CONFUSED";
+                } else if (todayMood.mood == 3) {
+                  moodLogo = 'images/scared_emoji.png';
+                  moodName = "SCARED";
+                } else if (todayMood.mood == 4) {
+                  moodLogo = 'images/angry_emoji.png';
+                  moodName = "ANGRY";
+                }
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 25.0),
+                            child: SizedBox(
+                                child: Text("My Mood Today",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18))),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 25.0),
+                            child: Row(
+                              children: [
+                                // SizedBox(
+                                //   child: IconButton(
+                                //     icon: Icon(
+                                //       Icons.note,
+                                //       size: 30,
+                                //       color: Colors.black87,
+                                //     ),
+                                //     onPressed: () {},
+                                //   ),
+                                // ),
+                                // SizedBox(
+                                //   child: IconButton(
+                                //     icon: Icon(
+                                //       Icons.edit,
+                                //       size: 30,
+                                //       color: primaryGrey,
+                                //     ),
+                                //     onPressed: () {},
+                                //   ),
+                                // ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    SizedBox(
+                      width: 150,
+                      height: 150,
+                      child: Image.asset(
+                        moodLogo,
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: Text(
+                        moodName,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width - 40.0,
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                        child: TextFormField(
+                          controller: moodController.noteController,
+                          //initialValue: "",
+                          maxLines: 3,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: unselectedLightBlue,
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(25.0)),
+                            ),
+                            hintText: 'Tell us how you feel...',
+                          ),
+                        ),
+                      ),
+                    ),
+                    FilledButton(
+                      onPressed: () {
+                        moodController.logMood(
+                            todayMood.mood, moodController.noteController.text);
+
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: ((context) => LoginPage())));
+                      },
+                      style: ButtonStyle(
+                          minimumSize:
+                              MaterialStateProperty.all<Size>(Size(200, 50)),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              primaryLightBlue)),
+                      child: Text(
+                        'SAVE',
+                        style: TextStyle(
+                            fontFamily: 'Open Sans',
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                  ],
+                );
+              } else {
+                return const Text("No Mood Data");
+              }
+            }),
       ),
     );
   }
