@@ -6,7 +6,7 @@ uses pydantic base model.
 date: 10/07/2023
 """
 from typing import List, Tuple, Dict
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from internal.database import MembershipType, MembershipStatus, AppointmentStatus
 
 
@@ -109,16 +109,21 @@ class MembershipCancelApi(BaseModel):
     suggestion: str
 
 
-class ThreadRequestApi(BaseModel):
-
-    topic: str
-    content: str
-
-
 class ThreadCommentApi(BaseModel):
     """API model for posting a comment to a thread.
-    
+
     Supported Method: POST
     """
 
+    creator: str = ""
+    date_created: str = ""
     content: str
+
+
+class ThreadRequestApi(BaseModel):
+    thread_id: int
+    topic: str
+    content: str
+    creator: str = ""
+    date_created: str = ""
+    comments: List[ThreadCommentApi] = Field(default_factory=list)

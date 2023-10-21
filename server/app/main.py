@@ -8,7 +8,16 @@ from typing import Dict, Any, Optional, Annotated
 # third-party imports
 import jwt
 from passlib.hash import bcrypt
-from fastapi import FastAPI, HTTPException, Response, status, Depends, File, Form, UploadFile
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    Response,
+    status,
+    Depends,
+    File,
+    Form,
+    UploadFile,
+)
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
@@ -186,7 +195,9 @@ async def mood_get(month: str, user: UserSchema = Depends(get_current_user)) -> 
         for mood_db_data in await MoodModel.get_all_by_month(user.email, month):
             response.mood_list += [
                 MoodLog(
-                    mood=mood_db_data.id, note=mood_db_data.note, date=mood_db_data.date.isoformat()
+                    mood=mood_db_data.id,
+                    note=mood_db_data.note,
+                    date=mood_db_data.date.isoformat(),
                 )
             ]
         return response
@@ -310,38 +321,89 @@ async def update_profile(
 
 
 @app.post("/user/thread/submit")
-async def thread_submit(thread_request: ThreadRequestApi, user: UserSchema = Depends(get_current_user)) -> Any:
+async def thread_submit(
+    thread_request: ThreadRequestApi, user: UserSchema = Depends(get_current_user)
+) -> Any:
     """User create and submits a new thread."""
     poster = await UserModel.get(email=user.email)
     await ThreadModel(
-        user = poster,
-        topic = thread_request.topic,
-        content = thread_request.content
+        user=poster, topic=thread_request.topic, content=thread_request.content
     ).save()
 
 
-@app.post("/user/thread/{thread_id}/comment")
-async def thread_comment(thread_id: int, thread_comment: ThreadCommentApi, user: UserSchema = Depends(get_current_user)) -> Any:
+@app.post("/user/thread/{thread_id}/comment/")
+async def thread_comment(
+    thread_id: int,
+    thread_comment: ThreadCommentApi,
+    user: UserSchema = Depends(get_current_user),
+) -> Any:
     """A User comment to a thread"""
-    thread = ThreadModel.get(id=thread_id)
-    if thread is not None:
+    try:
+        thread: ThreadModel = await ThreadModel.get(id=thread_id)
         commenter = await UserModel.get(email=user.email)
         await ThreadCommentModel(
             user=commenter, thread=thread, content=thread_comment.content
         ).save()
-    else:
+    except DoesNotExist as exc:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
-        )
+        ) from exc
+
 
 @app.get("/user/thread/{thread_id}")
-async def get_thread(user: UserSchema = Depends(get_current_user)) -> Any:
+async def get_thread(
+    thread_id: int, user: UserSchema = Depends(get_current_user)
+) -> ThreadRequestApi:
     """A User comment to a thread"""
+    try:
+        thread: ThreadModel = await ThreadModel.get(id=thread_id)
+    except DoesNotExist as exc:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
+        ) from exc
+    creator = await thread.user
+    # create the response model
+    response = ThreadRequestApi(
+        thread_id=thread_id,
+        topic=thread.topic,
+        content=thread.content,
+        creator=creator.email,
+        date_created=thread.created.isoformat(),
+    )
+    # build the list of responses
+    for comment in await ThreadCommentModel.all().order_by("-created"):
+        creator = await comment.user
+        response.comments += [
+            ThreadCommentApi(
+                creator=creator.email,
+                date_created=comment.created.isoformat(),
+                content=comment.content,
+            )
+        ]
+
+    # get all comments related to this thread
+    return response
 
 
-@app.get("/user/thread/{page}")
-async def get_thread_list(page: int, limit: int=5, user: UserSchema = Depends(get_current_user)) -> None:
+@app.get("/user/thread/{page}/")
+async def get_thread_list(
+    page: int = 0, limit: int = 5, user: UserSchema = Depends(get_current_user)
+) -> List[ThreadRequestApi]:
     """Get thread list base on page."""
+    thread_list = await ThreadModel.all().order_by("-created").offset(page * 5).limit(limit)
+    thread_req = []
+    for thread in thread_list:
+        creator = await thread.user
+        thread_req += [
+            ThreadRequestApi(
+                thread_id=thread.id,
+                topic=thread.topic,
+                content=thread.content,
+                creator=creator.email,
+                date_created=thread.created.isoformat(),
+            )
+        ]
+    return thread_req
 
 
 @app.get("/user/appointments/{year}/{month}")
@@ -391,7 +453,10 @@ async def set_appointment_list(
     # does not exist in database
     log.info("creating new appointment")
     new_appointment = Appointment(
-        patient=user_db, start_time=start_time, end_time=end_time, status=AppointmentStatus.PENDING
+        patient=user_db,
+        start_time=start_time,
+        end_time=end_time,
+        status=AppointmentStatus.PENDING,
     )
     log.info("saving appointment %s...", new_appointment)
     await new_appointment.save()
