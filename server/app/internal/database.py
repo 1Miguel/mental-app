@@ -188,6 +188,10 @@ class ThreadCommentModel(Model):
     created = DatetimeField(auto_now=True)
     content = CharField(max_length=1024)
 
+    @classmethod
+    async def get_thread_comments(cls, thread_id: int) -> List["ThreadCommentModel"]:
+        return await cls.filter(thread__id=thread_id).order_by("-created")
+
 
 class Doctor(Model):
     """Model that links user account(doctor) and health center."""
