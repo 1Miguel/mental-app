@@ -416,7 +416,7 @@ async def get_thread(
         date_created=thread.created.isoformat(),
     )
     # build the list of responses
-    for comment in await ThreadCommentModel.all().order_by("-created"):
+    for comment in await ThreadCommentModel.get_thread_comments(thread_id):
         creator = await comment.user
         response.comments += [
             ThreadCommentApi(
