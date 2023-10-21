@@ -76,3 +76,18 @@ class MembershipCancelApi(BaseModel):
 
     reason: str
     suggestion: str
+
+
+class ThreadRequestApi(BaseModel):
+
+    topic: str
+    content: str
+
+
+class ThreadCommentApi(BaseModel):
+    """API model for posting a comment to a thread.
+    
+    Supported Method: POST
+    """
+
+    content: str

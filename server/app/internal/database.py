@@ -11,6 +11,7 @@ from passlib.hash import bcrypt
 from tortoise.models import Model
 from tortoise.fields import (
     DateField,
+    DatetimeField,
     IntEnumField,
     IntField,
     CharField,
@@ -121,3 +122,21 @@ class MembershipModel(Model):
     status = CharEnumField(MembershipStatus, max_length=64)
     cancel_reason = CharField(max_length=160, default="")
     cancel_suggestion = CharField(max_length=160, default="")
+
+
+class ThreadModel(Model):
+
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    created = DatetimeField(auto_now=True, auto_now_add=True)
+    topic = CharField(max_length=160)
+    content = CharField(max_length=1024)
+
+
+class ThreadCommentModel(Model):
+
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    thread = ForeignKeyField("models.ThreadModel")
+    created = DatetimeField(auto_now=True, auto_now_add=True)
+    content = CharField(max_length=1024)

@@ -306,6 +306,36 @@ async def update_profile(
     await user_model.save()
 
 
+@app.post("/user/thread/submit")
+async def new_thread(thread_request: ThreadRequestApi, user: UserSchema = Depends(get_current_user)) -> Any:
+    """User create and submits a new thread."""
+    poster = await UserModel.get(email=user.email)
+    await ThreadModel(
+        user = poster,
+        topic = thread_request.topic,
+        content = thread_request.content
+    ).save()
+
+
+@app.post("/user/thread/{thread_id}/comment")
+async def comment_thread(thread_id: int, thread_comment: ThreadCommentApi, user: UserSchema = Depends(get_current_user)) -> Any:
+    """A User comment to a thread"""
+    thread = ThreadModel.get(id=thread_id)
+    if thread is not None:
+        commenter = await UserModel.get(email=user.email)
+        await ThreadCommentModel(
+            user=commenter, thread=thread, content=thread_comment.content
+        ).save()
+    else:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
+        )
+
+@app.get("/user/thread/{thread_id}")
+async def get_thread(user: UserSchema = Depends(get_current_user)) -> Any:
+    """A User comment to a thread"""
+
+
 def run() -> None:
     import uvicorn
 
