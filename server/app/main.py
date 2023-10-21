@@ -337,7 +337,6 @@ async def set_appointment_list(
     appointment: AppointmentApi, user: UserSchema = Depends(get_current_user)
 ) -> None:
     # validate field
-    log.info("appointment req field validating..")
     try:
         start_time = datetime.fromisoformat(appointment.start_time)
         end_time = datetime.fromisoformat(appointment.end_time)
@@ -347,14 +346,11 @@ async def set_appointment_list(
         ) from exc
 
     # check if there is already an appointment for this time slot
-    log.info("check if slot is taken...")
     appointment: Appointment = await Appointment.get_by_datetime(start_time, end_time)
     if appointment:
         # appointment is taken
-        log.info("Slot is taken %s", appointment)
         raise HTTPException(status.HTTP_409_CONFLICT, detail="Slot is already taken")
 
-    log.info("get user email %s...", user.email)
     user_db = await UserModel.get(email=user.email)
     # TODO: refactor this later.
     # does not exist in database
@@ -362,7 +358,7 @@ async def set_appointment_list(
     new_appointment = Appointment(
         patient=user_db, start_time=start_time, end_time=end_time, status=AppointmentStatus.PENDING
     )
-    log.info("new item %s...", new_appointment)
+    log.info("saving appointment %s...", new_appointment)
     await new_appointment.save()
 
 
