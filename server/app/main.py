@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from datetime import datetime
-from typing import Dict, Any, Optional, Annotated
+from typing import Dict, Any, Optional
 
 # third-party imports
 import jwt
