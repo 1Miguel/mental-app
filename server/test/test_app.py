@@ -3,6 +3,8 @@ import json
 import logging
 import unittest
 import requests
+import random
+import datetime
 from typing import Dict, Tuple
 
 # logger module
@@ -125,6 +127,34 @@ class TestServer(unittest.TestCase):
         )
         self.assertTrue(response.ok)
 
+    def test_log_mood_rand_a_month(self) -> None:
+        """Test Logging Mood today.
+
+        Given: User is logged in
+         When: Attempt to log mood for entire month
+         Then: Server response must be ok
+        """
+        headers, _ = self.login_routine()
+        headers["accept"]: "application/json"
+
+        notes = [
+            "Feeling Happy!",
+            "Feeling Sad",
+            "Feeling Confused",
+            "Feeling Scared",
+            "Feeling Angry",
+        ]
+
+        for day in range(1, 24):
+            today = datetime.datetime(2023, 10, day)
+            rand_mood = int(random.random() * 4)
+            new_mood = {"mood": rand_mood, "note": notes[rand_mood], "date": today.isoformat()}
+            # first time setting mood today
+            response = self.client.post(
+                f"http://127.0.0.1:8000/user/mood", headers=headers, json=new_mood
+            )
+        self.assertTrue(response.ok)
+
     def test_get_log_mood_this_month(self) -> None:
         """Test Requesting list of log moods for a given month.
 
@@ -136,11 +166,11 @@ class TestServer(unittest.TestCase):
         headers, _ = self.login_routine()
         headers["accept"]: "application/json"
         test_params = {"month": "2023-10-11"}
+
         test_response = self.client.get(
             "http://127.0.0.1:8000/user/mood/", headers=headers, params=test_params
         )
         self.assertTrue(test_response.ok)
-        print(test_response.json())
 
     def test_user_logout(self) -> None:
         """Test User logout.
