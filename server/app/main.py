@@ -451,7 +451,7 @@ async def get_thread_list(
     return thread_req
 
 
-@app.get("/user/appointments/{year}/{month}")
+@app.get("/user/appointment/{year}/{month}")
 async def get_appointment_list(
     year: str, month: str, user: UserSchema = Depends(get_current_user)
 ) -> Optional[List[AppointmentBlockedSlot]]:
@@ -474,8 +474,8 @@ async def get_appointment_list(
     return []
 
 
-@app.post("/user/appointment/")
-async def set_appointment_list(
+@app.post("/user/appointment/set")
+async def set_appointment(
     appointment: AppointmentApi, user: UserSchema = Depends(get_current_user)
 ) -> None:
     # validate field
@@ -507,7 +507,7 @@ async def set_appointment_list(
     await new_appointment.save()
 
 
-@app.get("/user/membership/requests/")
+@app.get("/admin/membership/requests/")
 async def get_membership_profile_list(
     admin: UserSchema = Depends(get_admin_user),
 ) -> List[MembershipProfileApi]:
@@ -530,7 +530,7 @@ async def get_membership_profile_list(
     return mem_profile_list
 
 
-@app.post("/user/membership/{membership_id}/set")
+@app.post("/admin/membership/{membership_id}/set")
 async def set_membership_status(
     membership_id: int,
     membership_status: MembershipSetStatusApi,
@@ -563,6 +563,46 @@ async def set_membership_status(
             end_year, membership.start_time.month, membership.start_time.day
         )
     await membership.save()
+
+
+@app.get("/admin/appointment/")
+async def admin_get_appointments(
+    admin: UserSchema = Depends(get_admin_user),
+) -> List[AppointmentInfoApi]:
+    ap: Appointment
+    appointment_list = []
+    for ap in await Appointment.all():
+        p: UserModel = await ap.patient
+        appointment_list += [
+            AppointmentInfoApi(
+                id=ap.id,
+                patient_id=p.id,
+                center="",
+                start_time=ap.start_time.isoformat(),
+                end_time=ap.end_time.isoformat(),
+                status=ap.status.value,
+            )
+        ]
+    return appointment_list
+
+
+@app.post("/admin/appointment/{appointment_id}/update")
+async def admin_update_appointment(
+    appointment_id: int, update_status: str, admin: UserSchema = Depends(get_admin_user)
+) -> None:
+    if update_status not in [s for s in AppointmentStatus]:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=f"invalid param {update_status}")
+    try:
+        ap: Appointment = await Appointment.get(id=appointment_id)
+        if update_status == AppointmentStatus.CANCELLED:
+            await ap.delete()
+        else:
+            ap.status = update_status
+            await ap.save()
+    except DoesNotExist as exc:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail="Appointment {appointment_id} invalid"
+        )
 
 
 def run() -> None:
