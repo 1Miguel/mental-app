@@ -190,7 +190,12 @@ class CommunityMainPage extends StatelessWidget {
                 ),
                 FilledButton(
                   onPressed: () {
-                    //onPressed();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: ((context) => CreatePost()),
+                      ),
+                    );
                   },
                   style: ButtonStyle(
                       minimumSize:
@@ -378,7 +383,16 @@ class PostCard extends StatelessWidget {
   }
 }
 
-class CreatePost extends StatelessWidget {
+class CreatePost extends StatefulWidget {
+  const CreatePost({super.key});
+
+  @override
+  State<CreatePost> createState() => _CreatePostState();
+}
+
+class _CreatePostState extends State<CreatePost> {
+  bool anonymous = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -420,6 +434,125 @@ class CreatePost extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: Colors.white),
           ),
+        ),
+      ),
+      body: Container(
+        width: MediaQuery.sizeOf(context).width,
+        child: ListView(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: SizedBox(
+                width: MediaQuery.sizeOf(context).width,
+                child: Text(
+                  'Title',
+                  style: TextStyle(
+                    fontFamily: 'Open Sans',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ),
+            TextFormField(
+              minLines: 1,
+              maxLines: 2,
+              keyboardType: TextInputType.multiline,
+              //controller: _Textcontroller,
+              style: TextStyle(
+                  fontFamily: 'Roboto',
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87),
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(10),
+              ),
+              onSaved: (String? value) {
+                // This optional block of code can be used to run
+                // code when the user saves the form.
+              },
+              validator: (String? value) {
+                return (value != null && value.contains('@'))
+                    ? 'Do not use the @ char.'
+                    : null;
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: SizedBox(
+                width: MediaQuery.sizeOf(context).width,
+                child: Text(
+                  'Description',
+                  style: TextStyle(
+                    fontFamily: 'Open Sans',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ),
+            TextFormField(
+              minLines: 5,
+              maxLines: 6,
+              keyboardType: TextInputType.multiline,
+              //controller: _Textcontroller,
+              style: TextStyle(
+                  fontFamily: 'Roboto',
+                  fontSize: 20,
+                  fontWeight: FontWeight.normal,
+                  color: primaryGrey),
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(10),
+              ),
+              onSaved: (String? value) {
+                // This optional block of code can be used to run
+                // code when the user saves the form.
+              },
+              validator: (String? value) {
+                return (value != null && value.contains('@'))
+                    ? 'Do not use the @ char.'
+                    : null;
+              },
+            ),
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0, right: 10),
+                  child: Text(
+                    'Anonymous: ',
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 15,
+                      fontWeight: FontWeight.normal,
+                      color: primaryGrey,
+                    ),
+                  ),
+                ),
+                Switch(
+                  // This bool value toggles the switch.
+                  value: anonymous,
+                  activeColor: Colors.green,
+                  onChanged: (bool value) {
+                    // This is called when the user toggles the switch.
+                    setState(() {
+                      anonymous = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+            SizedBox(
+              child: MaterialButton(
+                color: primaryLightBlue,
+                child: Text("Create Post",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
+                onPressed: () {
+                  //getImageFromGallery();
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

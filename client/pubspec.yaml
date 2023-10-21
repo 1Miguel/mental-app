@@ -36,6 +36,11 @@ dependencies:
   syncfusion_flutter_datagrid: ^23.1.40
   timeline_tile: ^2.0.0
   flutter_showcase_nullsafety: ^1.0.0
+  youtube_player_flutter: ^8.1.2
+  youtube_player_iframe: ^4.0.4
+  comment_box: ^0.0.18
+  comment_tree: ^0.3.0
+  url_launcher: ^6.1.14
 
 dev_dependencies:
   flutter_test:

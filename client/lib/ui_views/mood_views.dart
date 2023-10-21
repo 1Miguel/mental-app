@@ -3,6 +3,7 @@ import 'dart:convert';
 
 // Local import
 import 'package:flutter_intro/controllers/mood_controller.dart';
+import 'package:flutter_intro/model/mood.dart';
 import 'package:flutter_intro/model/user.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
 import 'package:flutter_intro/ui_views/membership_views.dart';
@@ -150,6 +151,7 @@ class MoodModalPage extends StatelessWidget {
                           moodName: "Sad",
                           moodInfo: moodMessageList['Sad'],
                           onTap: () {
+                            moodController.logMood(MoodId.SAD.index);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -166,6 +168,7 @@ class MoodModalPage extends StatelessWidget {
                           moodName: "Confused",
                           moodInfo: moodMessageList['Confused'],
                           onTap: () {
+                            moodController.logMood(MoodId.CONFUSED.index);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -187,6 +190,7 @@ class MoodModalPage extends StatelessWidget {
                           moodName: "Angry",
                           moodInfo: moodMessageList['Angry'],
                           onTap: () {
+                            moodController.logMood(MoodId.SAD.index);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -203,6 +207,7 @@ class MoodModalPage extends StatelessWidget {
                           moodName: "Scared",
                           moodInfo: moodMessageList['Scared'],
                           onTap: () {
+                            moodController.logMood(MoodId.SCARED.index);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -652,6 +657,16 @@ class HappyMoodPage extends StatelessWidget {
 }
 
 class MoodHistoryPage extends StatelessWidget {
+  MoodController moodController = Get.put(MoodController());
+  late Future<List<Mood>?> futureMoodHistory;
+
+  Future<List<Mood>?> getMoodHistory() async {
+    futureMoodHistory = moodController.fetchMoodHistory(DateTime.now());
+    print('futureMoodHistory');
+    print(futureMoodHistory);
+    return futureMoodHistory;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -684,47 +699,90 @@ class MoodHistoryPage extends StatelessWidget {
           ),
         ),
       ),
-      body: Container(
-        color: Colors.white,
-        width: MediaQuery.sizeOf(context).width,
-        child: ListView(
-          children: [
-            Column(
-              children: [
-                SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
-                  child: SizedBox(
-                    width: MediaQuery.sizeOf(context).width - 20.0,
-                    child: Text('October',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 25)),
+      body: FutureBuilder(
+          future: getMoodHistory(),
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.deepPurpleAccent,
+                ),
+              );
+            }
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'An ${snapshot.error} occurred',
+                    style: const TextStyle(fontSize: 18, color: Colors.red),
                   ),
-                ),
-                SizedBox(
-                  width: MediaQuery.sizeOf(context).width - 20.0,
-                  child: MonthlyMoodSummary(),
-                ),
-                SizedBox(height: 30),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20.0, bottom: 10.0),
-                  child: SizedBox(
-                    width: MediaQuery.sizeOf(context).width - 20.0,
-                    child: Text('Today',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 25)),
+                );
+              } else if (snapshot.hasData) {
+                List<Mood>? data = snapshot.data;
+                print('snapshot data');
+                for (var i = 0; i < data!.length; i++) {
+                  print(data[i]);
+                  print(data[i].mood);
+                }
+
+                //String mystring = data.toString();
+                // print('myString');
+                // print(mystring);
+                // Mood moodData = Mood.fromJson(jsonDecode(mystring));
+                // print("moodData");
+                // print(moodData);
+
+                return Container(
+                  color: Colors.white,
+                  width: MediaQuery.sizeOf(context).width,
+                  child: ListView(
+                    children: [
+                      Column(
+                        children: [
+                          SizedBox(height: 20),
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(left: 20.0, bottom: 10.0),
+                            child: SizedBox(
+                              width: MediaQuery.sizeOf(context).width - 20.0,
+                              child: Text('October',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 25)),
+                            ),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 20.0,
+                            child: MonthlyMoodSummary(),
+                          ),
+                          SizedBox(height: 30),
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(left: 20.0, bottom: 10.0),
+                            child: SizedBox(
+                              width: MediaQuery.sizeOf(context).width - 20.0,
+                              child: Text('Today',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 25)),
+                            ),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 20.0,
+                            child: TodayMoodInfo(),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 50),
+                    ],
                   ),
-                ),
-                SizedBox(
-                  width: MediaQuery.sizeOf(context).width - 20.0,
-                  child: TodayMoodInfo(),
-                ),
-              ],
-            ),
-            SizedBox(height: 50),
-          ],
-        ),
-      ),
+                );
+              }
+            }
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }),
     );
   }
 }
