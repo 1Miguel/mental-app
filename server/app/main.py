@@ -71,6 +71,7 @@ register_tortoise(
 # user(pydantic dataclass) schema from usermodel
 UserSchema = pydantic_model_creator(UserModel, name="User", exclude_readonly=False)
 UserSchemaReadOnly = pydantic_model_creator(UserModel, name="User", exclude_readonly=True)
+AppointmentModelApi = pydantic_model_creator(Appointment, name="Appointment", exclude_readonly=False)
 # oauth authentication scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # temporary file where all files will be stored
@@ -491,6 +492,25 @@ async def set_appointment_list(
     )
     log.info("saving appointment %s...", new_appointment)
     await new_appointment.save()
+
+
+@app.get("/admin/appointment/{year}/{month}", response_class=List[AppointmentModelApi])
+async def admin_get_appointment_list(
+    year: int, month: int, admin: UserSchema = Depends(get_admin_user)
+) -> List[AppointmentModelApi]:
+    log.info("get all available appointments %s %s", year, month)
+    try:
+        # add some random day just so we could create datetime object
+        date = datetime.fromisoformat(f"{year}-{month}-01")
+    except ValueError:
+        # invalid filter value, expect iso format month
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, f"Invalid param {year}/{month}, expected Iso"
+        )
+    appointment_list = []
+    for ap in await Appointment.get_by_month(date):
+        appointment_list += [await AppointmentModelApi.from_tortoise_orm(ap)]
+    return appointment_list
 
 
 @app.get("/user/membership/requests/")
