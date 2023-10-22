@@ -3,6 +3,7 @@ import 'package:flutter_intro/controllers/appointment_controller.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:flutter_intro/model/appointment.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'dashboard_views.dart';
@@ -1069,6 +1070,51 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
   String targetDate = "";
   bool dateSelected = false;
   String selectedService = "OCCUPATIONAL_THERAPY";
+  late Future<List<AppointmentSlot>> futureBlockedSlots;
+
+  Future<List<DateTime>> getBlockedDatesAsync() async {
+    List<DateTime> dateList = <DateTime>[];
+    List<AppointmentSlot> futureBlockedSlots = await appointmentController
+        .fetchBlockedSlots(DateTime.now().year, DateTime.now().month);
+
+    futureBlockedSlots.forEach((element) {
+      dateList.add(DateTime.parse(element.startTime));
+    });
+
+    print(dateList);
+    return dateList;
+  }
+
+  List<AppointmentSlot> blockedSlots = getSlots();
+  static List<AppointmentSlot> getSlots() {
+    const data = [
+      {
+        "start_time": "2023-10-25T09:00:00+00:00",
+        "end_time": "2023-10-25T10:00:00+00:00"
+      },
+      {
+        "start_time": "2023-10-23T09:00:00+00:00",
+        "end_time": "2023-10-23T10:00:00+00:00"
+      },
+      {
+        "start_time": "2023-10-23T09:00:00+00:00",
+        "end_time": "2023-10-23T10:00:00+00:00"
+      },
+      {
+        "start_time": "2023-10-23T09:00:00+00:00",
+        "end_time": "2023-10-23T10:00:00+00:00"
+      },
+      {
+        "start_time": "2023-10-23T09:00:00+00:00",
+        "end_time": "2023-10-23T10:00:00+00:00"
+      },
+      {
+        "start_time": "2023-10-23T09:00:00+00:00",
+        "end_time": "2023-10-23T10:00:00+00:00"
+      }
+    ];
+    return data.map<AppointmentSlot>(AppointmentSlot.fromJson).toList();
+  }
 
   _BookSchedulePageState({required this.service});
 
@@ -1112,8 +1158,23 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
     });
   }
 
+  List<DateTime> getBlackoutDates() {
+    List<DateTime> blockDateList = <DateTime>[];
+
+    print("Get Blackout Dates");
+
+    blockedSlots.forEach((element) {
+      // final blockDay =
+      //     DateFormat('yyyy-MM-dd').format(DateTime.parse(element.startTime));
+      blockDateList.add(DateTime.parse(element.startTime));
+    });
+
+    return blockDateList;
+  }
+
   @override
   Widget build(BuildContext context) {
+    getBlockedDatesAsync();
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: Container(
@@ -1160,49 +1221,107 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
           SizedBox(
             width: MediaQuery.sizeOf(context).width,
             height: 380,
-            child: SfDateRangePicker(
-              showTodayButton: false,
-              enablePastDates: false,
-              selectionShape: DateRangePickerSelectionShape.rectangle,
-              selectionColor: primaryLightBlue,
-              headerHeight: 80,
-              monthViewSettings: DateRangePickerMonthViewSettings(
-                blackoutDates: [DateTime(2023, 10, 20), DateTime(2023, 10, 21)],
-                viewHeaderStyle: DateRangePickerViewHeaderStyle(
-                    backgroundColor: calendarHeaderBgLightTeal),
-              ),
-              monthCellStyle: DateRangePickerMonthCellStyle(
-                cellDecoration: BoxDecoration(
-                    color: calendarCellUnselectedBgWhite,
-                    // border:
-                    //     Border.all(color: const Color(0xFFF44436), width: 1),
-                    shape: BoxShape.rectangle),
-                blackoutDatesDecoration: BoxDecoration(
-                    color: Colors.red,
-                    border:
-                        Border.all(color: const Color(0xFFF44436), width: 1),
-                    shape: BoxShape.rectangle),
-                disabledDatesDecoration: BoxDecoration(
-                    color: unselectedGray,
-                    border: Border.all(color: unselectedGray, width: 1),
-                    shape: BoxShape.rectangle),
-                specialDatesDecoration: BoxDecoration(
-                    color: Colors.green,
-                    border:
-                        Border.all(color: const Color(0xFF2B732F), width: 1),
-                    shape: BoxShape.circle),
-              ),
-              headerStyle: DateRangePickerHeaderStyle(
-                  backgroundColor: calendarHeaderMainLightBlue,
-                  textAlign: TextAlign.center,
-                  textStyle: TextStyle(
-                    fontStyle: FontStyle.normal,
-                    fontSize: 25,
-                    letterSpacing: 5,
-                    color: backgroundColor,
-                  )),
-              onSelectionChanged: selectionChanged,
-            ),
+            child: FutureBuilder<List<DateTime>>(
+                future: getBlockedDatesAsync(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final dates = snapshot.data!;
+                    print("dates");
+                    print(dates);
+                    return SfDateRangePicker(
+                      showTodayButton: false,
+                      enablePastDates: false,
+                      selectionShape: DateRangePickerSelectionShape.rectangle,
+                      selectionColor: primaryLightBlue,
+                      headerHeight: 80,
+                      monthViewSettings: DateRangePickerMonthViewSettings(
+                        //blackoutDates: [DateTime(2023, 10, 20), DateTime(2023, 10, 21)],
+                        blackoutDates: dates,
+                        viewHeaderStyle: DateRangePickerViewHeaderStyle(
+                            backgroundColor: calendarHeaderBgLightTeal),
+                      ),
+                      monthCellStyle: DateRangePickerMonthCellStyle(
+                        cellDecoration: BoxDecoration(
+                            color: calendarCellUnselectedBgWhite,
+                            // border:
+                            //     Border.all(color: const Color(0xFFF44436), width: 1),
+                            shape: BoxShape.rectangle),
+                        blackoutDatesDecoration: BoxDecoration(
+                            color: Colors.red,
+                            border: Border.all(
+                                color: const Color(0xFFF44436), width: 1),
+                            shape: BoxShape.rectangle),
+                        disabledDatesDecoration: BoxDecoration(
+                            color: unselectedGray,
+                            border: Border.all(color: unselectedGray, width: 1),
+                            shape: BoxShape.rectangle),
+                        specialDatesDecoration: BoxDecoration(
+                            color: Colors.green,
+                            border: Border.all(
+                                color: const Color(0xFF2B732F), width: 1),
+                            shape: BoxShape.circle),
+                      ),
+                      headerStyle: DateRangePickerHeaderStyle(
+                          backgroundColor: calendarHeaderMainLightBlue,
+                          textAlign: TextAlign.center,
+                          textStyle: TextStyle(
+                            fontStyle: FontStyle.normal,
+                            fontSize: 25,
+                            letterSpacing: 5,
+                            color: backgroundColor,
+                          )),
+                      onSelectionChanged: selectionChanged,
+                    );
+                  } else {
+                    return SfDateRangePicker(
+                      showTodayButton: false,
+                      enablePastDates: false,
+                      selectionShape: DateRangePickerSelectionShape.rectangle,
+                      selectionColor: primaryLightBlue,
+                      headerHeight: 80,
+                      monthViewSettings: DateRangePickerMonthViewSettings(
+                        blackoutDates: [
+                          DateTime(2023, 10, 20),
+                          DateTime(2023, 10, 21)
+                        ],
+                        //blackoutDates: [],
+                        viewHeaderStyle: DateRangePickerViewHeaderStyle(
+                            backgroundColor: calendarHeaderBgLightTeal),
+                      ),
+                      monthCellStyle: DateRangePickerMonthCellStyle(
+                        cellDecoration: BoxDecoration(
+                            color: calendarCellUnselectedBgWhite,
+                            // border:
+                            //     Border.all(color: const Color(0xFFF44436), width: 1),
+                            shape: BoxShape.rectangle),
+                        blackoutDatesDecoration: BoxDecoration(
+                            color: Colors.red,
+                            border: Border.all(
+                                color: const Color(0xFFF44436), width: 1),
+                            shape: BoxShape.rectangle),
+                        disabledDatesDecoration: BoxDecoration(
+                            color: unselectedGray,
+                            border: Border.all(color: unselectedGray, width: 1),
+                            shape: BoxShape.rectangle),
+                        specialDatesDecoration: BoxDecoration(
+                            color: Colors.green,
+                            border: Border.all(
+                                color: const Color(0xFF2B732F), width: 1),
+                            shape: BoxShape.circle),
+                      ),
+                      headerStyle: DateRangePickerHeaderStyle(
+                          backgroundColor: calendarHeaderMainLightBlue,
+                          textAlign: TextAlign.center,
+                          textStyle: TextStyle(
+                            fontStyle: FontStyle.normal,
+                            fontSize: 25,
+                            letterSpacing: 5,
+                            color: backgroundColor,
+                          )),
+                      onSelectionChanged: selectionChanged,
+                    );
+                  }
+                }),
           ),
           Container(
             height: 8,
@@ -1314,6 +1433,7 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                   onPressed: () {
                     if (scheduleValue != TimeSlot.slot0.index && dateSelected) {
                       print("Valid Schedule is selected");
+                      print("startDate: $startDate endDate:$endDate");
                       print('Service Type: $selectedService');
                     } else {
                       print("No valid schedule selected");

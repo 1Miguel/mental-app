@@ -31,6 +31,50 @@ class AppointmentController extends GetxController {
     return token_type;
   }
 
+  Future<List<AppointmentSlot>> fetchBlockedSlots(int year, int month) async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/appointment/$year/$month'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> myMap = json.decode(response.body);
+        List<AppointmentSlot> AppointmentList = <AppointmentSlot>[];
+
+        myMap.forEach((element) {
+          print(element);
+          AppointmentList.add(AppointmentSlot.fromJson(element));
+        });
+
+        return AppointmentList;
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+      throw "Unknown Error Occurred";
+    }
+  }
+
   Future<void> setAppointment(
       String startTime, String endTime, String service) async {
     String? token = await getToken();
@@ -45,9 +89,9 @@ class AppointmentController extends GetxController {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          "start_time": "2023-10-23T09:00",
-          "end_time": "2023-10-23T10:00",
-          "service": "COUNSELING",
+          "start_time": startTime,
+          "end_time": endTime,
+          "service": service,
           "concerns": "",
         }),
       );
