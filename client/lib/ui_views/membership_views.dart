@@ -1475,10 +1475,12 @@ class SustainingMembershipForm extends StatelessWidget {
 
 class MembershipInfoForm extends StatelessWidget {
   final String amount;
+  final String type;
 
   const MembershipInfoForm({
     super.key,
     required this.amount,
+    required this.type,
   });
 
   @override
@@ -1513,7 +1515,7 @@ class MembershipInfoForm extends StatelessWidget {
           ),
         ),
       ),
-      body: MembershipPaymentForm(amount: amount),
+      body: MembershipPaymentForm(amount: amount, type: type),
     );
   }
 }
@@ -1753,6 +1755,7 @@ class _MembershipFormState extends State<MembershipForm> {
                     MaterialPageRoute(
                       builder: ((context) => MembershipInfoForm(
                             amount: amount,
+                            type: membershipType,
                           )),
                     ),
                   );
@@ -1773,19 +1776,22 @@ class _MembershipFormState extends State<MembershipForm> {
 
 class MembershipPaymentForm extends StatefulWidget {
   final String amount;
+  final String type;
 
   const MembershipPaymentForm({
     super.key,
     required this.amount,
+    required this.type,
   });
 
   @override
   _MembershipPaymentFormState createState() =>
-      _MembershipPaymentFormState(amount: amount);
+      _MembershipPaymentFormState(amount: amount, type: type);
 }
 
 class _MembershipPaymentFormState extends State<MembershipPaymentForm> {
   final String amount;
+  final String type;
   File? _image;
   final picker = ImagePicker();
   User emptyUser = User(
@@ -1811,6 +1817,7 @@ class _MembershipPaymentFormState extends State<MembershipPaymentForm> {
 
   _MembershipPaymentFormState({
     required this.amount,
+    required this.type,
   });
 
   //Image Picker function to get image from gallery
@@ -2168,6 +2175,18 @@ class _MembershipPaymentFormState extends State<MembershipPaymentForm> {
                             width: 200,
                             child: FilledButton(
                               onPressed: () {
+                                print("Register Membership");
+                                print(type);
+                                var memberType = 0;
+                                if (type == "CONTRIBUTING") {
+                                  memberType = 3;
+                                } else if (type == "SUSTAINING") {
+                                  memberType = 1;
+                                } else if (type == "CORPORATE") {
+                                  memberType = 2;
+                                } else if (type == "STUDENT") {
+                                  memberType = 4;
+                                }
                                 // Navigator.push(
                                 //   context,
                                 //   MaterialPageRoute(
@@ -2175,8 +2194,8 @@ class _MembershipPaymentFormState extends State<MembershipPaymentForm> {
                                 //         MembershipSuccessPage()),
                                 //   ),
                                 // );
-                                //membershipController
-                                //    .registerMembership(_image!.path);
+                                membershipController
+                                    .registerMembership(memberType);
                               },
                               style: ButtonStyle(
                                   minimumSize: MaterialStateProperty.all<Size>(

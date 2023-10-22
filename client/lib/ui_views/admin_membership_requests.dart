@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
+import 'package:flutter_intro/model/membership.dart';
+import 'package:flutter_intro/controllers/membership_controller.dart';
+
+import 'package:get/get.dart';
 
 class MembershipRequestsMainView extends StatelessWidget {
   @override
@@ -84,160 +88,183 @@ class MembershipRequestsView extends StatefulWidget {
 }
 
 class _MembershipRequestsState extends State<MembershipRequestsView> {
-  List<Membership> membershipRequests = <Membership>[];
+  late Future<List<Membership>> futureMemberList;
+  MembershipController membershipController = Get.put(MembershipController());
+
   late MembershipDataSource membershipDataSource;
+
+  Future<List<Membership>> fethMembershipRequests() async {
+    futureMemberList = membershipController.fetchMembershipRequests(0);
+    print(futureMemberList);
+    return futureMemberList;
+  }
 
   @override
   void initState() {
     super.initState();
-    membershipRequests = getMembershipData();
-    membershipDataSource =
-        MembershipDataSource(membershipData: membershipRequests);
+    membershipDataSource = MembershipDataSource(membershipData: []);
   }
 
   @override
   Widget build(BuildContext context) {
+    fethMembershipRequests();
     return Container(
       child: Column(
         children: [
           SizedBox(
             height: 600,
             width: MediaQuery.sizeOf(context).width,
-            child: SfDataGridTheme(
-              data: SfDataGridThemeData(
-                  headerColor: primaryLightBlue,
-                  headerHoverColor: backgroundColor),
-              child: SfDataGrid(
-                source: membershipDataSource,
-                columnWidthMode: ColumnWidthMode.auto,
-                columns: <GridColumn>[
-                  GridColumn(
-                      minimumWidth: 150,
-                      maximumWidth: 250,
-                      columnName: 'memId',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          child: const Text('Membership ID'))),
-                  GridColumn(
-                      minimumWidth: 200,
-                      maximumWidth: 300,
-                      columnName: 'patient',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          child: const Text('Patient Name'))),
-                  GridColumn(
-                      minimumWidth: 200,
-                      maximumWidth: 300,
-                      columnName: 'type',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          child: const Text('Membership Type',
-                              overflow: TextOverflow.ellipsis))),
-                  GridColumn(
-                      minimumWidth: 200,
-                      maximumWidth: 300,
-                      columnName: 'amount',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          child: const Text('Membership Fee',
-                              overflow: TextOverflow.ellipsis))),
-                  GridColumn(
-                      minimumWidth: 200,
-                      maximumWidth: 300,
-                      columnName: 'proof',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          child: const Text('Requirements',
-                              overflow: TextOverflow.ellipsis))),
-                  GridColumn(
-                      minimumWidth: 200,
-                      maximumWidth: 300,
-                      columnName: 'status',
-                      label: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.center,
-                          child: const Text('Status'))),
-                  GridColumn(
-                    minimumWidth: 200,
-                    maximumWidth: 300,
-                    columnName: 'button',
-                    label: Container(
-                      padding: const EdgeInsets.all(8.0),
-                      alignment: Alignment.center,
-                      child: const Text('Action '),
-                    ),
-                  ),
-                ],
-                //selectionMode: SelectionMode.multiple,
-              ),
-            ),
+            child: FutureBuilder<List<Membership>>(
+                future: fethMembershipRequests(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final requestList = snapshot.data!;
+                    membershipDataSource =
+                        MembershipDataSource(membershipData: requestList);
+                    return Column(
+                      children: [
+                        SfDataGridTheme(
+                          data: SfDataGridThemeData(
+                              headerColor: primaryLightBlue,
+                              headerHoverColor: backgroundColor),
+                          child: SfDataGrid(
+                            source: membershipDataSource,
+                            columnWidthMode: ColumnWidthMode.auto,
+                            columns: <GridColumn>[
+                              GridColumn(
+                                  minimumWidth: 150,
+                                  maximumWidth: 250,
+                                  columnName: 'id',
+                                  label: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      alignment: Alignment.center,
+                                      child: const Text('Request ID'))),
+                              GridColumn(
+                                  minimumWidth: 200,
+                                  maximumWidth: 300,
+                                  columnName: 'user',
+                                  label: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      alignment: Alignment.center,
+                                      child: const Text('User ID'))),
+                              GridColumn(
+                                  minimumWidth: 200,
+                                  maximumWidth: 300,
+                                  columnName: 'fname',
+                                  label: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      alignment: Alignment.center,
+                                      child: const Text('First Name',
+                                          overflow: TextOverflow.ellipsis))),
+                              GridColumn(
+                                  minimumWidth: 200,
+                                  maximumWidth: 300,
+                                  columnName: 'lname',
+                                  label: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      alignment: Alignment.center,
+                                      child: const Text('Last Name',
+                                          overflow: TextOverflow.ellipsis))),
+                              GridColumn(
+                                  minimumWidth: 200,
+                                  maximumWidth: 300,
+                                  columnName: 'email',
+                                  label: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      alignment: Alignment.center,
+                                      child: const Text('Email',
+                                          overflow: TextOverflow.ellipsis))),
+                              GridColumn(
+                                  minimumWidth: 200,
+                                  maximumWidth: 300,
+                                  columnName: 'type',
+                                  label: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      alignment: Alignment.center,
+                                      child: const Text('Type'))),
+                              GridColumn(
+                                  minimumWidth: 200,
+                                  maximumWidth: 300,
+                                  columnName: 'status',
+                                  label: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      alignment: Alignment.center,
+                                      child: const Text('Status'))),
+                              GridColumn(
+                                minimumWidth: 200,
+                                maximumWidth: 300,
+                                columnName: 'button',
+                                label: Container(
+                                  padding: const EdgeInsets.all(8.0),
+                                  alignment: Alignment.center,
+                                  child: const Text('Action '),
+                                ),
+                              ),
+                            ],
+                            //selectionMode: SelectionMode.multiple,
+                          ),
+                        ),
+                        Container(
+                          height: 70,
+                          color: Colors.white,
+                          child: SfDataPager(
+                            pageCount: (requestList.length / rowsPerPage)
+                                .ceilToDouble(),
+                            delegate: membershipDataSource,
+                            direction: Axis.horizontal,
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return const Text("No Records To Display");
+                  }
+                }),
           ),
-          Container(
-            height: 70,
-            color: Colors.white,
-            child: SfDataPager(
-              pageCount:
-                  (membershipRequests.length / rowsPerPage).ceilToDouble(),
-              delegate: membershipDataSource,
-              direction: Axis.horizontal,
-            ),
-          )
         ],
       ),
     );
-  }
-
-  List<Membership> getMembershipData() {
-    return [
-      Membership(10001, 'Jack Doe', 'Sustaining', '3000', 'N/A', 'PENDING'),
-      Membership(10002, 'Perry Doe', 'Sustaining', '3000', 'N/A', 'PENDING'),
-      Membership(10003, 'Lara Doe', 'Sustaining', '3000', 'N/A', 'PENDING'),
-      Membership(10004, 'Ellis Doe', 'Sustaining', '3000', 'N/A', 'PENDING'),
-      Membership(10005, 'Adams Doe', 'Sustaining', '3000', 'N/A', 'PENDING'),
-      Membership(10006, 'Owens Doe', 'Sustaining', '3000', 'N/A', 'PENDING'),
-      Membership(10007, 'Balnc Doe', 'Sustaining', '3000', 'N/A', 'PENDING'),
-      Membership(10008, 'Steve Doe', 'Sustaining', '3000', 'N/A', 'PENDING'),
-      Membership(10009, 'Linda Doe', 'Sustaining', '3000', 'N/A', 'PENDING'),
-      Membership(10010, 'Michael Doe', 'Sustaining', '3000', 'N/A', 'PENDING'),
-    ];
   }
 }
 
 class MembershipDataSource extends DataGridSource {
   /// Creates the employee data source class with required details.
   MembershipDataSource({required List<Membership> membershipData}) {
+    print(membershipData);
     _membershipDataGridRows = membershipData
         .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<int>(columnName: 'memId', value: e.memId),
-              DataGridCell<String>(columnName: 'patient', value: e.patient),
-              DataGridCell<String>(columnName: 'type', value: e.membershipType),
-              DataGridCell<String>(
-                  columnName: 'amount', value: e.membershipFee),
-              DataGridCell<String>(columnName: 'proof', value: e.paymentProof),
+              DataGridCell<int>(columnName: 'id', value: e.id),
+              DataGridCell<int>(columnName: 'user', value: e.user),
+              DataGridCell<String>(columnName: 'fname', value: e.firstname),
+              DataGridCell<String>(columnName: 'amount', value: e.lastname),
+              DataGridCell<String>(columnName: 'email', value: e.email),
+              DataGridCell<String>(columnName: 'type', value: e.type),
               DataGridCell<String>(columnName: 'status', value: e.status),
               DataGridCell<String>(columnName: 'button', value: null),
             ]))
         .toList();
     _membershipData = membershipData;
-    _paginatedRows =
-        membershipData.getRange(0, rowsPerPage).toList(growable: false);
-    buildDataGridRow();
+    if (membershipData.isNotEmpty) {
+      _paginatedRows = membershipData
+          .getRange(
+              0,
+              membershipData.length < rowsPerPage
+                  ? membershipData.length
+                  : rowsPerPage)
+          .toList(growable: false);
+      buildDataGridRow();
+    }
   }
 
   void buildDataGridRow() {
     _membershipDataGridRows = _paginatedRows
         .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<int>(columnName: 'memId', value: e.memId),
-              DataGridCell<String>(columnName: 'patient', value: e.patient),
-              DataGridCell<String>(columnName: 'type', value: e.membershipType),
-              DataGridCell<String>(
-                  columnName: 'amount', value: e.membershipFee),
-              DataGridCell<String>(columnName: 'proof', value: e.paymentProof),
+              DataGridCell<int>(columnName: 'id', value: e.id),
+              DataGridCell<int>(columnName: 'user', value: e.user),
+              DataGridCell<String>(columnName: 'fname', value: e.firstname),
+              DataGridCell<String>(columnName: 'amount', value: e.lastname),
+              DataGridCell<String>(columnName: 'email', value: e.email),
+              DataGridCell<String>(columnName: 'type', value: e.type),
               DataGridCell<String>(columnName: 'status', value: e.status),
               DataGridCell<String>(columnName: 'button', value: null),
             ]))
@@ -348,16 +375,4 @@ class MembershipDataSource extends DataGridSource {
   void updateDataGriDataSource() {
     notifyListeners();
   }
-}
-
-class Membership {
-  Membership(this.memId, this.patient, this.membershipType, this.membershipFee,
-      this.paymentProof, this.status);
-
-  final int memId;
-  final String patient;
-  final String membershipType;
-  final String membershipFee;
-  final String paymentProof;
-  final String status;
 }
