@@ -31,6 +31,50 @@ class AppointmentController extends GetxController {
     return token_type;
   }
 
+  Future<List<AppointmentInfo>> fetchAppointmentInfo() async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/appointment/'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> myMap = json.decode(response.body);
+        List<AppointmentInfo> AppointmentList = <AppointmentInfo>[];
+
+        myMap.forEach((element) {
+          print(element);
+          AppointmentList.add(AppointmentInfo.fromJson(element));
+        });
+
+        return AppointmentList;
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+      throw "Unknown Error Occurred";
+    }
+  }
+
   Future<List<AppointmentSlot>> fetchBlockedSlots(int year, int month) async {
     String? token = await getToken();
     String? token_type = await getTokenType();

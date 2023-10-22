@@ -67,3 +67,46 @@ class Appointment {
     );
   }
 }
+
+class AppointmentInfo {
+  final int id;
+  final int patientId;
+  final String center;
+  final String startTime;
+  final String endTime;
+  final String status;
+
+  const AppointmentInfo({
+    required this.id,
+    required this.patientId,
+    required this.center,
+    required this.startTime,
+    required this.endTime,
+    required this.status,
+  });
+
+  factory AppointmentInfo.fromJson(Map<String, dynamic> json) {
+    int def_id;
+    int def_patientId;
+    String def_center;
+    String def_startTime;
+    String def_endTime;
+    String def_status;
+
+    def_id = json['id'] ?? 0;
+    def_patientId = json['patient_id'] ?? 0;
+    def_center = json['center'] ?? '';
+    def_startTime = json['start_time'] ?? DateTime.now.toString();
+    def_endTime = json['end_time'] ?? DateTime.now.toString();
+    def_status = json['status'] ?? '';
+
+    return AppointmentInfo(
+      id: def_id as int,
+      patientId: def_patientId as int,
+      center: def_center as String,
+      startTime: def_startTime as String,
+      endTime: def_endTime as String,
+      status: def_status as String,
+    );
+  }
+}
