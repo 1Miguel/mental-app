@@ -107,7 +107,6 @@ class _MembershipRequestsState extends State<MembershipRequestsView> {
 
   @override
   Widget build(BuildContext context) {
-    fethMembershipRequests();
     return Container(
       child: Column(
         children: [
