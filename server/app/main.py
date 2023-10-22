@@ -254,41 +254,55 @@ async def mood_get(user: UserSchema = Depends(get_current_user)) -> MoodLog:
         return MoodLog(mood=MoodId.UNDEFINED, note="", date=datetime.today().date().isoformat())
 
 
+# @app.post("/user/membership/register")
+# async def membership_register_route(
+#     membership_api: str = Form(...),
+#     files: List[UploadFile] = File(...),
+#     user: UserSchema = Depends(get_current_user),
+# ) -> Any:
+#     """New Membership Request."""
+#     try:
+#         # the api field is not a json field but raw string, parse...
+#         membership_api: MembershipRegisterApi = MembershipRegisterApi.model_validate_json(
+#             membership_api
+#         )
+#         if not files:
+#             # no files attached
+#             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Failed to attach files.")
+#         user_model = await UserModel.get(email=user.email)
+#         for file in files:
+#             p = Path(temp_file_storage.name).joinpath(str(user_model.id))
+#             # NOTE: this is temporary, the file storage space must be
+#             # created when user creates a new account/profile... unless
+#             # we expect user files to be deleted on runtime by the admin
+#             if not p.is_dir():
+#                 p.mkdir(exist_ok=True)
+#             p.joinpath(file.filename).write_bytes(await file.read())
+#         # create a new membership request
+#         new_membership_req = MembershipModel(
+#             user=user_model,
+#             type=membership_api.membership_type,
+#             status=MembershipStatus.PENDING,
+#         )
+#         await new_membership_req.save()
+#     except ValidationError as exc:
+#         raise HTTPException(
+#             status.HTTP_422_UNPROCESSABLE_ENTITY, jsonable_encoder(exc.errors())
+#         ) from exc
+
+
 @app.post("/user/membership/register")
 async def membership_register_route(
-    membership_api: str = Form(...),
-    files: List[UploadFile] = File(...),
-    user: UserSchema = Depends(get_current_user),
-) -> Any:
-    """New Membership Request."""
-    try:
-        # the api field is not a json field but raw string, parse...
-        membership_api: MembershipRegisterApi = MembershipRegisterApi.model_validate_json(
-            membership_api
-        )
-        if not files:
-            # no files attached
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Failed to attach files.")
-        user_model = await UserModel.get(email=user.email)
-        for file in files:
-            p = Path(temp_file_storage.name).joinpath(str(user_model.id))
-            # NOTE: this is temporary, the file storage space must be
-            # created when user creates a new account/profile... unless
-            # we expect user files to be deleted on runtime by the admin
-            if not p.is_dir():
-                p.mkdir(exist_ok=True)
-            p.joinpath(file.filename).write_bytes(await file.read())
-        # create a new membership request
-        new_membership_req = MembershipModel(
-            user=user_model,
-            type=membership_api.membership_type,
-            status=MembershipStatus.PENDING,
-        )
-        await new_membership_req.save()
-    except ValidationError as exc:
-        raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY, jsonable_encoder(exc.errors())
-        ) from exc
+    membership_api: MembershipRegisterApi, user: UserSchema = Depends(get_current_user)
+) -> None:
+    user_model = await UserModel.get(email=user.email)
+    # create a new membership request
+    new_membership_req = MembershipModel(
+        user=user_model,
+        type=membership_api.membership_type,
+        status=MembershipStatus.PENDING,
+    )
+    await new_membership_req.save()
 
 
 @app.post("/user/membership/cancel")
