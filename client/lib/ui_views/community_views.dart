@@ -417,7 +417,7 @@ class PostCard extends StatelessWidget {
                   width: MediaQuery.sizeOf(context).width,
                   child: Padding(
                     padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                    child: PostUser(username: username),
+                    child: PostUser(username: "anonymous"),
                   ),
                 ),
               ),

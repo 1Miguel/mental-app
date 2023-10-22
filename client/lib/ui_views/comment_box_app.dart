@@ -74,7 +74,7 @@ class _TopicThreadState extends State<TopicThread> {
                 ),
               ),
               title: Text(
-                comment.creator,
+                "anonymous",
                 style: TextStyle(fontWeight: FontWeight.bold, color: mainBlue),
               ),
               subtitle: Text(comment.content),

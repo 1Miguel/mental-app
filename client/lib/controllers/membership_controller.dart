@@ -10,6 +10,8 @@ import 'package:flutter_intro/utils/api_endpoints.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class MembershipController extends GetxController {
   TextEditingController firstNameController = TextEditingController();
@@ -20,37 +22,58 @@ class MembershipController extends GetxController {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String loginUrl = ApiEndPoints.checkPlatform();
 
-  Future<void> registerMembership() async {
+  String baseUrl = ApiEndPoints.checkPlatform();
+
+  Future<String?> getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? token = prefs.getString('token');
+    return token;
+  }
+
+  Future<String?> getTokenType() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? token_type = prefs.getString('token_type');
+    return token_type;
+  }
+
+  Future<void> registerMembership(String filename) async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
     try {
-      final response = await http.post(
-        Uri.parse('$loginUrl/signup'),
-        headers: <String, String>{
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'email': emailController.text,
-          'password': passwordController.text,
-          'firstname': firstNameController.text,
-          'lastname': lastNameController.text,
-        }),
-      );
+      Map<String, String> headersList = {
+        'Accept': 'application/json',
+        'Authorization': '$token_type $token',
+        'Content-Type': 'application/json'
+      };
+      Map<String, String> dataList = {
+        'membership_api': "{'membership_type': 0}"
+      };
+      var request = http.MultipartRequest(
+          'POST', Uri.parse('$baseUrl/user/membership/register'));
+      request.headers.addAll(headersList);
+      request.fields.addAll(dataList);
+      request.files.add(http.MultipartFile('files',
+          File(filename).readAsBytes().asStream(), File(filename).lengthSync(),
+          filename: filename.split("/").last));
+
+      var response = await request.send();
 
       if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        // final SharedPreferences? prefs = await _prefs;
+        // final json = jsonDecode(response.body);
+        // // final SharedPreferences? prefs = await _prefs;
 
-        // await prefs?.setString('token', token);
-        firstNameController.clear();
-        lastNameController.clear();
-        emailController.clear();
-        passwordController.clear();
-        //go to home
-        Get.off(() => SignupSuccessPage());
-      } else if (response.statusCode == 409) {
-        throw jsonDecode(response.body)['Message'] ?? "Account already exists";
+        // // await prefs?.setString('token', token);
+        // firstNameController.clear();
+        // lastNameController.clear();
+        // emailController.clear();
+        // passwordController.clear();
+        // //go to home
+        // Get.off(() => SignupSuccessPage());
       } else {
-        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+        throw "Unknown Error Occurred";
       }
     } catch (e) {
       Get.back();

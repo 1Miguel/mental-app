@@ -145,10 +145,10 @@ class AdminSidebarX extends StatelessWidget {
             debugPrint('Home');
           },
         ),
-        const SidebarXItem(
-          icon: Icons.medical_services,
-          label: 'Doctors',
-        ),
+        // const SidebarXItem(
+        //   icon: Icons.medical_services,
+        //   label: 'Doctors',
+        // ),
         const SidebarXItem(
           icon: Icons.schedule,
           label: 'Schedule',
@@ -184,11 +184,11 @@ class _ScreensExample extends StatelessWidget {
         switch (controller.selectedIndex) {
           case 0:
             return MainBody();
-          case 2:
+          case 1:
             return ScheduleCalendarView();
-          case 3:
+          case 2:
             return AppointmentRequestsMainView();
-          case 4:
+          case 3:
             return MembershipRequestsMainView();
           default:
             return Text(
@@ -206,16 +206,14 @@ String _getTitleByIndex(int index) {
     case 0:
       return 'Home';
     case 1:
-      return 'Doctor';
-    case 2:
       return 'Schedule';
-    case 3:
+    case 2:
       return 'Appointment';
-    case 4:
+    case 3:
       return 'Membership';
-    case 5:
+    case 4:
       return 'Profile';
-    case 6:
+    case 5:
       return 'Settings';
     default:
       return 'Not found page';
