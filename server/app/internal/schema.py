@@ -7,7 +7,12 @@ date: 10/07/2023
 """
 from typing import List, Tuple, Dict
 from pydantic import BaseModel, Field
-from internal.database import MembershipType, MembershipStatus, AppointmentStatus
+from internal.database import (
+    MembershipType,
+    MembershipStatus,
+    AppointmentStatus,
+    AppointmentServices,
+)
 
 
 class MoodLog(BaseModel):
@@ -58,6 +63,8 @@ class AppointmentApi(BaseModel):
 
     start_time: str
     end_time: str
+    service: AppointmentServices
+    concerns: str = ""
 
 
 class UserApi(BaseModel):

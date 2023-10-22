@@ -476,12 +476,12 @@ async def get_appointment_list(
 
 @app.post("/user/appointment/set")
 async def set_appointment(
-    appointment: AppointmentApi, user: UserSchema = Depends(get_current_user)
+    appointment_api: AppointmentApi, user: UserSchema = Depends(get_current_user)
 ) -> None:
     # validate field
     try:
-        start_time = datetime.fromisoformat(appointment.start_time)
-        end_time = datetime.fromisoformat(appointment.end_time)
+        start_time = datetime.fromisoformat(appointment_api.start_time)
+        end_time = datetime.fromisoformat(appointment_api.end_time)
     except ValueError as exc:
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST, detail="Time expect to be in ISO Format"
@@ -498,6 +498,7 @@ async def set_appointment(
     # does not exist in database
     log.info("creating new appointment")
     new_appointment = Appointment(
+        service=appointment_api.service,
         patient=user_db,
         start_time=start_time,
         end_time=end_time,
@@ -505,6 +506,22 @@ async def set_appointment(
     )
     log.info("saving appointment %s...", new_appointment)
     await new_appointment.save()
+
+
+@app.get("/user/appointment/upcoming")
+async def get_upcoming_appointment(
+    user: UserSchema = Depends(get_current_user),
+) -> Optional[List[AppointmentApi]]:
+    ap_list = []
+    for ap in await Appointment.get_upcoming():
+        ap_list = [
+            AppointmentApi(
+                service=ap.service,
+                start_time=ap.start_time.isoformat(),
+                end_time=ap.end_time.isoformat(),
+            )
+        ]
+    return ap_list
 
 
 @app.get("/admin/membership/requests/")
