@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/controllers/appointment_controller.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'dashboard_views.dart';
 import 'dart:convert';
+import 'package:get/get.dart';
 
 // Loacl import
 import 'package:flutter_intro/model/user.dart';
@@ -1024,7 +1027,8 @@ class GenericConsultationPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: ((context) => BookSchedulePage())));
+                            builder: ((context) =>
+                                BookSchedulePage(service: service))));
                   },
                   style: ButtonStyle(
                       minimumSize:
@@ -1042,15 +1046,71 @@ class GenericConsultationPage extends StatelessWidget {
   }
 }
 
+enum TimeSlot { slot0, slot1, slot2, slot3, slot4, slot5, slot6 }
+
 class BookSchedulePage extends StatefulWidget {
-  const BookSchedulePage({super.key});
+  final ConsulationServices service;
+
+  const BookSchedulePage({super.key, required this.service});
 
   @override
-  State<BookSchedulePage> createState() => _BookSchedulePageState();
+  State<BookSchedulePage> createState() =>
+      _BookSchedulePageState(service: service);
 }
 
 class _BookSchedulePageState extends State<BookSchedulePage> {
-  int? scheduleValue = 0;
+  final ConsulationServices service;
+  int? scheduleValue = TimeSlot.slot0.index;
+  String _date = "0000-00-00";
+  String _timeSlot = "00:00";
+  String _selectionDate = "";
+  String startDate = "";
+  String endDate = "";
+  String targetDate = "";
+  bool dateSelected = false;
+  String selectedService = "OCCUPATIONAL_THERAPY";
+
+  _BookSchedulePageState({required this.service});
+
+  AppointmentController appointmentController =
+      Get.put(AppointmentController());
+
+  @override
+  void initState() {
+    super.initState();
+    if (service == ConsulationServices.therapy) {
+      selectedService = "OCCUPATIONAL_THERAPY";
+    } else if (service == ConsulationServices.consultation) {
+      selectedService = "PSYCHIATRIC_CONSULTATION";
+    } else if (service == ConsulationServices.counseling) {
+      selectedService = "COUNSELING";
+    } else if (service == ConsulationServices.assessment) {
+      selectedService = "PSYCHOLOGICAL_ASSESMENT";
+    }
+  }
+
+  void updateSelectionDate() {
+    setState(() {
+      const tString = "T";
+      startDate = "$_date$tString$_timeSlot";
+      print("startDate: $startDate");
+
+      final sunDate = DateTime.parse(startDate).add(const Duration(hours: 1));
+      endDate = DateFormat('yyyy-MM-ddTHH:mm').format(sunDate).toString();
+      print("endDate: $endDate");
+    });
+  }
+
+  void selectionChanged(DateRangePickerSelectionChangedArgs args) {
+    SchedulerBinding.instance!.addPostFrameCallback((duration) {
+      setState(() {
+        dateSelected = true;
+        _date = DateFormat('yyyy-MM-dd').format(args.value).toString();
+        print("date selection changed");
+        updateSelectionDate();
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1141,6 +1201,7 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                     letterSpacing: 5,
                     color: backgroundColor,
                   )),
+              onSelectionChanged: selectionChanged,
             ),
           ),
           Container(
@@ -1173,28 +1234,34 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
             children: [
               ChoiceChip(
                 label: Text('9:00-10:00'),
-                selected: scheduleValue == 0,
+                selected: scheduleValue == TimeSlot.slot1.index,
                 onSelected: (bool selected) {
                   setState(() {
-                    scheduleValue = selected ? 0 : null;
+                    _timeSlot = "09:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot1.index : null;
                   });
                 },
               ),
               ChoiceChip(
                 label: Text('10:00-11:00'),
-                selected: scheduleValue == 1,
+                selected: scheduleValue == TimeSlot.slot2.index,
                 onSelected: (bool selected) {
                   setState(() {
-                    scheduleValue = selected ? 1 : null;
+                    _timeSlot = "10:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot2.index : null;
                   });
                 },
               ),
               ChoiceChip(
                 label: Text('11:00-12:00'),
-                selected: scheduleValue == 2,
+                selected: scheduleValue == TimeSlot.slot3.index,
                 onSelected: (bool selected) {
                   setState(() {
-                    scheduleValue = selected ? 2 : null;
+                    _timeSlot = "11:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot3.index : null;
                   });
                 },
               ),
@@ -1205,28 +1272,34 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
             children: [
               ChoiceChip(
                 label: Text('1:00-2:00'),
-                selected: scheduleValue == 3,
+                selected: scheduleValue == TimeSlot.slot4.index,
                 onSelected: (bool selected) {
                   setState(() {
-                    scheduleValue = selected ? 3 : null;
+                    _timeSlot = "01:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot4.index : null;
                   });
                 },
               ),
               ChoiceChip(
                 label: Text('2:00-3:00'),
-                selected: scheduleValue == 4,
+                selected: scheduleValue == TimeSlot.slot5.index,
                 onSelected: (bool selected) {
                   setState(() {
-                    scheduleValue = selected ? 4 : null;
+                    _timeSlot = "02:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot5.index : null;
                   });
                 },
               ),
               ChoiceChip(
                 label: Text('3:00-4:00'),
-                selected: scheduleValue == 5,
+                selected: scheduleValue == TimeSlot.slot6.index,
                 onSelected: (bool selected) {
                   setState(() {
-                    scheduleValue = selected ? 5 : null;
+                    _timeSlot = "03:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot6.index : null;
                   });
                 },
               ),
@@ -1239,10 +1312,18 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
               children: [
                 FilledButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) => BookScheduleSuccessPage())));
+                    if (scheduleValue != TimeSlot.slot0.index && dateSelected) {
+                      print("Valid Schedule is selected");
+                      print('Service Type: $selectedService');
+                    } else {
+                      print("No valid schedule selected");
+                    }
+                    appointmentController.setAppointment(
+                        startDate, endDate, selectedService);
+                    // Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: ((context) => BookScheduleSuccessPage())));
                   },
                   style: ButtonStyle(
                       minimumSize:
@@ -1272,6 +1353,7 @@ class BookScheduleSuccessPage extends StatelessWidget {
               MaterialPageRoute(builder: ((context) => DashboardPage())));
         },
         child: Container(
+          width: MediaQuery.sizeOf(context).width,
           color: backgroundColor,
           child: Column(
             children: [
@@ -1282,32 +1364,32 @@ class BookScheduleSuccessPage extends StatelessWidget {
                 height: 300,
               ),
               SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: MainHeadingText(
-                        title: "October 15, 2023",
-                        isOverflow: false,
-                        isHeavy: true,
-                        customColor: mainLightGreen),
-                  )
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: SubHeadingText(
-                        title: "Friday (1:00 - 2:00)",
-                        isOverflow: false,
-                        isHeavy: true,
-                        customColor: Colors.black),
-                  )
-                ],
-              ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     Padding(
+              //       padding: const EdgeInsets.only(bottom: 15.0),
+              //       child: MainHeadingText(
+              //           title: "October 15, 2023",
+              //           isOverflow: false,
+              //           isHeavy: true,
+              //           customColor: mainLightGreen),
+              //     )
+              //   ],
+              // ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     Padding(
+              //       padding: const EdgeInsets.only(bottom: 15.0),
+              //       child: SubHeadingText(
+              //           title: "Friday (1:00 - 2:00)",
+              //           isOverflow: false,
+              //           isHeavy: true,
+              //           customColor: Colors.black),
+              //     )
+              //   ],
+              // ),
               SizedBox(height: 50),
               SizedBox(
                 width: MediaQuery.sizeOf(context).width - 80,
