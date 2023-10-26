@@ -1,20 +1,85 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_intro/ui_views/book_appointment.dart';
-import 'package:flutter_intro/model/user.dart';
-import 'package:flutter_intro/ui_views/login_views.dart';
-import 'package:flutter_intro/utils/colors_scheme.dart';
-import 'package:hexcolor/hexcolor.dart';
-import 'membership_views.dart';
-
 import 'dart:convert';
 
 // Local import
 import 'package:flutter_intro/ui_views/login_views.dart';
+import 'package:flutter_intro/ui_views/book_appointment.dart';
+import 'package:flutter_intro/ui_views/mood_views.dart';
+import 'package:flutter_intro/model/user.dart';
+import 'package:flutter_intro/ui_views/talktous_views.dart';
+import 'package:flutter_intro/ui_views/community_views.dart';
+import 'package:flutter_intro/utils/colors_scheme.dart';
+import 'membership_views.dart';
 
 // Third-party import
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
 import 'package:get/get.dart';
+import 'package:hexcolor/hexcolor.dart';
+
+class InputDescription extends StatelessWidget {
+  final String desc;
+
+  const InputDescription({
+    super.key,
+    required this.desc,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 80,
+      child: Text(
+        desc,
+        style: TextStyle(
+          color: primaryGrey,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Open Sans',
+        ),
+      ),
+    );
+  }
+}
+
+InputDecoration getDecor() {
+  return InputDecoration(
+    labelStyle: TextStyle(
+      fontFamily: 'Open Sans',
+      color: primaryBlue,
+      fontSize: 10,
+    ),
+    errorStyle: TextStyle(
+      fontFamily: 'Open Sans',
+      color: Colors.red,
+      fontSize: 10,
+    ),
+  );
+}
+
+class PasswordDescription extends StatelessWidget {
+  final String desc;
+
+  const PasswordDescription({
+    super.key,
+    required this.desc,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 120,
+      child: Text(
+        desc,
+        style: TextStyle(
+          color: primaryGrey,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Open Sans',
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+}
 
 class AccountNameHeadingText extends StatelessWidget {
   final String title;
@@ -64,8 +129,16 @@ class DashboardLoaderPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: Colors.deepPurpleAccent,
+          // backgroundColor: primaryBlue,
           title: const Text('Flutter FutureBuilder'),
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: <Color>[primaryLightBlue, primaryBlue]),
+            ),
+          ),
         ),
         body: SizedBox(
           width: double.infinity,
@@ -135,7 +208,15 @@ class DashboardPage extends StatelessWidget {
             snap: false,
             centerTitle: false,
             toolbarHeight: 100,
-            backgroundColor: Colors.deepPurple,
+            //backgroundColor: primaryBlue,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: <Color>[primaryLightBlue, primaryBlue]),
+              ),
+            ),
             leading: Builder(
               builder: (BuildContext context) {
                 return SizedBox(
@@ -184,7 +265,6 @@ class DashboardPage extends StatelessWidget {
                       );
                     } else if (snapshot.hasData) {
                       final data = snapshot.data;
-                      print(data);
                       return Padding(
                         padding: const EdgeInsets.only(right: 20.0),
                         child: Text(
@@ -210,6 +290,7 @@ class DashboardPage extends StatelessWidget {
           SliverList(
             delegate: SliverChildListDelegate([
               SizedBox(
+                width: MediaQuery.sizeOf(context).width,
                 child: Column(
                   children: [
                     SizedBox(
@@ -217,12 +298,13 @@ class DashboardPage extends StatelessWidget {
                     ),
                     SizedBox(
                       height: 40,
-                      width: MediaQuery.sizeOf(context).width - 20,
+                      width: MediaQuery.sizeOf(context).width - 60,
                       child: TextFormField(
+                        textAlign: TextAlign.center,
                         decoration: InputDecoration(
-                          contentPadding: EdgeInsets.only(left: 30.0),
-                          hintText: 'Enter Keyword',
-                          suffixIcon: Icon(Icons.search),
+                          contentPadding: EdgeInsets.only(top: 5.0),
+                          hintText: 'How may we help you today?',
+                          //suffixIcon: Icon(Icons.search),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(30)),
                           ),
@@ -231,7 +313,14 @@ class DashboardPage extends StatelessWidget {
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(30)),
                             borderSide: BorderSide(
-                              color: unselectedGray,
+                              color: primaryLightPurple,
+                              width: 1.0,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(30)),
+                            borderSide: BorderSide(
+                              color: primaryLightBlue,
                               width: 1.0,
                             ),
                           ),
@@ -243,36 +332,54 @@ class DashboardPage extends StatelessWidget {
                       child: Padding(
                         padding: EdgeInsets.only(top: 10.0),
                         child: Text(
-                          'Featured',
+                          'Trending',
                           textAlign: TextAlign.left,
                           style: TextStyle(
-                              fontFamily: 'Raleways',
+                              fontFamily: 'Proza Libre',
                               fontSize: 25,
                               fontWeight: FontWeight.bold,
-                              color: mainDeepPurple),
+                              color: primaryBlue),
                         ),
                       ),
                     ),
-                    // SizedBox(
-                    //   width: 380,
-                    //   child: Text(
-                    //     'Puerto Princesa, Palawan',
-                    //     textAlign: TextAlign.left,
-                    //     style: TextStyle(
-                    //         fontFamily: 'Open Sans',
-                    //         fontSize: 12,
-                    //         color: mainDeepPurple),
-                    //   ),
-                    // ),
-                    //SizedBox(height: 10, width: 380),
+                    SizedBox(
+                      width: 380,
+                      child: Text(
+                        'Puerto Princesa, Palawan',
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            fontFamily: 'Open Sans',
+                            fontSize: 12,
+                            color: mainLightGreen),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 380,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 15.0),
+                        child: Text(
+                          'EVENTS',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                              fontFamily: 'Open Sans',
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: primaryGrey),
+                        ),
+                      ),
+                    ),
                     DashboardFeatureCarousel(),
-                    // DashboardFeatureContext(
-                    //     title:
-                    //         'SECOND MENTAL HEALTH SUMMIT: "INCLUSIVITY AMIDST DIVERSITY"',
-                    //     image: 'images/sample_cover_image.png',
-                    //     content:
-                    //         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',"),
                   ],
+                ),
+              ),
+              SizedBox(height: 10),
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: <Color>[mainLightBlue, primaryBlue]),
                 ),
               ),
               Container(
@@ -286,23 +393,12 @@ class DashboardPage extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(left: 20.0, top: 20.0),
                           child: Text(
-                            'Categories',
+                            'Features',
                             style: TextStyle(
                                 fontFamily: 'Roboto',
-                                fontSize: 20,
+                                fontSize: 25,
                                 fontWeight: FontWeight.bold,
-                                color: mainDeepPurple),
-                          ),
-                        ),
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(right: 20.0, top: 20.0),
-                          child: Text(
-                            'Explore More',
-                            style: TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 15,
-                                color: mainDeepPurple),
+                                color: primaryBlue),
                           ),
                         ),
                       ],
@@ -313,17 +409,29 @@ class DashboardPage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           DashboardCategoryButtons(
-                            title: 'Library',
-                            imageIcon: 'images/dashboard_category_library.png',
-                            icon: Icons.library_books,
-                            onPressed: () {},
+                            title: 'Talk To Us',
+                            imageIcon: 'images/dashboard_category_talk.png',
+                            icon: Icons.question_answer,
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          TalkToUsIntroPage())));
+                            },
                           ),
                           DashboardCategoryButtons(
-                            title: 'Mental Health Care',
+                            title: 'Discover',
                             imageIcon:
                                 'images/dashboard_category_mental_health_care.png',
                             icon: Icons.psychology,
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          DiscoverIntroPage())));
+                            },
                           ),
                           DashboardCategoryButtons(
                             title: 'Book Appointment',
@@ -338,10 +446,32 @@ class DashboardPage extends StatelessWidget {
                             },
                           ),
                           DashboardCategoryButtons(
-                            title: 'Talk To Us',
-                            imageIcon: 'images/dashboard_category_talk.png',
-                            icon: Icons.groups_2,
-                            onPressed: () {},
+                            title: 'Membership',
+                            imageIcon: 'images/dashboard_category_library.png',
+                            icon: Icons.diversity_2,
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          MembershipIntroPage())));
+                              // final datenow = DateTime.now();
+                              // final later =
+                              //     datenow.addf(const Duration(hours: 24));
+
+                              // showDialog(
+                              //     context: Get.context!,
+                              //     builder: (context) {
+                              //       return SimpleDialog(
+                              //         title: Text('Error!'),
+                              //         contentPadding: EdgeInsets.all(20),
+                              //         children: [
+                              //           Text(datenow.toString()),
+                              //           Text(later.toString())
+                              //         ],
+                              //       );
+                              //     });
+                            },
                           ),
                         ],
                       ),
@@ -361,26 +491,26 @@ class DashboardFeatureCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 380,
+      height: 330,
       child: ImageSlideshow(
         indicatorColor: Colors.blue,
         onPageChanged: (value) {
           debugPrint('Page changed: $value');
         },
-        autoPlayInterval: 3000,
+        autoPlayInterval: 4000,
         isLoop: true,
         children: [
           DashboardFeatureContext(
             title:
                 'SECOND MENTAL HEALTH SUMMIT: "INCLUSIVITY\nAMIDST DIVERSITY"',
-            image: 'images/sample_cover_image.png',
+            image: 'images/cover_1.png',
             content:
                 "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',",
           ),
           DashboardFeatureContext(
             title:
                 'THIRD MENTAL HEALTH SUMMIT: "INCLUSIVITY\nAMIDST DIVERSITY"',
-            image: 'images/sample_cover_image.png',
+            image: 'images/cover_2.png',
             content:
                 "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',",
           ),
@@ -456,66 +586,65 @@ class DashboardFeatureContext extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
-        width: MediaQuery.sizeOf(context).width,
-        height: 500,
+        width: MediaQuery.sizeOf(context).width - 28.0,
+        height: 320,
         child: Card(
-          surfaceTintColor: Colors.grey,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0.0),
+          ),
+          elevation: 0,
           child: Column(
             children: <Widget>[
+              // SizedBox(
+              //   width: MediaQuery.sizeOf(context).width,
+              //   child: Padding(
+              //     padding: const EdgeInsets.all(10.0),
+              //     child: Text(
+              //       title,
+              //       textAlign: TextAlign.left,
+              //       style: TextStyle(
+              //         fontFamily: 'Open Sans',
+              //         fontSize: 15,
+              //         fontWeight: FontWeight.bold,
+              //         color: HexColor('#424242'),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               SizedBox(
                 width: MediaQuery.sizeOf(context).width,
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Text(
-                    title,
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontFamily: 'Open Sans',
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: HexColor('#424242'),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: MediaQuery.sizeOf(context).width - 30,
                 child: Image.asset(
                   image,
-                  fit: BoxFit.fitHeight,
-                  height: 200,
+                  fit: BoxFit.fitWidth,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Text(
-                  content,
-                  maxLines: 2,
-                  softWrap: true,
-                  textAlign: TextAlign.justify,
-                  style: TextStyle(
-                      fontFamily: 'Asap',
-                      fontSize: 12,
-                      color: HexColor('#424242')),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.all(10.0),
+              //   child: Text(
+              //     content,
+              //     maxLines: 2,
+              //     softWrap: true,
+              //     textAlign: TextAlign.justify,
+              //     style: TextStyle(
+              //         fontFamily: 'Asap',
+              //         fontSize: 12,
+              //         color: HexColor('#424242')),
+              //   ),
+              // ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 20.0),
-                    child: TextButton(
-                      child: Text(
-                        'Read more',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                            fontFamily: 'Open Sans',
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
-                      onPressed: () {/* ... */},
+                  TextButton(
+                    child: Text(
+                      'Read more',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                          fontFamily: 'Open Sans',
+                          fontSize: 10,
+                          //fontWeight: FontWeight.bold,
+                          color: Colors.black87),
                     ),
+                    onPressed: () {/* ... */},
                   ),
                 ],
               ),
@@ -537,6 +666,7 @@ class AccountsPage extends StatelessWidget {
     address: "",
     age: 0,
     occupation: "",
+    contact_number: "",
   );
 
   getUserData() async {
@@ -545,12 +675,28 @@ class AccountsPage extends StatelessWidget {
     return prefs.getString('user_data') ?? jsonEncode(emptyUser).toString();
   }
 
+  Future<String?> getLogOutState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? name = prefs.getString('first_name')!.toUpperCase();
+    prefs.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 80,
-        backgroundColor: mainDeepPurple,
+        //backgroundColor: primaryBlue,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -610,17 +756,37 @@ class AccountsPage extends StatelessWidget {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: ((context) => AccountProfilePage())));
+                                builder: ((context) => EditProfilePage())));
                       },
                     ),
                     AccountMenuTile(
-                      menu: 'Membership',
-                      menuIcon: Icons.badge,
+                      menu: 'Notifications',
+                      menuIcon: Icons.notifications,
+                      onTap: () {
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: ((context) => AccountProfilePage())));
+                      },
+                    ),
+                    AccountMenuTile(
+                      menu: 'Community',
+                      menuIcon: Icons.groups,
                       onTap: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: ((context) => MembershipIntroPage())));
+                                builder: ((context) => CommunityIntroPage())));
+                      },
+                    ),
+                    AccountMenuTile(
+                      menu: 'Mood History',
+                      menuIcon: Icons.emoji_emotions,
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => MoodHistoryPage())));
                       },
                     ),
                     AccountMenuTile(
@@ -629,9 +795,26 @@ class AccountsPage extends StatelessWidget {
                       onTap: () {},
                     ),
                     AccountMenuTile(
+                      menu: 'Contact Us',
+                      menuIcon: Icons.call,
+                      onTap: () {},
+                    ),
+                    AccountMenuTile(
                       menu: 'About Us',
                       menuIcon: Icons.diversity_3,
                       onTap: () {},
+                    ),
+                    Divider(),
+                    AccountMenuTile(
+                      menu: 'Logout',
+                      menuIcon: Icons.logout,
+                      onTap: () {
+                        getLogOutState();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => LoginMainPage())));
+                      },
                     ),
                   ],
                 );
@@ -883,9 +1066,9 @@ class MenuTitleText extends StatelessWidget {
     return Text(
       menuText,
       style: TextStyle(
-        color: mainLightPurple,
+        color: primaryGrey,
         fontFamily: 'Roboto',
-        fontWeight: FontWeight.w900,
+        fontWeight: FontWeight.w500,
         fontSize: 20,
       ),
     );
@@ -951,15 +1134,14 @@ class AccountMenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-          border: Border(
-              bottom: BorderSide(
-        color: unselectedGray,
-      ))),
+      // decoration: BoxDecoration(
+      //     border: Border(
+      //         bottom: BorderSide(
+      //   color: unselectedGray,
+      // ))),
       child: ListTile(
-        contentPadding:
-            EdgeInsets.only(left: 50.0, right: 50.0, top: 10.0, bottom: 10.0),
-        leading: Icon(menuIcon, size: 50),
+        contentPadding: EdgeInsets.only(left: 50.0, right: 50.0, top: 10.0),
+        leading: Icon(menuIcon, size: 30, color: mainLightBlue),
         horizontalTitleGap: 30.0,
         title: MenuTitleText(menuText: menu),
         onTap: () {
@@ -1007,7 +1189,8 @@ class AccountSubMenuTile extends StatelessWidget {
   }
 }
 
-class AccountProfilePage extends StatelessWidget {
+class EditProfilePage extends StatelessWidget {
+  final _formKey = GlobalKey<FormState>();
   User emptyUser = User(
     id: 0,
     email: "",
@@ -1017,6 +1200,7 @@ class AccountProfilePage extends StatelessWidget {
     address: "",
     age: 0,
     occupation: "",
+    contact_number: "",
   );
 
   getUserData() async {
@@ -1025,11 +1209,17 @@ class AccountProfilePage extends StatelessWidget {
     return prefs.getString('user_data') ?? jsonEncode(emptyUser).toString();
   }
 
-  Future<String?> getLogOutState() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isMobileNumberValid(String phoneNumber) {
+    String regexPattern =
+        r'((\+[0-9]{2})|0)[.\- ]?9[0-9]{2}[.\- ]?[0-9]{3}[.\- ]?[0-9]{4}';
+    var regExp = RegExp(regexPattern);
 
-    String? name = prefs.getString('first_name')!.toUpperCase();
-    prefs.clear();
+    if (phoneNumber.length == 0) {
+      return false;
+    } else if (regExp.hasMatch(phoneNumber)) {
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -1039,7 +1229,14 @@ class AccountProfilePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1058,11 +1255,11 @@ class AccountProfilePage extends StatelessWidget {
           ),
         ),
         title: Text(
-          'Profile',
+          'Edit Profile',
           style: const TextStyle(
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
-            fontFamily: 'Proza Libre',
+            fontFamily: 'Roboto',
             color: Colors.white,
           ),
         ),
@@ -1093,65 +1290,312 @@ class AccountProfilePage extends StatelessWidget {
                 String firstname = userdata.firstname;
                 String lastname = userdata.lastname;
                 String email = userdata.email;
+                String address = userdata.address;
+                String contact_number = userdata.contact_number;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AccountDetaiiledSummaryCard(
-                      name: "$lastname, $firstname",
-                      image: "images/generic_user.png",
-                      details: "$email",
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(left: 50, right: 20, top: 15.0),
-                      child: ProfileHeadingText(menuText: 'Information'),
-                    ),
-                    AccountSubMenuTile(
-                      menu: 'Edit Profile',
-                      menuIcon: Icons.edit_square,
-                      onTap: () {},
-                    ),
-                    AccountSubMenuTile(
-                      menu: 'Email',
-                      menuIcon: Icons.mail_rounded,
-                      onTap: () {},
-                    ),
-                    AccountSubMenuTile(
-                      menu: 'Password',
-                      menuIcon: Icons.lock,
-                      onTap: () {},
-                    ),
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(left: 50, right: 20, top: 15.0),
-                      child: ProfileHeadingText(menuText: 'Account'),
-                    ),
-                    AccountSubMenuTile(
-                      menu: 'Notifications',
-                      menuIcon: Icons.notifications,
-                      onTap: () {},
-                    ),
-                    AccountSubMenuTile(
-                      menu: 'Switch Account',
-                      menuIcon: Icons.sync_alt_outlined,
-                      onTap: () {},
-                    ),
-                    AccountSubMenuTile(
-                      menu: 'Logout',
-                      menuIcon: Icons.logout,
-                      onTap: () {
-                        getLogOutState();
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: ((context) => LoginMainPage())));
-                      },
-                    ),
-                  ],
+                return Container(
+                  color: backgroundColor,
+                  child: ListView(
+                    children: [
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      EdgeInsets.only(top: 5.0, left: 40.0),
+                                  child: InputDescription(desc: 'First Name'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 40.0, right: 20.0),
+                                  child: SizedBox(
+                                    width: 210,
+                                    child: TextFormField(
+                                      style: TextStyle(color: primaryBlue),
+                                      decoration: getDecor(),
+                                      initialValue: firstname,
+                                      enabled: true,
+                                      onSaved: (String? value) {
+                                        // This optional block of code can be used to run
+                                        // code when the user saves the form.
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your first name';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      EdgeInsets.only(top: 5.0, left: 40.0),
+                                  child: InputDescription(desc: 'Last Name'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 40.0, right: 20.0),
+                                  child: SizedBox(
+                                    width: 210,
+                                    child: TextFormField(
+                                      style: TextStyle(color: primaryBlue),
+                                      decoration: getDecor(),
+                                      initialValue: lastname,
+                                      enabled: true,
+                                      onSaved: (String? value) {
+                                        // This optional block of code can be used to run
+                                        // code when the user saves the form.
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your last name';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      EdgeInsets.only(top: 5.0, left: 40.0),
+                                  child: InputDescription(desc: 'Address'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 40.0, right: 20.0),
+                                  child: SizedBox(
+                                    width: 210,
+                                    child: TextFormField(
+                                      style: TextStyle(color: primaryBlue),
+                                      decoration: getDecor(),
+                                      initialValue: address,
+                                      enabled: true,
+                                      onSaved: (String? value) {
+                                        // This optional block of code can be used to run
+                                        // code when the user saves the form.
+                                      },
+                                      validator: (String? value) {
+                                        return (value != null &&
+                                                value.contains('@'))
+                                            ? 'Do not use the @ char.'
+                                            : null;
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      EdgeInsets.only(top: 5.0, left: 40.0),
+                                  child:
+                                      InputDescription(desc: 'Mobile Number'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 40.0, right: 20.0),
+                                  child: SizedBox(
+                                    width: 210,
+                                    child: TextFormField(
+                                      style: TextStyle(color: primaryBlue),
+                                      decoration: getDecor(),
+                                      initialValue: contact_number,
+                                      enabled: true,
+                                      onSaved: (String? value) {
+                                        // This optional block of code can be used to run
+                                        // code when the user saves the form.
+                                      },
+                                      // validator: (value) {
+                                      //   if (value != null && value.isNotEmpty) {
+                                      //     if (!isMobileNumberValid(
+                                      //         contact_number)) {
+                                      //       return 'Invalid Mobile Number format';
+                                      //     }
+                                      //   }
+                                      //   return null;
+                                      // },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      EdgeInsets.only(top: 5.0, left: 40.0),
+                                  child: InputDescription(desc: 'Email'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 40.0, right: 20.0),
+                                  child: SizedBox(
+                                    width: 210,
+                                    child: TextFormField(
+                                      style: TextStyle(color: primaryGrey),
+                                      decoration: getDecor(),
+                                      initialValue: email,
+                                      enabled: false,
+                                      onSaved: (String? value) {
+                                        // This optional block of code can be used to run
+                                        // code when the user saves the form.
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            Container(
+                              height: 4,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                    colors: <Color>[
+                                      mainLightBlue,
+                                      primaryBlue
+                                    ]),
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      EdgeInsets.only(top: 5.0, left: 40.0),
+                                  child: PasswordDescription(
+                                      desc: 'Current Password'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 15.0, right: 20.0),
+                                  child: SizedBox(
+                                    width: 200,
+                                    child: TextFormField(
+                                      obscureText: true,
+                                      enabled: true,
+                                      onSaved: (String? value) {
+                                        // This optional block of code can be used to run
+                                        // code when the user saves the form.
+                                      },
+                                      validator: (String? value) {
+                                        return (value != null &&
+                                                value.contains('@'))
+                                            ? 'Do not use the @ char.'
+                                            : null;
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      EdgeInsets.only(top: 5.0, left: 40.0),
+                                  child:
+                                      PasswordDescription(desc: 'New Password'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 15.0, right: 20.0),
+                                  child: SizedBox(
+                                    width: 200,
+                                    child: TextFormField(
+                                      obscureText: true,
+                                      enabled: true,
+                                      onSaved: (String? value) {
+                                        // This optional block of code can be used to run
+                                        // code when the user saves the form.
+                                      },
+                                      validator: (String? value) {
+                                        return (value != null &&
+                                                value.contains('@'))
+                                            ? 'Do not use the @ char.'
+                                            : null;
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      EdgeInsets.only(top: 5.0, left: 40.0),
+                                  child: PasswordDescription(
+                                      desc: 'Re-enter Password'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 15.0, right: 20.0),
+                                  child: SizedBox(
+                                    width: 200,
+                                    child: TextFormField(
+                                      obscureText: true,
+                                      enabled: true,
+                                      onSaved: (String? value) {
+                                        // This optional block of code can be used to run
+                                        // code when the user saves the form.
+                                      },
+                                      validator: (String? value) {
+                                        return (value != null &&
+                                                value.contains('@'))
+                                            ? 'Do not use the @ char.'
+                                            : null;
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 50),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                FilledButton(
+                                  onPressed: () {
+                                    if (_formKey.currentState!.validate()) {}
+                                  },
+                                  style: ButtonStyle(
+                                      minimumSize:
+                                          MaterialStateProperty.all<Size>(
+                                              Size(200, 50)),
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              primaryLightBlue)),
+                                  child: Text(
+                                    'SAVE',
+                                    style: TextStyle(
+                                        fontFamily: 'Open Sans',
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               }
             }

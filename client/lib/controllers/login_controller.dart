@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 // Local import
 import 'package:flutter_intro/ui_views/login_views.dart';
 import 'package:flutter_intro/utils/api_endpoints.dart';
+import 'package:flutter_intro/ui_views/admin_navigation_views.dart';
 
 // Third-party import
 import 'package:get/get.dart';
@@ -50,14 +51,19 @@ class LoginController extends GetxController {
 
           await prefs?.setString('user_data', jsonEncode(userdata));
           await prefs?.setString('token', accessToken);
+          await prefs?.setString('token_type', tokenType);
           await prefs?.setString('first_name', userdata['firstname']);
           await prefs?.setString('last_name', userdata['lastname']);
           await prefs?.setString('islogged_in', "true");
           emailController.clear();
           passwordController.clear();
 
-          //Go to Home
-          Get.off(() => WelcomePage());
+          if (userdata['email'] == "admin0@mentalapp.com") {
+            Get.off(() => AdminApp());
+          } else {
+            //Go to Home
+            Get.off(() => WelcomePage());
+          }
         } else {
           // If the server did not return a 201 CREATED response,
           // then throw an exception.

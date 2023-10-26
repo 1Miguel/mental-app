@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/controllers/appointment_controller.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:flutter_intro/model/appointment.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'dashboard_views.dart';
 import 'dart:convert';
+import 'package:get/get.dart';
 
 // Loacl import
 import 'package:flutter_intro/model/user.dart';
@@ -53,6 +58,109 @@ class AccountNameHeadingText extends StatelessWidget {
   }
 }
 
+class MainHeadingText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const MainHeadingText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 20 : 40;
+    //Overwrite size based on length
+    newSize = (title.length > 20) ? 25 : 30;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Proza Libre',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
+class SubHeadingText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const SubHeadingText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 10 : 20;
+    //Overwrite size based on length
+    newSize = (title.length > 20) ? 12 : 20;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 2,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Proza Libre',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
+class HeaderContentText extends StatelessWidget {
+  final String title;
+  final bool isOverflow;
+  final bool isHeavy;
+  final Color customColor;
+
+  const HeaderContentText({
+    super.key,
+    required this.title,
+    required this.isOverflow,
+    required this.isHeavy,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double newSize = isOverflow ? 18 : 22;
+    FontWeight newWeight = isHeavy ? FontWeight.w900 : FontWeight.bold;
+    return Text(
+      title,
+      textAlign: TextAlign.center,
+      softWrap: true,
+      maxLines: 5,
+      style: TextStyle(
+        color: customColor,
+        fontFamily: 'Open Sans',
+        fontWeight: newWeight,
+        fontSize: newSize,
+      ),
+    );
+  }
+}
+
 class TimeBox extends StatelessWidget {
   final String time;
 
@@ -70,7 +178,9 @@ class TimeBox extends StatelessWidget {
         style:
             TextStyle(fontFamily: 'Roboto', fontSize: 10, color: Colors.black),
       ),
-      selectedColor: Colors.black26,
+      isEnabled: true,
+      selectedColor: primaryBlue,
+      onSelected: (bool selected) {},
     );
   }
 }
@@ -95,7 +205,7 @@ class BookIconBox extends StatelessWidget {
           softWrap: true,
           maxLines: 2,
           style: TextStyle(
-            color: mainDeepPurple,
+            color: primaryBlue,
             fontWeight: FontWeight.bold,
             fontFamily: 'Roboto',
             fontSize: 20,
@@ -182,6 +292,7 @@ class BookAppointmentPage extends StatelessWidget {
     address: "",
     age: 0,
     occupation: "",
+    contact_number: "",
   );
 
   getUserData() async {
@@ -194,7 +305,14 @@ class BookAppointmentPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: mainDeepPurple,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -226,69 +344,28 @@ class BookAppointmentPage extends StatelessWidget {
           ),
         ),
       ),
-      body: FutureBuilder(
-          future: getUserData(),
-          builder: (BuildContext context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.deepPurpleAccent,
-                ),
-              );
-            }
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    'An ${snapshot.error} occurred',
-                    style: const TextStyle(fontSize: 18, color: Colors.red),
-                  ),
-                );
-              } else if (snapshot.hasData) {
-                final data = snapshot.data;
-                String mystring = data.toString();
-                //Map<String, dynamic> myjson = jsonDecode(mystring);
-                User userdata = User.fromJson(jsonDecode(mystring));
-                String firstname = userdata.firstname;
-                String lastname = userdata.lastname;
-                String address = userdata.address;
-                String occupation = userdata.occupation;
-                int age = userdata.age;
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    BookAccountSummaryCard(
-                      name: "$lastname, $firstname",
-                      address: address,
-                      occupation: occupation,
-                      age: "$age yo",
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 30.0),
-                      child: Text(
-                        "SERVICES",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: mainDeepPurple,
-                          fontSize: 30,
-                          fontFamily: 'Proza Libre',
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    ServiceIcons(),
-                  ],
-                );
-              }
-            }
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 30.0, top: 30.0),
+            child: Text(
+              "Please select the service you want",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: primaryGrey,
+                fontSize: 20,
+                fontFamily: 'Asap',
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 50,
+          ),
+          ServiceIcons(),
+        ],
+      ),
     );
   }
 }
@@ -764,6 +841,7 @@ class GenericConsultationPage extends StatelessWidget {
     address: "",
     age: 0,
     occupation: "",
+    contact_number: "",
   );
 
   GenericConsultationPage({
@@ -800,214 +878,16 @@ class GenericConsultationPage extends StatelessWidget {
       icon = Icons.psychology;
     }
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          backgroundColor: mainDeepPurple,
-          toolbarHeight: 60,
-          leading: SizedBox(
-            width: 20,
-            height: 20,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  size: 30,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-          ),
-          title: Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Text(
-              'BOOK APPOINTMENT',
-              style: TextStyle(
-                  fontFamily: 'Proza Libre',
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
           ),
         ),
-        body: FutureBuilder(
-            future: getUserData(),
-            builder: (BuildContext context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.deepPurpleAccent,
-                  ),
-                );
-              }
-              if (snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'An ${snapshot.error} occurred',
-                      style: const TextStyle(fontSize: 18, color: Colors.red),
-                    ),
-                  );
-                } else if (snapshot.hasData) {
-                  final data = snapshot.data;
-                  String mystring = data.toString();
-                  User userdata = User.fromJson(jsonDecode(mystring));
-                  String firstname = userdata.firstname;
-                  String lastname = userdata.lastname;
-                  String address = userdata.address;
-                  String occupation = userdata.occupation;
-                  int age = userdata.age;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BookAccountSummaryCard(
-                        name: '$lastname, $firstname',
-                        address: address,
-                        occupation: occupation,
-                        age: '$age yo',
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 30.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircleAvatar(
-                              radius: 70,
-                              backgroundColor: mainBlue,
-                              child: IconButton(
-                                icon: Icon(
-                                  icon,
-                                  size: 70,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () {},
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: SizedBox(
-                          width: MediaQuery.sizeOf(context).width,
-                          child: SizedBox(
-                            width: 170,
-                            child: Center(
-                              child: Text(
-                                title,
-                                textAlign: TextAlign.center,
-                                softWrap: true,
-                                maxLines: 2,
-                                style: TextStyle(
-                                  color: mainDeepPurple,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Roboto',
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 30.0),
-                        child: SizedBox(
-                          height: 80,
-                          width: MediaQuery.sizeOf(context).width,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.only(left: 20.0, right: 20.0),
-                            child: Text(
-                              subheading,
-                              softWrap: true,
-                              maxLines: 6,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 15,
-                                  color: Colors.black54),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 30.0, top: 30.0),
-                        child: Text(
-                          "Concerns",
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                            color: mainDeepPurple,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width - 20.0,
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 16),
-                              child: TextField(
-                                maxLines: 3,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(25.0)),
-                                  ),
-                                  hintText: 'Please note here your concern',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 30.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            FilledButton(
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: ((context) =>
-                                            BookSchedulePage())));
-                              },
-                              style: ButtonStyle(
-                                  minimumSize: MaterialStateProperty.all<Size>(
-                                      Size(200, 50)),
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          mainBlue)),
-                              child: Text('BOOK'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                }
-              }
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }));
-  }
-}
-
-class BookSchedulePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: mainDeepPurple,
         toolbarHeight: 60,
         leading: SizedBox(
           width: 20,
@@ -1039,41 +919,420 @@ class BookSchedulePage extends StatelessWidget {
         ),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BookAccountSummaryCard(
-            name: "Philippine Mental Health\nAssociation-Palawan Chapter",
-            address: "Manalo Extension, Puerto Princesa",
-            occupation: "",
-            age: "",
+          SizedBox(height: 80),
+          Padding(
+            padding: const EdgeInsets.only(top: 30.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 70,
+                  backgroundColor: mainBlue,
+                  child: IconButton(
+                    icon: Icon(
+                      icon,
+                      size: 70,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {},
+                  ),
+                ),
+              ],
+            ),
           ),
-          SizedBox(
-            width: MediaQuery.sizeOf(context).width,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 30.0, top: 20.0),
-              child: Text(
-                'DATE',
-                style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+          SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: SizedBox(
+              width: MediaQuery.sizeOf(context).width,
+              child: SizedBox(
+                width: 170,
+                child: Center(
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    maxLines: 2,
+                    style: TextStyle(
+                      color: primaryBlue,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Roboto',
+                      fontSize: 20,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(top: 30.0),
+            child: SizedBox(
+              height: 80,
+              width: MediaQuery.sizeOf(context).width,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                child: Text(
+                  subheading,
+                  softWrap: true,
+                  maxLines: 6,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 15,
+                      color: Colors.black54),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 30.0, top: 30.0),
+            child: Text(
+              "Concerns",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: primaryBlue,
+                fontSize: 30,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width - 20.0,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  child: TextField(
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                      ),
+                      hintText: 'Please note here your concern',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 30.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FilledButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: ((context) =>
+                                BookSchedulePage(service: service))));
+                  },
+                  style: ButtonStyle(
+                      minimumSize:
+                          MaterialStateProperty.all<Size>(Size(200, 50)),
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(mainBlue)),
+                  child: Text('BOOK'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+enum TimeSlot { slot0, slot1, slot2, slot3, slot4, slot5, slot6 }
+
+class BookSchedulePage extends StatefulWidget {
+  final ConsulationServices service;
+
+  const BookSchedulePage({super.key, required this.service});
+
+  @override
+  State<BookSchedulePage> createState() =>
+      _BookSchedulePageState(service: service);
+}
+
+class _BookSchedulePageState extends State<BookSchedulePage> {
+  final ConsulationServices service;
+  int? scheduleValue = TimeSlot.slot0.index;
+  String _date = "0000-00-00";
+  String _timeSlot = "00:00";
+  String _selectionDate = "";
+  String startDate = "";
+  String endDate = "";
+  String targetDate = "";
+  bool dateSelected = false;
+  String selectedService = "OCCUPATIONAL_THERAPY";
+  late Future<List<AppointmentSlot>> futureBlockedSlots;
+
+  Future<List<DateTime>> getBlockedDatesAsync() async {
+    List<DateTime> dateList = <DateTime>[];
+    List<AppointmentSlot> futureBlockedSlots = await appointmentController
+        .fetchBlockedSlots(DateTime.now().year, DateTime.now().month);
+
+    futureBlockedSlots.forEach((element) {
+      dateList.add(DateTime.parse(element.startTime));
+    });
+
+    print(dateList);
+    return dateList;
+  }
+
+  List<AppointmentSlot> blockedSlots = getSlots();
+  static List<AppointmentSlot> getSlots() {
+    const data = [
+      {
+        "start_time": "2023-10-25T09:00:00+00:00",
+        "end_time": "2023-10-25T10:00:00+00:00"
+      },
+      {
+        "start_time": "2023-10-23T09:00:00+00:00",
+        "end_time": "2023-10-23T10:00:00+00:00"
+      },
+      {
+        "start_time": "2023-10-23T09:00:00+00:00",
+        "end_time": "2023-10-23T10:00:00+00:00"
+      },
+      {
+        "start_time": "2023-10-23T09:00:00+00:00",
+        "end_time": "2023-10-23T10:00:00+00:00"
+      },
+      {
+        "start_time": "2023-10-23T09:00:00+00:00",
+        "end_time": "2023-10-23T10:00:00+00:00"
+      },
+      {
+        "start_time": "2023-10-23T09:00:00+00:00",
+        "end_time": "2023-10-23T10:00:00+00:00"
+      }
+    ];
+    return data.map<AppointmentSlot>(AppointmentSlot.fromJson).toList();
+  }
+
+  _BookSchedulePageState({required this.service});
+
+  AppointmentController appointmentController =
+      Get.put(AppointmentController());
+
+  @override
+  void initState() {
+    super.initState();
+    if (service == ConsulationServices.therapy) {
+      selectedService = "OCCUPATIONAL_THERAPY";
+    } else if (service == ConsulationServices.consultation) {
+      selectedService = "PSYCHIATRIC_CONSULTATION";
+    } else if (service == ConsulationServices.counseling) {
+      selectedService = "COUNSELING";
+    } else if (service == ConsulationServices.assessment) {
+      selectedService = "PSYCHOLOGICAL_ASSESMENT";
+    }
+  }
+
+  void updateSelectionDate() {
+    setState(() {
+      const tString = "T";
+      startDate = "$_date$tString$_timeSlot";
+      print("startDate: $startDate");
+
+      final sunDate = DateTime.parse(startDate).add(const Duration(hours: 1));
+      endDate = DateFormat('yyyy-MM-ddTHH:mm').format(sunDate).toString();
+      print("endDate: $endDate");
+    });
+  }
+
+  void selectionChanged(DateRangePickerSelectionChangedArgs args) {
+    SchedulerBinding.instance!.addPostFrameCallback((duration) {
+      setState(() {
+        dateSelected = true;
+        _date = DateFormat('yyyy-MM-dd').format(args.value).toString();
+        print("date selection changed");
+        updateSelectionDate();
+      });
+    });
+  }
+
+  List<DateTime> getBlackoutDates() {
+    List<DateTime> blockDateList = <DateTime>[];
+
+    print("Get Blackout Dates");
+
+    blockedSlots.forEach((element) {
+      // final blockDay =
+      //     DateFormat('yyyy-MM-dd').format(DateTime.parse(element.startTime));
+      blockDateList.add(DateTime.parse(element.startTime));
+    });
+
+    return blockDateList;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    getBlockedDatesAsync();
+    return Scaffold(
+      appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[primaryLightBlue, primaryBlue]),
+          ),
+        ),
+        toolbarHeight: 60,
+        leading: SizedBox(
+          width: 20,
+          height: 20,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            child: IconButton(
+              icon: const Icon(
+                Icons.arrow_back,
+                size: 30,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
+        title: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Text(
+            'SCHEDULE APPOINTMENT',
+            style: TextStyle(
+                fontFamily: 'Proza Libre',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white),
+          ),
+        ),
+      ),
+      body: Column(
+        children: [
+          SizedBox(height: 60),
           SizedBox(
             width: MediaQuery.sizeOf(context).width,
             height: 380,
-            child: SfDateRangePicker(
-              showTodayButton: false,
-              enablePastDates: false,
-              monthViewSettings: DateRangePickerMonthViewSettings(
-                  blackoutDates: [
-                    DateTime(2023, 10, 20),
-                    DateTime(2023, 10, 21)
-                  ]),
+            child: FutureBuilder<List<DateTime>>(
+                future: getBlockedDatesAsync(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final dates = snapshot.data!;
+                    print("dates");
+                    print(dates);
+                    return SfDateRangePicker(
+                      showTodayButton: false,
+                      enablePastDates: false,
+                      selectionShape: DateRangePickerSelectionShape.rectangle,
+                      selectionColor: primaryLightBlue,
+                      headerHeight: 80,
+                      monthViewSettings: DateRangePickerMonthViewSettings(
+                        //blackoutDates: [DateTime(2023, 10, 20), DateTime(2023, 10, 21)],
+                        blackoutDates: dates,
+                        viewHeaderStyle: DateRangePickerViewHeaderStyle(
+                            backgroundColor: calendarHeaderBgLightTeal),
+                      ),
+                      monthCellStyle: DateRangePickerMonthCellStyle(
+                        cellDecoration: BoxDecoration(
+                            color: calendarCellUnselectedBgWhite,
+                            // border:
+                            //     Border.all(color: const Color(0xFFF44436), width: 1),
+                            shape: BoxShape.rectangle),
+                        blackoutDatesDecoration: BoxDecoration(
+                            color: Colors.red,
+                            border: Border.all(
+                                color: const Color(0xFFF44436), width: 1),
+                            shape: BoxShape.rectangle),
+                        disabledDatesDecoration: BoxDecoration(
+                            color: unselectedGray,
+                            border: Border.all(color: unselectedGray, width: 1),
+                            shape: BoxShape.rectangle),
+                        specialDatesDecoration: BoxDecoration(
+                            color: Colors.green,
+                            border: Border.all(
+                                color: const Color(0xFF2B732F), width: 1),
+                            shape: BoxShape.circle),
+                      ),
+                      headerStyle: DateRangePickerHeaderStyle(
+                          backgroundColor: calendarHeaderMainLightBlue,
+                          textAlign: TextAlign.center,
+                          textStyle: TextStyle(
+                            fontStyle: FontStyle.normal,
+                            fontSize: 25,
+                            letterSpacing: 5,
+                            color: backgroundColor,
+                          )),
+                      onSelectionChanged: selectionChanged,
+                    );
+                  } else {
+                    return SfDateRangePicker(
+                      showTodayButton: false,
+                      enablePastDates: false,
+                      selectionShape: DateRangePickerSelectionShape.rectangle,
+                      selectionColor: primaryLightBlue,
+                      headerHeight: 80,
+                      monthViewSettings: DateRangePickerMonthViewSettings(
+                        blackoutDates: [
+                          DateTime(2023, 10, 20),
+                          DateTime(2023, 10, 21)
+                        ],
+                        //blackoutDates: [],
+                        viewHeaderStyle: DateRangePickerViewHeaderStyle(
+                            backgroundColor: calendarHeaderBgLightTeal),
+                      ),
+                      monthCellStyle: DateRangePickerMonthCellStyle(
+                        cellDecoration: BoxDecoration(
+                            color: calendarCellUnselectedBgWhite,
+                            // border:
+                            //     Border.all(color: const Color(0xFFF44436), width: 1),
+                            shape: BoxShape.rectangle),
+                        blackoutDatesDecoration: BoxDecoration(
+                            color: Colors.red,
+                            border: Border.all(
+                                color: const Color(0xFFF44436), width: 1),
+                            shape: BoxShape.rectangle),
+                        disabledDatesDecoration: BoxDecoration(
+                            color: unselectedGray,
+                            border: Border.all(color: unselectedGray, width: 1),
+                            shape: BoxShape.rectangle),
+                        specialDatesDecoration: BoxDecoration(
+                            color: Colors.green,
+                            border: Border.all(
+                                color: const Color(0xFF2B732F), width: 1),
+                            shape: BoxShape.circle),
+                      ),
+                      headerStyle: DateRangePickerHeaderStyle(
+                          backgroundColor: calendarHeaderMainLightBlue,
+                          textAlign: TextAlign.center,
+                          textStyle: TextStyle(
+                            fontStyle: FontStyle.normal,
+                            fontSize: 25,
+                            letterSpacing: 5,
+                            color: backgroundColor,
+                          )),
+                      onSelectionChanged: selectionChanged,
+                    );
+                  }
+                }),
+          ),
+          Container(
+            height: 8,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: <Color>[mainLightBlue, primaryBlue]),
             ),
           ),
+          SizedBox(height: 20),
           SizedBox(
             width: MediaQuery.sizeOf(context).width,
             child: Padding(
@@ -1084,7 +1343,7 @@ class BookSchedulePage extends StatelessWidget {
                   fontFamily: 'Roboto',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: primaryBlue,
                 ),
               ),
             ),
@@ -1092,18 +1351,76 @@ class BookSchedulePage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              TimeBox(time: "11:00"),
-              TimeBox(time: "14:30"),
-              TimeBox(time: "15:00"),
-              TimeBox(time: "14:30"),
-              TimeBox(time: "15:00"),
+              ChoiceChip(
+                label: Text('9:00-10:00'),
+                selected: scheduleValue == TimeSlot.slot1.index,
+                onSelected: (bool selected) {
+                  setState(() {
+                    _timeSlot = "09:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot1.index : null;
+                  });
+                },
+              ),
+              ChoiceChip(
+                label: Text('10:00-11:00'),
+                selected: scheduleValue == TimeSlot.slot2.index,
+                onSelected: (bool selected) {
+                  setState(() {
+                    _timeSlot = "10:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot2.index : null;
+                  });
+                },
+              ),
+              ChoiceChip(
+                label: Text('11:00-12:00'),
+                selected: scheduleValue == TimeSlot.slot3.index,
+                onSelected: (bool selected) {
+                  setState(() {
+                    _timeSlot = "11:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot3.index : null;
+                  });
+                },
+              ),
             ],
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: TimeBox(time: "11:00"),
+              ChoiceChip(
+                label: Text('1:00-2:00'),
+                selected: scheduleValue == TimeSlot.slot4.index,
+                onSelected: (bool selected) {
+                  setState(() {
+                    _timeSlot = "01:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot4.index : null;
+                  });
+                },
+              ),
+              ChoiceChip(
+                label: Text('2:00-3:00'),
+                selected: scheduleValue == TimeSlot.slot5.index,
+                onSelected: (bool selected) {
+                  setState(() {
+                    _timeSlot = "02:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot5.index : null;
+                  });
+                },
+              ),
+              ChoiceChip(
+                label: Text('3:00-4:00'),
+                selected: scheduleValue == TimeSlot.slot6.index,
+                onSelected: (bool selected) {
+                  setState(() {
+                    _timeSlot = "03:00";
+                    updateSelectionDate();
+                    scheduleValue = selected ? TimeSlot.slot6.index : null;
+                  });
+                },
               ),
             ],
           ),
@@ -1114,22 +1431,86 @@ class BookSchedulePage extends StatelessWidget {
               children: [
                 FilledButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) => DashboardPage())));
+                    if (scheduleValue != TimeSlot.slot0.index && dateSelected) {
+                      print("Valid Schedule is selected");
+                      print("startDate: $startDate endDate:$endDate");
+                      print('Service Type: $selectedService');
+                    } else {
+                      print("No valid schedule selected");
+                    }
+                    appointmentController.setAppointment(
+                        startDate, endDate, selectedService);
+                    // Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: ((context) => BookScheduleSuccessPage())));
                   },
                   style: ButtonStyle(
                       minimumSize:
                           MaterialStateProperty.all<Size>(Size(200, 50)),
                       backgroundColor:
-                          MaterialStateProperty.all<Color>(Colors.deepPurple)),
+                          MaterialStateProperty.all<Color>(primaryLightBlue)),
                   child: Text('BOOK'),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class BookScheduleSuccessPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: ((context) => DashboardPage())));
+        },
+        child: Container(
+          width: MediaQuery.sizeOf(context).width,
+          color: backgroundColor,
+          child: Column(
+            children: [
+              SizedBox(height: 100),
+              Image.asset(
+                'images/welcome_logo.png',
+                fit: BoxFit.fitHeight,
+                height: 300,
+              ),
+              SizedBox(height: 30),
+              SizedBox(height: 50),
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width - 80,
+                child: HeaderContentText(
+                    title:
+                        'Your appointment request has been submitted. Please wait for our call(09362855204) between 2-3 business days for confirmation of booking appointment.',
+                    isOverflow: true,
+                    isHeavy: true,
+                    customColor: Colors.black87),
+              ),
+              SizedBox(height: 70),
+              FilledButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => DashboardPage())));
+                },
+                style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(primaryLightBlue)),
+                child: Text('CONFIRM'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

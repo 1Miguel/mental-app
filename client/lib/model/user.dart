@@ -7,6 +7,7 @@ class User {
   final String address;
   final int age;
   final String occupation;
+  final String contact_number;
 
   const User({
     required this.id,
@@ -17,6 +18,7 @@ class User {
     required this.address,
     required this.age,
     required this.occupation,
+    required this.contact_number,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class User {
     String address = json['address'];
     int age = json['age'];
     String occupation = json['occupation'];
+    String contact_number = json['mobile_number'];
 
     return User(
       id: id,
@@ -38,6 +41,7 @@ class User {
       address: address,
       age: age,
       occupation: occupation,
+      contact_number: contact_number,
     );
   }
 
@@ -50,5 +54,8 @@ class User {
         'address': address,
         'age': age,
         'occupation': occupation,
+        'contact_number': contact_number,
       };
 }
+
+enum MoodId { HAPPY, SAD, CONFUSED, SCARED, ANGRY }

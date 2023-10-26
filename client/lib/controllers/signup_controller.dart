@@ -12,7 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class SignupController extends GetxController {
-  TextEditingController nameController = TextEditingController();
+  TextEditingController firstNameController = TextEditingController();
+  TextEditingController lastNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -28,26 +29,23 @@ class SignupController extends GetxController {
         },
         body: jsonEncode({
           'email': emailController.text,
-          'password_hash': passwordController.text,
-          'firstname': nameController.text,
-          'lastname': 'test',
-          'address': 'Alabang, Muntinlupa',
-          'age': 30,
-          'occupation': 'Software Engineer',
+          'password': passwordController.text,
+          'firstname': firstNameController.text,
+          'lastname': lastNameController.text,
         }),
       );
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
-        print(json);
         // final SharedPreferences? prefs = await _prefs;
 
         // await prefs?.setString('token', token);
-        nameController.clear();
+        firstNameController.clear();
+        lastNameController.clear();
         emailController.clear();
         passwordController.clear();
         //go to home
-        Get.off(() => LoginMainPage());
+        Get.off(() => SignupSuccessPage());
       } else if (response.statusCode == 409) {
         throw jsonDecode(response.body)['Message'] ?? "Account already exists";
       } else {
