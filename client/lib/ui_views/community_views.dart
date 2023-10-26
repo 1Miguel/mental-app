@@ -228,36 +228,6 @@ class _CommunityMainPageState extends State<CommunityMainpage> {
                       }
                     },
                   ),
-                  // child: ListView(
-                  //   children: [
-                  //     PostCard(
-                  //       title: 'How to Overcome depression',
-                  //       username: '/user001',
-                  //       content:
-                  //           'I have been depressed for over a month now, would you guys help me out',
-                  //       count: 45,
-                  //       onTap: () {},
-                  //     ),
-                  //     Divider(),
-                  //     PostCard(
-                  //       title: 'Does having a pet help me overcome stress?',
-                  //       username: '/user002',
-                  //       content:
-                  //           "I'm going to get me dog as soon as next week, would it help me to deal with my stress?",
-                  //       count: 5,
-                  //       onTap: () {},
-                  //     ),
-                  //     Divider(),
-                  //     PostCard(
-                  //       title: 'Most Common Health Problems',
-                  //       username: '/user003',
-                  //       content:
-                  //           "I'm wondering what are the most common mental health related problems people face today",
-                  //       count: 2,
-                  //       onTap: () {},
-                  //     ),
-                  //   ],
-                  // ),
                 ),
                 FilledButton(
                   onPressed: () {

@@ -13,78 +13,6 @@ import 'package:get/get.dart';
 class MoodTimeline extends StatelessWidget {
   MoodController moodController = Get.put(MoodController());
   late Future<List<Mood>> futureMoodHistory;
-  // List<Mood> moods = getMoods();
-
-  // static List<Mood> getMoods() {
-  //   const data = [
-  //     {
-  //       "mood": 1,
-  //       "note": "This is my mood today",
-  //       "date": "2023-10-01",
-  //     },
-  //     {
-  //       "mood": 2,
-  //       "note": "I'm feeling super sad toady",
-  //       "date": "2023-10-02",
-  //     },
-  //     {
-  //       "mood": 3,
-  //       "note": "I'm feeling just meeeh",
-  //       "date": "2023-10-03",
-  //     },
-  //     {
-  //       "mood": 3,
-  //       "note": "I'm feeling just meeeh",
-  //       "date": "2023-10-03",
-  //     },
-  //     {
-  //       "mood": 3,
-  //       "note": "I'm feeling just meeeh",
-  //       "date": "2023-10-03",
-  //     },
-  //     {
-  //       "mood": 3,
-  //       "note": "I'm feeling just meeeh",
-  //       "date": "2023-10-03",
-  //     },
-  //     {
-  //       "mood": 1,
-  //       "note": "This is my mood today",
-  //       "date": "2023-10-01",
-  //     },
-  //     {
-  //       "mood": 1,
-  //       "note": "This is my mood today",
-  //       "date": "2023-10-01",
-  //     },
-  //     {
-  //       "mood": 1,
-  //       "note": "This is my mood today",
-  //       "date": "2023-10-01",
-  //     },
-  //     {
-  //       "mood": 1,
-  //       "note": "This is my mood today",
-  //       "date": "2023-10-01",
-  //     },
-  //     {
-  //       "mood": 1,
-  //       "note": "This is my mood today",
-  //       "date": "2023-10-01",
-  //     },
-  //     {
-  //       "mood": 1,
-  //       "note": "This is my mood today",
-  //       "date": "2023-10-01",
-  //     },
-  //     {
-  //       "mood": 1,
-  //       "note": "This is my mood today",
-  //       "date": "2023-10-01",
-  //     },
-  //   ];
-  //   return data.map<Mood>(Mood.fromJson).toList();
-  // }
 
   Future<List<Mood>> getMoodHistory() async {
     futureMoodHistory = moodController.fetchMoodHistory(DateTime.now());
@@ -140,82 +68,6 @@ class MoodTimeline extends StatelessWidget {
                           }
                         })),
               ),
-              // SizedBox(
-              //   height: 800,
-              //   child:
-              // ),
-              // _buildTimelineTile(
-              //   indicator: _IconIndicator(
-              //     iconData: Icons.sentiment_dissatisfied,
-              //     size: 20,
-              //   ),
-              //   date: 'Oct 01',
-              //   mood: 'Sad',
-              //   phrase:
-              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
-              // ),
-              // _buildTimelineTile(
-              //   indicator: _IconIndicator(
-              //     iconData: Icons.sentiment_dissatisfied,
-              //     size: 20,
-              //   ),
-              //   date: 'Oct 02',
-              //   mood: 'Happy',
-              //   //temperature: 'quite a pleasant day',
-              //   phrase:
-              //       "It's quite a bit happy day today. It's quite a bit happy day today.",
-              // ),
-              // _buildTimelineTile(
-              //   indicator: _IconIndicator(
-              //     iconData: Icons.sentiment_satisfied,
-              //     size: 20,
-              //   ),
-              //   date: 'Oct 03',
-              //   mood: 'Sad',
-              //   phrase:
-              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
-              // ),
-              // _buildTimelineTile(
-              //   indicator: _IconIndicator(
-              //     iconData: Icons.sentiment_neutral,
-              //     size: 20,
-              //   ),
-              //   date: 'Oct 04',
-              //   mood: 'Sad',
-              //   phrase:
-              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
-              // ),
-              // _buildTimelineTile(
-              //   indicator: _IconIndicator(
-              //     iconData: Icons.sentiment_neutral,
-              //     size: 20,
-              //   ),
-              //   date: 'Oct 05',
-              //   mood: 'Sad',
-              //   phrase:
-              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
-              // ),
-              // _buildTimelineTile(
-              //   indicator: _IconIndicator(
-              //     iconData: Icons.sentiment_neutral,
-              //     size: 20,
-              //   ),
-              //   date: 'Oct 06',
-              //   mood: 'Sad',
-              //   phrase:
-              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
-              // ),
-              // _buildTimelineTile(
-              //   indicator: _IconIndicator(
-              //     iconData: Icons.sentiment_neutral,
-              //     size: 20,
-              //   ),
-              //   date: 'Oct 07',
-              //   mood: 'Sad',
-              //   phrase:
-              //       "It's quite a bit sad day today. It's quite a bit sad day today.",
-              //   isLast: true,
-              // ),
             ],
           ),
         ),
@@ -419,15 +271,6 @@ class _ContainerHeader extends StatelessWidget {
                     ),
                   ),
                 ),
-                //const SizedBox(width: 20),
-                // Text(
-                //   '30°C',
-                //   style: TextStyle(
-                //     fontSize: 14,
-                //     color: const Color(0xFF4A448F).withOpacity(0.8),
-                //     fontWeight: FontWeight.w800,
-                //   ),
-                // )
               ],
             )
           ],

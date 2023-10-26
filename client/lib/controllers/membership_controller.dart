@@ -88,23 +88,6 @@ class MembershipController extends GetxController {
     String? token_type = await getTokenType();
 
     try {
-      // Map<String, String> headersList = {
-      //   'Accept': 'application/json',
-      //   'Authorization': '$token_type $token',
-      //   'Content-Type': 'application/json'
-      // };
-      // Map<String, String> dataList = {
-      //   'membership_api': "{'membership_type': 0}"
-      // };
-      // var request = http.MultipartRequest(
-      //     'POST', Uri.parse('$baseUrl/user/membership/register'));
-      // request.headers.addAll(headersList);
-      // request.fields.addAll(dataList);
-      // request.files.add(http.MultipartFile('files',
-      //     File(filename).readAsBytes().asStream(), File(filename).lengthSync(),
-      //     filename: filename.split("/").last));
-      //var response = await request.send();
-
       final response = await http.post(
         Uri.parse('$baseUrl/user/membership/register'),
         headers: <String, String>{
@@ -118,15 +101,6 @@ class MembershipController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        // final json = jsonDecode(response.body);
-        // // final SharedPreferences? prefs = await _prefs;
-
-        // // await prefs?.setString('token', token);
-        // firstNameController.clear();
-        // lastNameController.clear();
-        // emailController.clear();
-        // passwordController.clear();
-        // //go to home
         Get.off(() => MembershipSuccessPage());
       } else {
         throw "Unknown Error Occurred";

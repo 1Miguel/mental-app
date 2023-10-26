@@ -727,13 +727,6 @@ class MoodHistoryPage extends StatelessWidget {
                   print(data[i].mood);
                 }
 
-                //String mystring = data.toString();
-                // print('myString');
-                // print(mystring);
-                // Mood moodData = Mood.fromJson(jsonDecode(mystring));
-                // print("moodData");
-                // print(moodData);
-
                 return Container(
                   color: Colors.white,
                   width: MediaQuery.sizeOf(context).width,
@@ -862,51 +855,6 @@ class MonthlyMoodSummary extends StatelessWidget {
                   }
                 }),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          //   child: MoodBar(
-          //     moodLogo: 'images/happy_emoji.png',
-          //     moodName: 'Happy',
-          //     moodColor: Colors.pinkAccent,
-          //     moodPercent: '50%',
-          //   ),
-          // ),
-          // Padding(
-          //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          //   child: MoodBar(
-          //     moodLogo: 'images/sad_emoji.png',
-          //     moodName: 'Sad',
-          //     moodColor: Colors.blueAccent,
-          //     moodPercent: '40%',
-          //   ),
-          // ),
-          // Padding(
-          //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          //   child: MoodBar(
-          //     moodLogo: 'images/confused_emoji.png',
-          //     moodName: 'Confused',
-          //     moodColor: Colors.orangeAccent,
-          //     moodPercent: '30%',
-          //   ),
-          // ),
-          // Padding(
-          //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          //   child: MoodBar(
-          //     moodLogo: 'images/angry_emoji.png',
-          //     moodName: 'Angry',
-          //     moodColor: Colors.redAccent,
-          //     moodPercent: '20%',
-          //   ),
-          // ),
-          // Padding(
-          //   padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          //   child: MoodBar(
-          //     moodLogo: 'images/scared_emoji.png',
-          //     moodName: 'Scared',
-          //     moodColor: Colors.deepPurpleAccent,
-          //     moodPercent: '10%',
-          //   ),
-          // ),
           SizedBox(height: 20),
         ],
       ),
@@ -1083,28 +1031,7 @@ class TodayMoodInfo extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(right: 25.0),
                             child: Row(
-                              children: [
-                                // SizedBox(
-                                //   child: IconButton(
-                                //     icon: Icon(
-                                //       Icons.note,
-                                //       size: 30,
-                                //       color: Colors.black87,
-                                //     ),
-                                //     onPressed: () {},
-                                //   ),
-                                // ),
-                                // SizedBox(
-                                //   child: IconButton(
-                                //     icon: Icon(
-                                //       Icons.edit,
-                                //       size: 30,
-                                //       color: primaryGrey,
-                                //     ),
-                                //     onPressed: () {},
-                                //   ),
-                                // ),
-                              ],
+                              children: [],
                             ),
                           ),
                         ],
@@ -1150,11 +1077,6 @@ class TodayMoodInfo extends StatelessWidget {
                       onPressed: () {
                         moodController.logMood(
                             todayMood.mood, moodController.noteController.text);
-
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: ((context) => LoginPage())));
                       },
                       style: ButtonStyle(
                           minimumSize:

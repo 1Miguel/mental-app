@@ -1484,32 +1484,6 @@ class BookScheduleSuccessPage extends StatelessWidget {
                 height: 300,
               ),
               SizedBox(height: 30),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.center,
-              //   children: [
-              //     Padding(
-              //       padding: const EdgeInsets.only(bottom: 15.0),
-              //       child: MainHeadingText(
-              //           title: "October 15, 2023",
-              //           isOverflow: false,
-              //           isHeavy: true,
-              //           customColor: mainLightGreen),
-              //     )
-              //   ],
-              // ),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.center,
-              //   children: [
-              //     Padding(
-              //       padding: const EdgeInsets.only(bottom: 15.0),
-              //       child: SubHeadingText(
-              //           title: "Friday (1:00 - 2:00)",
-              //           isOverflow: false,
-              //           isHeavy: true,
-              //           customColor: Colors.black),
-              //     )
-              //   ],
-              // ),
               SizedBox(height: 50),
               SizedBox(
                 width: MediaQuery.sizeOf(context).width - 80,

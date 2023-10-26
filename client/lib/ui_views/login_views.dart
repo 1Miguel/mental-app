@@ -1181,29 +1181,6 @@ class SignupState extends State<SignupPage> {
                               contentPadding: EdgeInsets.all(1),
                             ),
                           ),
-                          // Padding(
-                          //   padding: const EdgeInsets.only(bottom: 10.0),
-                          //   child: SizedBox(
-                          //     width: MediaQuery.sizeOf(context).width,
-                          //     child: Row(
-                          //       mainAxisAlignment: MainAxisAlignment.center,
-                          //       children: [
-                          //         CheckBoxExample(
-                          //           formkey: _formKey,
-                          //         ),
-                          //         Text(
-                          //           "Pursuant to the Data Privacy Act of 2012, I hereby give my consent to PMHA to process my\npersonal data as a member of the Association. I understand the processing of my personal\ndata shall be limited to the purpose specified.",
-                          //           softWrap: true,
-                          //           maxLines: 5,
-                          //           style: TextStyle(
-                          //             color: Colors.grey,
-                          //             fontSize: 6,
-                          //           ),
-                          //         ),
-                          //       ],
-                          //     ),
-                          //   ),
-                          // ),
                           FilledButton(
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {

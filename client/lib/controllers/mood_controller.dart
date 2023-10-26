@@ -136,25 +136,6 @@ class MoodController extends GetxController {
         });
         print(MoodList);
         return MoodList;
-
-        // mood_list.forEach((mood) {
-        //   (mood as Map<String, dynamic>).forEach((key, value) {
-        //     print(key);
-        //     (value as Map<String, dynamic>).forEach((key2, value2) {
-        //       print(key2);
-        //       print(value2);
-        //     });
-        //   });
-        // });
-        // print(jsonDecode(response.body));
-        //return Mood.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
-        // final SharedPreferences? prefs = await _prefs;
-        // final datenow = DateTime.now();
-        // final later = datenow.add(const Duration(hours: 24));
-
-        //await prefs?.setString('moodExpiryDate', later.toString());
-        //go to home
-        //Get.off(() => SignupSuccessPage());
       } else {
         print(response.body);
         print(response.statusCode);
