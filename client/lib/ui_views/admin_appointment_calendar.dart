@@ -32,60 +32,143 @@ class ScheduleCalendarView extends StatelessWidget {
     return appointments;
   }
 
+  List<Meeting> _getDataSource() {
+    final List<Meeting> meetings = <Meeting>[];
+    final DateTime today = DateTime.now();
+    final DateTime startTime =
+        DateTime(today.year, today.month, today.day, 9, 0, 0);
+    final DateTime endTime = startTime.add(const Duration(hours: 2));
+    meetings.add(Meeting(
+        'Psychological Assessment',
+        DateTime(today.year, today.month, 30, 9, 0, 0),
+        DateTime(today.year, today.month, 30, 10, 0, 0),
+        calendarPAColor,
+        false));
+    meetings.add(Meeting(
+        'Counseling',
+        DateTime(today.year, today.month, 30, 10, 0, 0),
+        DateTime(today.year, today.month, 30, 11, 0, 0),
+        calendarCoColor,
+        false));
+    meetings.add(Meeting(
+        'Occupational Therapy',
+        DateTime(today.year, today.month, 30, 13, 0, 0),
+        DateTime(today.year, today.month, 30, 14, 0, 0),
+        calendarOTColor,
+        false));
+    meetings.add(Meeting(
+        'Psychiatric Consultation',
+        DateTime(today.year, today.month, 31, 09, 0, 0),
+        DateTime(today.year, today.month, 31, 10, 0, 0),
+        calendarPCColor,
+        false));
+    meetings.add(Meeting(
+        'Psychiatric Consultation',
+        DateTime(today.year, today.month, 31, 10, 0, 0),
+        DateTime(today.year, today.month, 31, 11, 0, 0),
+        calendarPCColor,
+        false));
+    meetings.add(Meeting(
+        'Psychological Assessment',
+        DateTime(today.year, today.month, 31, 14, 0, 0),
+        DateTime(today.year, today.month, 31, 15, 0, 0),
+        calendarPAColor,
+        false));
+    meetings.add(Meeting('Counseling', DateTime(today.year, 11, 3, 10, 0, 0),
+        DateTime(today.year, 11, 3, 11, 0, 0), calendarCoColor, false));
+    meetings.add(Meeting('Counseling', DateTime(today.year, 11, 3, 13, 0, 0),
+        DateTime(today.year, 11, 3, 12, 0, 0), calendarCoColor, false));
+    meetings.add(Meeting(
+        'Occupational Therapy',
+        DateTime(today.year, 11, 3, 14, 0, 0),
+        DateTime(today.year, 11, 3, 15, 0, 0),
+        calendarOTColor,
+        false));
+    return meetings;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: SizedBox(
-        height: 800,
-        child: FutureBuilder<List<Appointment>>(
-            future: getBlockedDatesAsync(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final dates = snapshot.data!;
-                return SfCalendar(
-                  view: CalendarView.month,
-                  showNavigationArrow: true,
-                  dataSource: _getCalendarDataSource(dates),
-                  monthViewSettings: MonthViewSettings(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Monthly Schedule Overview',
+          style: TextStyle(
+            color: primaryBlue,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Roboto',
+          ),
+        ),
+      ),
+      body: Container(
+        child: SizedBox(
+          height: 800,
+          child: FutureBuilder<List<Appointment>>(
+              future: getBlockedDatesAsync(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final dates = snapshot.data!;
+                  return SfCalendar(
+                    view: CalendarView.month,
+                    showNavigationArrow: true,
+                    //dataSource: _getCalendarDataSource(dates),
+                    dataSource: MeetingDataSource(_getDataSource()),
+                    monthViewSettings: MonthViewSettings(
+                      appointmentDisplayCount: 3,
                       showAgenda: true,
                       appointmentDisplayMode:
-                          MonthAppointmentDisplayMode.appointment),
-                  headerHeight: 80,
-                  headerStyle: CalendarHeaderStyle(
-                    //textAlign: TextAlign.center,
-                    backgroundColor: calendarHeaderMainLightBlue,
-                    textStyle: TextStyle(
-                        fontFamily: 'Asap',
-                        fontSize: 25,
-                        fontStyle: FontStyle.normal,
-                        letterSpacing: 5,
-                        color: Color(0xFFff5eaea),
-                        fontWeight: FontWeight.w800),
-                  ),
-                );
-              } else {
-                return SfCalendar(
-                  view: CalendarView.month,
-                  showNavigationArrow: true,
-                  monthViewSettings: MonthViewSettings(
-                      showAgenda: true,
-                      appointmentDisplayMode:
-                          MonthAppointmentDisplayMode.appointment),
-                  headerHeight: 80,
-                  headerStyle: CalendarHeaderStyle(
-                    //textAlign: TextAlign.center,
-                    backgroundColor: calendarHeaderMainLightBlue,
-                    textStyle: TextStyle(
-                        fontFamily: 'Asap',
-                        fontSize: 25,
-                        fontStyle: FontStyle.normal,
-                        letterSpacing: 5,
-                        color: Color(0xFFff5eaea),
-                        fontWeight: FontWeight.w800),
-                  ),
-                );
-              }
-            }),
+                          MonthAppointmentDisplayMode.appointment,
+                    ),
+                    headerHeight: 80,
+                    headerStyle: CalendarHeaderStyle(
+                      //textAlign: TextAlign.center,
+                      backgroundColor: calendarHeaderMainLightBlue,
+                      textStyle: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 25,
+                          fontStyle: FontStyle.normal,
+                          letterSpacing: 5,
+                          color: Color(0xFFff5eaea),
+                          fontWeight: FontWeight.w800),
+                    ),
+                    viewHeaderStyle: ViewHeaderStyle(
+                        backgroundColor: unselectedLightBlue,
+                        dayTextStyle: TextStyle(
+                            fontSize: 18,
+                            color: mainBlue,
+                            fontWeight: FontWeight.w500),
+                        dateTextStyle: TextStyle(
+                            fontSize: 22,
+                            color: mainBlue,
+                            letterSpacing: 2,
+                            fontWeight: FontWeight.w500)),
+                  );
+                } else {
+                  return const Text('No Data to Display');
+                  // return SfCalendar(
+                  //   view: CalendarView.month,
+                  //   showNavigationArrow: true,
+                  //   monthViewSettings: MonthViewSettings(
+                  //       showAgenda: true,
+                  //       appointmentDisplayMode:
+                  //           MonthAppointmentDisplayMode.appointment),
+                  //   headerHeight: 80,
+                  //   headerStyle: CalendarHeaderStyle(
+                  //     //textAlign: TextAlign.center,
+                  //     backgroundColor: calendarHeaderMainLightBlue,
+                  //     textStyle: TextStyle(
+                  //         fontFamily: 'Asap',
+                  //         fontSize: 25,
+                  //         fontStyle: FontStyle.normal,
+                  //         letterSpacing: 5,
+                  //         color: Color(0xFFff5eaea),
+                  //         fontWeight: FontWeight.w800),
+                  //   ),
+                  // );
+                }
+              }),
+        ),
       ),
     );
   }
@@ -100,4 +183,45 @@ class _AppointmentDataSource extends CalendarDataSource {
   _AppointmentDataSource(List<Appointment> source) {
     appointments = source;
   }
+}
+
+class MeetingDataSource extends CalendarDataSource {
+  MeetingDataSource(List<Meeting> source) {
+    appointments = source;
+  }
+
+  @override
+  DateTime getStartTime(int index) {
+    return appointments![index].from;
+  }
+
+  @override
+  DateTime getEndTime(int index) {
+    return appointments![index].to;
+  }
+
+  @override
+  String getSubject(int index) {
+    return appointments![index].eventName;
+  }
+
+  @override
+  Color getColor(int index) {
+    return appointments![index].background;
+  }
+
+  @override
+  bool isAllDay(int index) {
+    return appointments![index].isAllDay;
+  }
+}
+
+class Meeting {
+  Meeting(this.eventName, this.from, this.to, this.background, this.isAllDay);
+
+  String eventName;
+  DateTime from;
+  DateTime to;
+  Color background;
+  bool isAllDay;
 }

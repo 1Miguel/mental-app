@@ -24,6 +24,10 @@ final HexColor calendarHeaderMainTeal = HexColor('#009688');
 final HexColor calendarHeaderMainLightBlue = HexColor('#03A9F4');
 final HexColor calendarHeaderBgLightTeal = HexColor('#E0F2F1');
 final HexColor calendarCellUnselectedBgWhite = HexColor('#FFFFFF');
+final HexColor calendarPAColor = HexColor("#1DE9B6");
+final HexColor calendarCoColor = HexColor("#EA80FC");
+final HexColor calendarOTColor = HexColor("#FFAB40");
+final HexColor calendarPCColor = HexColor("#7C4DFF");
 
 // Status Card
 final HexColor iconBoxBgColor = HexColor('#CFD8DC');

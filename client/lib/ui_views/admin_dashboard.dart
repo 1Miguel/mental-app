@@ -568,7 +568,7 @@ class DayView extends StatelessWidget {
                     SizedBox(width: TimeBox, child: Text('09:00 - 10:00')),
                     SizedBox(
                       width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(),
+                      child: TimeCard(type: "Psychiatric Consultation"),
                     ),
                   ],
                 ),
@@ -580,7 +580,7 @@ class DayView extends StatelessWidget {
                     SizedBox(width: TimeBox, child: Text('10:00 - 11:00')),
                     SizedBox(
                       width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(),
+                      child: TimeCard(type: "Counseling"),
                     ),
                   ],
                 ),
@@ -592,7 +592,7 @@ class DayView extends StatelessWidget {
                     SizedBox(width: TimeBox, child: Text('11:00 - 12:00')),
                     SizedBox(
                       width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(),
+                      child: TimeCard(type: "Occupational Therapy"),
                     ),
                   ],
                 ),
@@ -604,7 +604,7 @@ class DayView extends StatelessWidget {
                     SizedBox(width: TimeBox, child: Text('01:00 - 02:00')),
                     SizedBox(
                       width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(),
+                      child: TimeCard(type: "Psychological Assesment"),
                     ),
                   ],
                 ),
@@ -616,7 +616,7 @@ class DayView extends StatelessWidget {
                     SizedBox(width: TimeBox, child: Text('02:00 - 03:00')),
                     SizedBox(
                       width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(),
+                      child: TimeCard(type: "Counseling"),
                     ),
                   ],
                 ),
@@ -628,7 +628,7 @@ class DayView extends StatelessWidget {
                     SizedBox(width: TimeBox, child: Text('03:00 - 04:00')),
                     SizedBox(
                       width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(),
+                      child: TimeCard(type: "Counseling"),
                     ),
                   ],
                 ),
@@ -642,9 +642,25 @@ class DayView extends StatelessWidget {
 }
 
 class TimeCard extends StatelessWidget {
+  final String type;
+
   const TimeCard({
     super.key,
+    required this.type,
   });
+
+  Color getColor() {
+    if (type == "Occupational Therapy") {
+      return calendarOTColor;
+    } else if (type == "Psychiatric Consultation") {
+      return calendarPCColor;
+    } else if (type == "Counseling") {
+      return calendarCoColor;
+    } else if (type == "Psychological Assesment") {
+      return calendarPAColor;
+    }
+    return unselectedLightBlue;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -652,7 +668,7 @@ class TimeCard extends StatelessWidget {
       builder: (context, constraint) {
         return Container(
           child: Card(
-            color: unselectedLightBlue,
+            color: getColor(),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                   topRight: Radius.circular(15.0),
@@ -674,7 +690,8 @@ class TimeCard extends StatelessWidget {
                       child: SizedBox(
                         width: constraint.maxWidth - 50 - 5,
                         child: Text(
-                          'Consultation: Therapy',
+                          type,
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                     ),

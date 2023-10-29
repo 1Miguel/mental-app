@@ -150,10 +150,6 @@ class AdminSidebarX extends StatelessWidget {
             debugPrint('Home');
           },
         ),
-        // const SidebarXItem(
-        //   icon: Icons.medical_services,
-        //   label: 'Doctors',
-        // ),
         const SidebarXItem(
           icon: Icons.schedule,
           label: 'Schedule',
