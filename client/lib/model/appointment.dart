@@ -72,6 +72,7 @@ class AppointmentInfo {
   final int id;
   final int patientId;
   final String center;
+  final String date;
   final String startTime;
   final String endTime;
   final String status;
@@ -80,6 +81,7 @@ class AppointmentInfo {
     required this.id,
     required this.patientId,
     required this.center,
+    required this.date,
     required this.startTime,
     required this.endTime,
     required this.status,
@@ -89,6 +91,7 @@ class AppointmentInfo {
     int def_id;
     int def_patientId;
     String def_center;
+    String def_date;
     String def_startTime;
     String def_endTime;
     String def_status;
@@ -96,16 +99,27 @@ class AppointmentInfo {
     def_id = json['id'] ?? 0;
     def_patientId = json['patient_id'] ?? 0;
     def_center = json['center'] ?? '';
+    def_date = json['start_time'] ?? DateTime.now.toString();
     def_startTime = json['start_time'] ?? DateTime.now.toString();
     def_endTime = json['end_time'] ?? DateTime.now.toString();
     def_status = json['status'] ?? '';
+
+    String updDate =
+        DateFormat('yyyy-MM-dd').format(DateTime.parse(def_date)).toString();
+
+    String updStartTime =
+        DateFormat('HH:mm').format(DateTime.parse(def_startTime)).toString();
+
+    String updEndTime =
+        DateFormat('HH:mm').format(DateTime.parse(def_endTime)).toString();
 
     return AppointmentInfo(
       id: def_id as int,
       patientId: def_patientId as int,
       center: def_center as String,
-      startTime: def_startTime as String,
-      endTime: def_endTime as String,
+      date: updDate as String,
+      startTime: updStartTime as String,
+      endTime: updEndTime as String,
       status: def_status as String,
     );
   }

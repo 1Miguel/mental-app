@@ -1,21 +1,15 @@
-// standard import
 import 'package:flutter/material.dart';
-
-// local import
-import 'package:flutter_intro/controllers/admin_membership_controller.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:flutter_intro/model/membership.dart';
 import 'package:flutter_intro/controllers/membership_controller.dart';
 
-// third-party import
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import 'package:syncfusion_flutter_core/theme.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:get/get.dart';
 
 final DataGridController _dataGridController = DataGridController();
 
-class MembershipRequestsMainView extends StatelessWidget {
+class DonationRequestsMainView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -24,7 +18,7 @@ class MembershipRequestsMainView extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'Membership Request List',
+            'Donation Request List',
             style: TextStyle(
               color: primaryBlue,
               fontSize: 20,
@@ -357,8 +351,6 @@ class MembershipDataSource extends DataGridSource {
   List<DataGridRow> _membershipDataGridRows = [];
   List<Membership> _paginatedRows = [];
   List<Membership> _membershipData = [];
-  AdminMembershipController adminMembershipController =
-      Get.put(AdminMembershipController());
 
   MembershipDataSource({required List<Membership> membershipData}) {
     var length = membershipData.length;
@@ -413,29 +405,12 @@ class MembershipDataSource extends DataGridSource {
     return DataGridRowAdapter(
         color: backgroundColor,
         cells: row.getCells().map<Widget>((dataGridCell) {
-          Color getColor() {
-            if (dataGridCell.columnName == 'status') {
-              if (dataGridCell.value == 'PENDING') {
-                return Colors.orangeAccent;
-              } else if (dataGridCell.value == 'ACTIVE') {
-                return Colors.greenAccent;
-              } else if (dataGridCell.value == 'REJECTED') {
-                return Colors.redAccent;
-              }
-            }
-
-            return Colors.black87;
-          }
-
           return Container(
               alignment: Alignment.center,
               child: dataGridCell.columnName == 'button'
                   ? LayoutBuilder(builder:
                       (BuildContext context, BoxConstraints constraints) {
-                      var enabled =
-                          row.getCells()[6].value.toString() == "PENDING"
-                              ? true
-                              : false;
+                      var enabled = true;
                       return Row(
                         children: [
                           Padding(
@@ -445,10 +420,24 @@ class MembershipDataSource extends DataGridSource {
                               icon: Icon(Icons.check_circle, size: 15),
                               onPressed: enabled == false
                                   ? null
-                                  : () => {
-                                        _onApproveButtonPressed(
-                                            context, row.getCells()[0].value),
-                                      },
+                                  : () => showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                          content: SizedBox(
+                                              height: 100,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                      'Appointment ID: ${row.getCells()[0].value.toString()}'),
+                                                  Text(
+                                                      'Appointment Name: ${row.getCells()[1].value.toString()}'),
+                                                  Text(
+                                                      'Employee Designation: ${row.getCells()[2].value.toString()}'),
+                                                ],
+                                              )))),
                               style: ButtonStyle(
                                   minimumSize: MaterialStateProperty.all<Size>(
                                       Size(40, 40)),
@@ -473,8 +462,24 @@ class MembershipDataSource extends DataGridSource {
                               onPressed: enabled == false
                                   ? null
                                   : () => {
-                                        _onRejectButtonPressed(
-                                            context, row.getCells()[0].value),
+                                        showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                                content: SizedBox(
+                                                    height: 100,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Text(
+                                                            'Appointment ID: ${row.getCells()[0].value.toString()}'),
+                                                        Text(
+                                                            'Appointment Name: ${row.getCells()[1].value.toString()}'),
+                                                        Text(
+                                                            'Employee Designation: ${row.getCells()[2].value.toString()}'),
+                                                      ],
+                                                    ))))
                                       },
                               style: ButtonStyle(
                                   minimumSize: MaterialStateProperty.all<Size>(
@@ -489,81 +494,14 @@ class MembershipDataSource extends DataGridSource {
                                       RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(5.0),
                                   ))),
-                              label: Text('Reject'),
+                              label: Text('Unapprove'),
                             ),
                           ),
                         ],
                       );
                     })
-                  : Text(
-                      dataGridCell.value.toString(),
-                      style: TextStyle(color: getColor()),
-                    ));
+                  : Text(dataGridCell.value.toString()));
         }).toList());
-  }
-
-  _onApproveButtonPressed(context, int id) {
-    Alert(
-      context: context,
-      type: AlertType.warning,
-      title: "Confirm Action",
-      desc: "Approve Request?",
-      buttons: [
-        DialogButton(
-          child: Text(
-            "Approve",
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          onPressed: () {
-            adminMembershipController.approveMembership(id);
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-          color: Color.fromRGBO(0, 179, 134, 1.0),
-        ),
-        DialogButton(
-          child: Text(
-            "Cancel",
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-          color: Colors.redAccent,
-        )
-      ],
-    ).show();
-  }
-
-  _onRejectButtonPressed(context, int id) {
-    Alert(
-      context: context,
-      type: AlertType.warning,
-      title: "Confirm Action",
-      desc: "Reject Request?",
-      buttons: [
-        DialogButton(
-          child: Text(
-            "Confirm",
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          onPressed: () {
-            //adminMembershipController.approveMembership(id);
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-          color: Color.fromRGBO(0, 179, 134, 1.0),
-        ),
-        DialogButton(
-          child: Text(
-            "Cancel",
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-          color: Colors.redAccent,
-        )
-      ],
-    ).show();
   }
 
   @override
