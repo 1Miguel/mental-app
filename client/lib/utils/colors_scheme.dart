@@ -42,3 +42,7 @@ final HexColor pastelBlue = HexColor('#cdeff9');
 final HexColor pastelPink = HexColor('#ffdff7');
 final HexColor solidPurple = HexColor('#8b4cfc');
 final HexColor solidPink = HexColor('#e258c0');
+
+// Login
+final HexColor inputTextBoxFill = HexColor("#F5F5F5");
+final HexColor loginDarkTeal = HexColor("#004D40");
