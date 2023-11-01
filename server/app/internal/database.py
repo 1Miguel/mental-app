@@ -19,6 +19,7 @@ from tortoise.fields import (
     ForeignKeyField,
     CharEnumField,
     ReverseRelation,
+    BooleanField
 )
 
 
@@ -82,6 +83,7 @@ class UserModel(Model):
     age = IntField()
     occupation = CharField(128)
     birthday = CharField(128)
+    mobile_number = CharField(max_length=13)
 
     @classmethod
     async def get_user(cls, email: str) -> Self:
@@ -186,6 +188,7 @@ class ThreadModel(Model):
     topic = CharField(max_length=160)
     content = CharField(max_length=1024)
     comments = ReverseRelation["ThreadCommentModel"]
+    num_likes = IntField()
 
 
 class ThreadCommentModel(Model):
@@ -198,6 +201,21 @@ class ThreadCommentModel(Model):
     @classmethod
     async def get_thread_comments(cls, thread_id: int) -> List["ThreadCommentModel"]:
         return await cls.filter(thread__id=thread_id).order_by("-created")
+
+
+class ThreadUserLikeModel(Model):
+    id = IntField(pk=True)
+    thread = ForeignKeyField("models.ThreadModel")
+    user = ForeignKeyField("models.UserModel")
+    liked_at = DatetimeField(auto_now=True)
+
+    @classmethod
+    async def get_all_thread_like_by_user(cls, user_id: int) -> List["ThreadUserLikeModel"]:
+        return await cls.filter(user__id=user_id)
+
+    @classmethod
+    async def get_thread_like_by_user(cls, user_id: int, thread_id: int) -> List["ThreadUserLikeModel"]:
+        return await cls.filter(user__id=user_id, thread__id=thread_id)
 
 
 class Doctor(Model):
