@@ -650,9 +650,6 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    //loginController.emailController.clear();
-    //loginController.passwordController.clear();
-
     return LayoutBuilder(builder: (context, constraint) {
       return Scaffold(
         //resizeToAvoidBottomInset: false,
@@ -674,7 +671,6 @@ class LoginPageState extends State<LoginPage> {
                     SizedBox(height: 40),
                     Container(
                       width: constraint.maxWidth,
-
                       decoration: BoxDecoration(
                           color: backgroundColor,
                           border: Border(
@@ -685,44 +681,11 @@ class LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.only(
                               topLeft: Radius.elliptical(50, 20),
                               topRight: Radius.elliptical(50, 20))),
-
-                      // decoration: BoxDecoration(
-                      //     color: primaryBlue,
-                      //     borderRadius: BorderRadius.only(
-                      //         topLeft: Radius.circular(60),
-                      //         topRight: Radius.circular(60))),
                       child: Padding(
                         padding: const EdgeInsets.only(top: 30.0, bottom: 15.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Column(
-                            //   children: [
-                            //     Row(
-                            //       mainAxisAlignment: MainAxisAlignment.center,
-                            //       children: [
-                            //         MainHeadingText(
-                            //           title:
-                            //               'Philippine Mental\nHealth Association',
-                            //           isHeavy: true,
-                            //           isOverflow: true,
-                            //           customColor: primaryBlue,
-                            //         ),
-                            //       ],
-                            //     ),
-                            //     SizedBox(height: 30),
-                            //     Row(
-                            //       mainAxisAlignment: MainAxisAlignment.center,
-                            //       children: [
-                            //         SubHeadingText(
-                            //             title: 'Sign in to Continue',
-                            //             isOverflow: false,
-                            //             isHeavy: true,
-                            //             customColor: mainLightGreen),
-                            //       ],
-                            //     ),
-                            //   ],
-                            // ),
                             Padding(
                               padding: const EdgeInsets.only(left: 40),
                               child: SizedBox(
@@ -755,7 +718,6 @@ class LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                             ),
-
                             SizedBox(height: 30),
                             Padding(
                               padding: EdgeInsets.only(bottom: 3.0, left: 40.0),
@@ -896,51 +858,11 @@ class LoginPageState extends State<LoginPage> {
                                 ],
                               ),
                             ),
-                            // Padding(
-                            //   padding: const EdgeInsets.only(left: 45.0),
-                            //   child: SizedBox(
-                            //     width: MediaQuery.sizeOf(context).width - 35,
-                            //     child: CheckboxListTileFormField(
-                            //       title: Text(
-                            //         "I'm not a robot",
-                            //         style: TextStyle(
-                            //           color: Colors.teal,
-                            //           fontSize: 15,
-                            //         ),
-                            //       ),
-                            //       initialValue: false,
-                            //       onSaved: (bool? value) {
-                            //         print(value);
-                            //       },
-                            //       validator: (bool? value) {
-                            //         if (value! && agreementChecked) {
-                            //           return null;
-                            //         } else {
-                            //           return 'Verify identity first before proceeding';
-                            //         }
-                            //       },
-                            //       onChanged: (value) {
-                            //         agreementChecked = true;
-                            //         if (value) {
-                            //           print("Agreement Checked :)");
-                            //         } else {
-                            //           print("Agreement Not Checked :(");
-                            //         }
-                            //       },
-                            //       errorColor: Colors.red.shade300,
-                            //       activeColor: Colors.teal,
-                            //       checkColor: Colors.white,
-                            //       autovalidateMode: AutovalidateMode.disabled,
-                            //       contentPadding: EdgeInsets.all(1),
-                            //     ),
-                            //   ),
-                            // ),
                             SizedBox(height: 50),
                             FilledButton(
                               onPressed: () {
                                 if (_formKey.currentState!.validate()) {
                                   _onAlertWithCustomContentPressed(context);
-                                  //loginController.loginWithEmail();
                                 }
                               },
                               style: ButtonStyle(
@@ -966,7 +888,6 @@ class LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                             ),
-
                             SizedBox(height: 50),
                           ],
                         ),
@@ -1020,10 +941,6 @@ class LoginPageState extends State<LoginPage> {
                       ),
                       validator: (value) {
                         if (value != null && value.isNotEmpty) {
-                          // if (value.length != _configFormData.length) {
-                          //   return '* Code must be length of ${_configFormData.length}.';
-                          // }
-
                           final validation =
                               _localCaptchaController.validate(value);
 
@@ -1069,20 +986,6 @@ class LoginPageState extends State<LoginPage> {
                 _captchaFormKey.currentState!.save();
                 Navigator.of(context, rootNavigator: true).pop();
                 loginController.loginWithEmail();
-                // showDialog(
-                //   context: context,
-                //   builder: (context) {
-                //     return AlertDialog(
-                //       title: Text('Code: "$_inputCode" is valid.'),
-                //       actions: [
-                //         TextButton(
-                //           onPressed: () => Navigator.of(context).pop(),
-                //           child: const Text('OK'),
-                //         ),
-                //       ],
-                //     );
-                //   },
-                // );
               }
             },
             child: Text(
