@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'ui_views/login_views.dart';
 import 'ui_views/admin_navigation_views.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() {
   runApp(MyApp());
@@ -26,7 +27,9 @@ class MyApp extends StatelessWidget {
               platform: TargetPlatform.android),
           initialRoute: '/',
           routes: {
+            //'/': (context) => MyHomePage(),
             '/': (context) => LoginMainPage(),
+            //'/': (context) => kIsWeb ? AdminApp() : LoginMainPage(),
             '/admin': (context) => AdminApp(),
           }),
     );

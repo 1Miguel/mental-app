@@ -9,6 +9,7 @@ import 'package:flutter_intro/ui_views/admin_navigation_views.dart';
 
 // Third-party import
 import 'package:get/get.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,6 +18,27 @@ class LoginController extends GetxController {
   TextEditingController passwordController = TextEditingController();
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String loginUrl = ApiEndPoints.checkPlatform();
+
+  _showErrorAlert(context) {
+    Alert(
+      context: context,
+      type: AlertType.error,
+      title: "Login Error",
+      desc: "Unauthorized Login",
+      buttons: [
+        DialogButton(
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+            //Navigator.of(context, rootNavigator: true).pop();
+          },
+          child: Text(
+            "OK",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        )
+      ],
+    ).show();
+  }
 
   Future<void> loginWithEmail() async {
     try {
@@ -67,9 +89,12 @@ class LoginController extends GetxController {
         } else {
           // If the server did not return a 201 CREATED response,
           // then throw an exception.
+          Get.off(() => LoginMainPage());
           throw jsonDecode(response.body)['Message'] ??
               "Unknown Error Occurred";
         }
+      } else if (response.statusCode == 401) {
+        _showErrorAlert(Get.context!);
       } else {
         throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
       }
