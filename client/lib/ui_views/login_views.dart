@@ -460,10 +460,6 @@ class LoginMainView extends StatelessWidget {
     super.key,
   });
 
-  Future<bool> _onWillPop() async {
-    return false; //<-- SEE HERE
-  }
-
   Future<String?> getLoggedInState() async {
     String? logged_in;
     SharedPreferences prefs = await SharedPreferences.getInstance();
