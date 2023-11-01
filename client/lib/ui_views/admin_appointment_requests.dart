@@ -1,9 +1,15 @@
+// standard imports
 import 'package:flutter/material.dart';
+
+// local imports
 import 'package:flutter_intro/utils/colors_scheme.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:flutter_intro/model/appointment.dart';
 import 'package:flutter_intro/controllers/appointment_controller.dart';
+
+// third-party imports
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:get/get.dart';
 
 class AppointmentRequestsMainView extends StatelessWidget {
@@ -62,19 +68,14 @@ class AppointmentsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: 50),
-        Padding(
-          padding: const EdgeInsets.only(left: 65.0, bottom: 15.0, top: 20.0),
-          child: AppointmentRequestsView(),
-        ),
-      ],
+    return Container(
+      height: 1200,
+      child: AppointmentRequestsView(),
     );
   }
 }
 
-final int rowsPerPage = 10;
+final int rowsPerPage = 15;
 bool showLoadingIndicator = true;
 
 /// The home page of the application which hosts the datagrid.
@@ -105,97 +106,102 @@ class _AppointmentRequestsState extends State<AppointmentRequestsView> {
     return futureAppointmentList;
   }
 
+  final double _dataPagerHeight = 60.0;
+
   @override
   Widget build(BuildContext context) {
     fethAppointmentRequests();
-    return Container(
-      child: Column(children: [
-        SizedBox(
-          height: 600,
-          width: MediaQuery.sizeOf(context).width,
-          child: FutureBuilder<List<AppointmentInfo>>(
-              future: fethAppointmentRequests(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final requestList = snapshot.data!;
-                  appointmentDataSource =
-                      AppointmentDataSource(appointmentData: requestList);
-                  return Column(children: [
-                    SfDataGridTheme(
-                      data: SfDataGridThemeData(
-                          headerColor: primaryLightBlue,
-                          headerHoverColor: backgroundColor),
-                      child: SfDataGrid(
-                        source: appointmentDataSource,
-                        columnWidthMode: ColumnWidthMode.auto,
-                        columns: <GridColumn>[
-                          GridColumn(
-                              minimumWidth: 150,
-                              maximumWidth: 250,
-                              columnName: 'id',
+    return LayoutBuilder(builder: (context, constraint) {
+      return SizedBox(
+        height: constraint.maxHeight - _dataPagerHeight,
+        width: constraint.maxWidth,
+        child: FutureBuilder<List<AppointmentInfo>>(
+            future: fethAppointmentRequests(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final requestList = snapshot.data!;
+                appointmentDataSource =
+                    AppointmentDataSource(appointmentData: requestList);
+                return Column(
+                  children: [
+                    Container(
+                      height: constraint.maxHeight - _dataPagerHeight,
+                      child: SfDataGridTheme(
+                        data: SfDataGridThemeData(
+                            headerColor: primaryLightBlue,
+                            headerHoverColor: backgroundColor),
+                        child: SfDataGrid(
+                          source: appointmentDataSource,
+                          columnWidthMode: ColumnWidthMode.fill,
+                          columns: <GridColumn>[
+                            GridColumn(
+                                minimumWidth: 150,
+                                maximumWidth: 250,
+                                columnName: 'id',
+                                label: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    alignment: Alignment.center,
+                                    child: const Text('Appointment ID'))),
+                            GridColumn(
+                                minimumWidth: 200,
+                                maximumWidth: 300,
+                                columnName: 'patientId',
+                                label: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    alignment: Alignment.center,
+                                    child: const Text('Patient ID'))),
+                            GridColumn(
+                                minimumWidth: 200,
+                                maximumWidth: 300,
+                                columnName: 'center',
+                                label: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    alignment: Alignment.center,
+                                    child: const Text('Consulation Type',
+                                        overflow: TextOverflow.ellipsis))),
+                            GridColumn(
+                                minimumWidth: 200,
+                                maximumWidth: 300,
+                                columnName: 'date',
+                                label: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    alignment: Alignment.center,
+                                    child: const Text('Date',
+                                        overflow: TextOverflow.ellipsis))),
+                            GridColumn(
+                                minimumWidth: 200,
+                                maximumWidth: 300,
+                                columnName: 'timeSlot',
+                                label: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    alignment: Alignment.center,
+                                    child: const Text('Time Slot',
+                                        overflow: TextOverflow.ellipsis))),
+                            GridColumn(
+                                minimumWidth: 200,
+                                maximumWidth: 300,
+                                columnName: 'status',
+                                label: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    alignment: Alignment.center,
+                                    child: const Text('Status'))),
+                            GridColumn(
+                              minimumWidth: 300,
+                              maximumWidth: 350,
+                              columnName: 'button',
                               label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  child: const Text('Appointment ID'))),
-                          GridColumn(
-                              minimumWidth: 200,
-                              maximumWidth: 300,
-                              columnName: 'patientId',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  child: const Text('Patient ID'))),
-                          GridColumn(
-                              minimumWidth: 200,
-                              maximumWidth: 300,
-                              columnName: 'center',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  child: const Text('Center',
-                                      overflow: TextOverflow.ellipsis))),
-                          GridColumn(
-                              minimumWidth: 200,
-                              maximumWidth: 300,
-                              columnName: 'startTime',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  child: const Text('Start Time',
-                                      overflow: TextOverflow.ellipsis))),
-                          GridColumn(
-                              minimumWidth: 200,
-                              maximumWidth: 300,
-                              columnName: 'endTime',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  child: const Text('End Time',
-                                      overflow: TextOverflow.ellipsis))),
-                          GridColumn(
-                              minimumWidth: 200,
-                              maximumWidth: 300,
-                              columnName: 'Status',
-                              label: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  alignment: Alignment.center,
-                                  child: const Text('Status'))),
-                          GridColumn(
-                            minimumWidth: 200,
-                            maximumWidth: 300,
-                            columnName: 'button',
-                            label: Container(
-                              padding: const EdgeInsets.all(8.0),
-                              alignment: Alignment.center,
-                              child: const Text('Action '),
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Action '),
+                              ),
                             ),
-                          ),
-                        ],
-                        //selectionMode: SelectionMode.multiple,
+                          ],
+                          //selectionMode: SelectionMode.multiple,
+                        ),
                       ),
                     ),
                     Container(
-                      height: 70,
+                      height: _dataPagerHeight,
                       color: Colors.white,
                       child: SfDataPager(
                         pageCount:
@@ -204,14 +210,14 @@ class _AppointmentRequestsState extends State<AppointmentRequestsView> {
                         direction: Axis.horizontal,
                       ),
                     )
-                  ]);
-                } else {
-                  return const Text("No Records To Display");
-                }
-              }),
-        ),
-      ]),
-    );
+                  ],
+                );
+              } else {
+                return const Text("No Records To Display");
+              }
+            }),
+      );
+    });
   }
 }
 
@@ -220,12 +226,13 @@ class AppointmentDataSource extends DataGridSource {
   AppointmentDataSource({required List<AppointmentInfo> appointmentData}) {
     _appointmentDataGridRows = appointmentData
         .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<int>(columnName: 'appId', value: e.id),
-              DataGridCell<int>(columnName: 'appName', value: e.patientId),
-              DataGridCell<String>(columnName: 'date', value: e.center),
-              DataGridCell<String>(columnName: 'time', value: e.startTime),
-              DataGridCell<String>(columnName: 'doctor', value: e.endTime),
-              DataGridCell<String>(columnName: 'patient', value: e.status),
+              DataGridCell<int>(columnName: 'id', value: e.id),
+              DataGridCell<int>(columnName: 'patientId', value: e.patientId),
+              DataGridCell<String>(columnName: 'center', value: e.center),
+              DataGridCell<String>(columnName: 'date', value: e.date),
+              DataGridCell<String>(
+                  columnName: 'timeSlot', value: '${e.startTime}-${e.endTime}'),
+              DataGridCell<String>(columnName: 'status', value: e.status),
               DataGridCell<String>(columnName: 'button', value: null),
             ]))
         .toList();
@@ -243,12 +250,13 @@ class AppointmentDataSource extends DataGridSource {
   void buildDataGridRow() {
     _appointmentDataGridRows = _paginatedRows
         .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<int>(columnName: 'appId', value: e.id),
-              DataGridCell<int>(columnName: 'appName', value: e.patientId),
-              DataGridCell<String>(columnName: 'date', value: e.center),
-              DataGridCell<String>(columnName: 'time', value: e.startTime),
-              DataGridCell<String>(columnName: 'doctor', value: e.endTime),
-              DataGridCell<String>(columnName: 'patient', value: e.status),
+              DataGridCell<int>(columnName: 'id', value: e.id),
+              DataGridCell<int>(columnName: 'patientId', value: e.patientId),
+              DataGridCell<String>(columnName: 'center', value: e.center),
+              DataGridCell<String>(columnName: 'date', value: e.date),
+              DataGridCell<String>(
+                  columnName: 'timeSlot', value: '${e.startTime}-${e.endTime}'),
+              DataGridCell<String>(columnName: 'status', value: e.status),
               DataGridCell<String>(columnName: 'button', value: null),
             ]))
         .toList();
@@ -266,72 +274,198 @@ class AppointmentDataSource extends DataGridSource {
     return DataGridRowAdapter(
         color: backgroundColor,
         cells: row.getCells().map<Widget>((dataGridCell) {
+          Color getColor() {
+            if (dataGridCell.columnName == 'status') {
+              if (dataGridCell.value == 'PENDING') {
+                return Colors.orangeAccent;
+              } else if (dataGridCell.value == 'ACTIVE') {
+                return Colors.greenAccent;
+              } else if (dataGridCell.value == 'REJECTED') {
+                return Colors.redAccent;
+              }
+            }
+
+            return Colors.black87;
+          }
+
           return Container(
               alignment: Alignment.center,
               child: dataGridCell.columnName == 'button'
                   ? LayoutBuilder(builder:
                       (BuildContext context, BoxConstraints constraints) {
+                      var enabled =
+                          row.getCells()[5].value.toString() == "PENDING"
+                              ? true
+                              : false;
                       return Row(
                         children: [
                           Padding(
                             padding:
                                 const EdgeInsets.only(left: 8.0, right: 8.0),
-                            child: MaterialButton(
-                                color: unselectedLightBlue,
-                                onPressed: () {
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                          content: SizedBox(
-                                              height: 100,
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                      'Appointment ID: ${row.getCells()[0].value.toString()}'),
-                                                  Text(
-                                                      'Appointment Name: ${row.getCells()[1].value.toString()}'),
-                                                  Text(
-                                                      'Employee Designation: ${row.getCells()[2].value.toString()}'),
-                                                ],
-                                              ))));
-                                },
-                                child: const Text('Approve')),
+                            child: FilledButton.icon(
+                              icon: Icon(Icons.check_circle, size: 15),
+                              onPressed: enabled == false
+                                  ? null
+                                  : () => {
+                                        _onApproveButtonPressed(
+                                            context, row.getCells()[0].value),
+                                      },
+                              // onPressed: () {
+                              //   showDialog(
+                              //       context: context,
+                              //       builder: (context) =>
+                              //       AlertDialog(
+                              //           content: SizedBox(
+                              //               height: 100,
+                              //               child: Column(
+                              //                 mainAxisAlignment:
+                              //                     MainAxisAlignment
+                              //                         .spaceBetween,
+                              //                 children: [
+                              //                   Text(
+                              //                       'Appointment ID: ${row.getCells()[0].value.toString()}'),
+                              //                   Text(
+                              //                       'Appointment Name: ${row.getCells()[1].value.toString()}'),
+                              //                   Text(
+                              //                       'Employee Designation: ${row.getCells()[2].value.toString()}'),
+                              //                 ],
+                              //               ))));
+                              // },
+                              style: ButtonStyle(
+                                  minimumSize: MaterialStateProperty.all<Size>(
+                                      Size(40, 40)),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          enabled == true
+                                              ? Colors.green
+                                              : Colors.grey),
+                                  shape: MaterialStateProperty.all<
+                                          RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                  ))),
+                              label: Text('Approve'),
+                            ),
                           ),
                           Padding(
                             padding:
                                 const EdgeInsets.only(left: 8.0, right: 8.0),
-                            child: MaterialButton(
-                                color: unselectedGray,
-                                onPressed: () {
-                                  showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                          content: SizedBox(
-                                              height: 100,
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                      'Appointment ID: ${row.getCells()[0].value.toString()}'),
-                                                  Text(
-                                                      'Appointment Name: ${row.getCells()[1].value.toString()}'),
-                                                  Text(
-                                                      'Employee Designation: ${row.getCells()[2].value.toString()}'),
-                                                ],
-                                              ))));
-                                },
-                                child: const Text('Unapprove')),
+                            child: FilledButton.icon(
+                              icon: Icon(Icons.cancel, size: 15),
+                              onPressed: enabled == false
+                                  ? null
+                                  : () => {
+                                        _onRejectButtonPressed(
+                                            context, row.getCells()[0].value),
+                                      },
+                              // onPressed: () {
+                              //   showDialog(
+                              //       context: context,
+                              //       builder: (context) => AlertDialog(
+                              //           content: SizedBox(
+                              //               height: 100,
+                              //               child: Column(
+                              //                 mainAxisAlignment:
+                              //                     MainAxisAlignment
+                              //                         .spaceBetween,
+                              //                 children: [
+                              //                   Text(
+                              //                       'Appointment ID: ${row.getCells()[0].value.toString()}'),
+                              //                   Text(
+                              //                       'Appointment Name: ${row.getCells()[1].value.toString()}'),
+                              //                   Text(
+                              //                       'Employee Designation: ${row.getCells()[2].value.toString()}'),
+                              //                 ],
+                              //               ))));
+                              // },
+                              style: ButtonStyle(
+                                  minimumSize: MaterialStateProperty.all<Size>(
+                                      Size(40, 40)),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          enabled == true
+                                              ? primaryGrey
+                                              : Colors.grey),
+                                  shape: MaterialStateProperty.all<
+                                          RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                  ))),
+                              label: Text('Reject'),
+                            ),
                           ),
                         ],
                       );
                     })
-                  : Text(dataGridCell.value.toString()));
+                  : Text(
+                      dataGridCell.value.toString(),
+                      style: TextStyle(color: getColor()),
+                    ));
         }).toList());
+  }
+
+  _onApproveButtonPressed(context, int id) {
+    Alert(
+      context: context,
+      type: AlertType.warning,
+      title: "Confirm Action",
+      desc: "Approve Request?",
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Approve",
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          onPressed: () {
+            //adminMembershipController.approveMembership(id);
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          color: Color.fromRGBO(0, 179, 134, 1.0),
+        ),
+        DialogButton(
+          child: Text(
+            "Cancel",
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          color: Colors.redAccent,
+        )
+      ],
+    ).show();
+  }
+
+  _onRejectButtonPressed(context, int id) {
+    Alert(
+      context: context,
+      type: AlertType.warning,
+      title: "Confirm Action",
+      desc: "Reject Request?",
+      buttons: [
+        DialogButton(
+          child: Text(
+            "Confirm",
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          onPressed: () {
+            //adminMembershipController.approveMembership(id);
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          color: Color.fromRGBO(0, 179, 134, 1.0),
+        ),
+        DialogButton(
+          child: Text(
+            "Cancel",
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
+          color: Colors.redAccent,
+        )
+      ],
+    ).show();
   }
 
   @override

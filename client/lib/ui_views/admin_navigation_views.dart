@@ -1,10 +1,15 @@
+// standard import
 import 'package:flutter/material.dart';
-import 'package:sidebarx/sidebarx.dart';
+
+// local import
 import 'admin_dashboard.dart';
-import 'admin_appointment_views.dart';
 import 'admin_appointment_requests.dart';
 import 'admin_appointment_calendar.dart';
 import 'admin_membership_requests.dart';
+import 'admin_donation_requests.dart';
+
+// third-party import
+import 'package:sidebarx/sidebarx.dart';
 
 class AdminApp extends StatelessWidget {
   AdminApp({Key? key}) : super(key: key);
@@ -19,7 +24,7 @@ class AdminApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: primaryColor,
-        canvasColor: canvasColor,
+        canvasColor: scaffoldBackgroundColor,
         scaffoldBackgroundColor: scaffoldBackgroundColor,
         textTheme: const TextTheme(
           headlineSmall: TextStyle(
@@ -130,7 +135,7 @@ class AdminSidebarX extends StatelessWidget {
       footerDivider: divider,
       headerBuilder: (context, extended) {
         return SizedBox(
-          height: 100,
+          height: 200,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Image.asset('images/pmha_logo_rembg.png'),
@@ -145,10 +150,6 @@ class AdminSidebarX extends StatelessWidget {
             debugPrint('Home');
           },
         ),
-        // const SidebarXItem(
-        //   icon: Icons.medical_services,
-        //   label: 'Doctors',
-        // ),
         const SidebarXItem(
           icon: Icons.schedule,
           label: 'Schedule',
@@ -160,6 +161,10 @@ class AdminSidebarX extends StatelessWidget {
         const SidebarXItem(
           icon: Icons.group,
           label: 'Membership',
+        ),
+        const SidebarXItem(
+          icon: Icons.volunteer_activism,
+          label: 'Donation',
         ),
       ],
     );
@@ -190,6 +195,8 @@ class _ScreensExample extends StatelessWidget {
             return AppointmentRequestsMainView();
           case 3:
             return MembershipRequestsMainView();
+          case 4:
+            return DonationRequestsMainView();
           default:
             return Text(
               pageTitle,
@@ -222,6 +229,7 @@ String _getTitleByIndex(int index) {
 
 const primaryColor = Color(0xFF445fd2);
 const canvasColor = Color(0xFF445fd2);
+//const canvasColor = Color(0xFF445fd2);
 const scaffoldBackgroundColor = Color(0xFFf9fafb);
 const accentCanvasColor = Color(0xFF2196F3);
 const white = Colors.white;
