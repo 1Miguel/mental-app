@@ -8,6 +8,7 @@ import 'package:flutter_intro/controllers/signup_controller.dart';
 import 'package:flutter_intro/controllers/login_controller.dart';
 import 'package:flutter_intro/ui_views/admin_navigation_views.dart';
 import 'package:flutter_intro/ui_views/login_captcha.dart';
+import 'package:flutter_pw_validator/flutter_pw_validator.dart';
 
 import 'dashboard_views.dart';
 import 'mood_views.dart';
@@ -207,7 +208,7 @@ InputDecoration getDecor(IconData icon, String hintText) {
       borderRadius: BorderRadius.all(Radius.circular(10)),
       borderSide: BorderSide(
         color: Colors.red,
-        width: 1.0,
+        //width: 1.0,
       ),
     ),
   );
@@ -640,6 +641,13 @@ class LoginPageState extends State<LoginPage> {
   var isLogin = false.obs;
 
   @override
+  void initState() {
+    super.initState();
+    loginController.emailController.clear();
+    loginController.passwordController.clear();
+  }
+
+  @override
   void dispose() {
     loginController.emailController.clear();
     loginController.passwordController.clear();
@@ -648,255 +656,277 @@ class LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  // _onPagePop(context) {
+  //   Navigator.push(
+  //       context, MaterialPageRoute(builder: ((context) => LoginMainPage())));
+  // }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraint) {
-      return Scaffold(
-        //resizeToAvoidBottomInset: false,
-        body: Container(
-          color: backgroundColor,
-          height: constraint.maxHeight,
-          child: ListView(
-            children: [
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    SizedBox(height: 30),
-                    Image.asset(
-                      'images/pmha_logo_rembg.png',
-                      fit: BoxFit.fitHeight,
-                      height: 250,
-                    ),
-                    SizedBox(height: 40),
-                    Container(
-                      width: constraint.maxWidth,
-                      decoration: BoxDecoration(
-                          color: backgroundColor,
-                          border: Border(
-                            top: BorderSide(color: loginDarkTeal, width: 2),
-                            left: BorderSide(color: loginDarkTeal, width: 2),
-                            right: BorderSide(color: loginDarkTeal, width: 2),
-                          ),
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.elliptical(50, 20),
-                              topRight: Radius.elliptical(50, 20))),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 30.0, bottom: 15.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 40),
-                              child: SizedBox(
-                                width: constraint.maxWidth - 40,
-                                child: Text(
-                                  "Welcome",
-                                  softWrap: true,
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                    color: Colors.teal,
-                                    fontFamily: 'Proza Libre',
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 40,
+      return PopScope(
+        canPop: true,
+        // onPopInvoked: (value) {
+        //   //_onPagePop(context);
+        // },
+        child: Scaffold(
+          //resizeToAvoidBottomInset: false,
+          body: Container(
+            color: backgroundColor,
+            height: constraint.maxHeight,
+            child: ListView(
+              children: [
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      SizedBox(height: 30),
+                      Image.asset(
+                        'images/pmha_logo_rembg.png',
+                        fit: BoxFit.fitHeight,
+                        height: 250,
+                      ),
+                      SizedBox(height: 40),
+                      Container(
+                        width: constraint.maxWidth,
+                        decoration: BoxDecoration(
+                            color: backgroundColor,
+                            border: Border(
+                              top: BorderSide(color: loginDarkTeal, width: 2),
+                              left: BorderSide(color: loginDarkTeal, width: 2),
+                              right: BorderSide(color: loginDarkTeal, width: 2),
+                            ),
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.elliptical(50, 20),
+                                topRight: Radius.elliptical(50, 20))),
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.only(top: 30.0, bottom: 15.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(left: 40),
+                                child: SizedBox(
+                                  width: constraint.maxWidth - 40,
+                                  child: Text(
+                                    "Welcome",
+                                    softWrap: true,
+                                    maxLines: 2,
+                                    style: TextStyle(
+                                      color: Colors.teal,
+                                      fontFamily: 'Proza Libre',
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 40,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 40),
-                              child: SizedBox(
-                                width: constraint.maxWidth - 40,
-                                child: Text(
-                                  "Please login with your information",
-                                  style: TextStyle(
-                                    color: Colors.blueGrey,
-                                    fontFamily: 'Proza Libre',
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 15,
+                              Padding(
+                                padding: const EdgeInsets.only(left: 40),
+                                child: SizedBox(
+                                  width: constraint.maxWidth - 40,
+                                  child: Text(
+                                    "Please login with your information",
+                                    style: TextStyle(
+                                      color: Colors.blueGrey,
+                                      fontFamily: 'Proza Libre',
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 15,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            SizedBox(height: 30),
-                            Padding(
-                              padding: EdgeInsets.only(bottom: 3.0, left: 40.0),
-                              child: InputDescription(desc: 'Email Address:'),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  bottom: 12.0, left: 40, right: 40),
-                              child: SizedBox(
-                                width: MediaQuery.sizeOf(context).width - 40,
-                                child: TextFormField(
-                                  style: inputStyle,
-                                  cursorColor: Colors.teal,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      validEmail = false;
-                                      return 'Please enter email';
-                                    } else if (!EmailValidator.validate(
-                                        value)) {
-                                      validEmail = false;
-                                      return 'Invalid email';
-                                    }
-                                    validEmail = true;
-                                    return null;
-                                  },
-                                  controller: loginController.emailController,
-                                  keyboardType: TextInputType.emailAddress,
-                                  decoration: getDecor(
-                                      validEmail == true
-                                          ? Icons.check_box
-                                          : Icons.email,
-                                      ""),
-                                  autovalidateMode:
-                                      AutovalidateMode.onUserInteraction,
-                                  onChanged: (value) {
-                                    if (validEmail == true) {
-                                      setState(() {
-                                        validEmail = true;
-                                      });
-                                    } else {
-                                      setState(() {
+                              SizedBox(height: 30),
+                              Padding(
+                                padding:
+                                    EdgeInsets.only(bottom: 3.0, left: 40.0),
+                                child: InputDescription(desc: 'Email Address:'),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    bottom: 12.0, left: 40, right: 40),
+                                child: SizedBox(
+                                  width: MediaQuery.sizeOf(context).width - 40,
+                                  child: TextFormField(
+                                    style: inputStyle,
+                                    cursorColor: Colors.teal,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
                                         validEmail = false;
-                                      });
-                                    }
-                                  },
+                                        return 'Please enter email';
+                                      } else if (!EmailValidator.validate(
+                                          value)) {
+                                        validEmail = false;
+                                        return 'Invalid email';
+                                      }
+                                      validEmail = true;
+                                      return null;
+                                    },
+                                    controller: loginController.emailController,
+                                    keyboardType: TextInputType.emailAddress,
+                                    decoration: getDecor(
+                                        validEmail == true
+                                            ? Icons.check_box
+                                            : Icons.email,
+                                        ""),
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
+                                    onChanged: (value) {
+                                      if (validEmail == true) {
+                                        setState(() {
+                                          validEmail = true;
+                                        });
+                                      } else {
+                                        setState(() {
+                                          validEmail = false;
+                                        });
+                                      }
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(bottom: 3.0, left: 40.0),
-                              child: InputDescription(desc: 'Password:'),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  bottom: 12.0, left: 40, right: 40),
-                              child: SizedBox(
-                                width: MediaQuery.sizeOf(context).width - 40,
-                                child: TextFormField(
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter password';
-                                    } else if (value.length > 128) {
-                                      validEmail = false;
-                                      return 'Invalid password';
-                                    }
-                                    return null;
-                                  },
-                                  controller:
-                                      loginController.passwordController,
-                                  obscureText: true,
-                                  initialValue: null,
-                                  decoration:
-                                      getDecor(Icons.remove_red_eye, ""),
-                                  autovalidateMode:
-                                      AutovalidateMode.onUserInteraction,
+                              Padding(
+                                padding:
+                                    EdgeInsets.only(bottom: 3.0, left: 40.0),
+                                child: InputDescription(desc: 'Password:'),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    bottom: 12.0, left: 40, right: 40),
+                                child: SizedBox(
+                                  width: MediaQuery.sizeOf(context).width - 40,
+                                  child: TextFormField(
+                                    validator: (value) {
+                                      String validPattern = '[^ a-zA-Z]';
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter password';
+                                      }
+                                      if (value
+                                          .contains(RegExp(validPattern))) {
+                                        return 'Must not contain invalid characters';
+                                      }
+                                      if (value.length > 128 ||
+                                          value.length < 8) {
+                                        //validEmail = false;
+                                        return 'Invalid password length';
+                                      }
+                                      return null;
+                                    },
+                                    controller:
+                                        loginController.passwordController,
+                                    obscureText: true,
+                                    initialValue: null,
+                                    decoration:
+                                        getDecor(Icons.remove_red_eye, ""),
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 40.0, right: 40),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(
-                                    width: constraint.maxWidth / 2 - 60,
-                                    child: CheckboxListTileFormField(
-                                      title: Text(
-                                        "I'm not a robot",
-                                        style: TextStyle(
-                                          color: primaryGrey,
-                                          fontSize: 12,
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 40.0, right: 40),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SizedBox(
+                                      width: constraint.maxWidth / 2 - 60,
+                                      child: CheckboxListTileFormField(
+                                        title: Text(
+                                          "I'm not a robot",
+                                          style: TextStyle(
+                                            color: primaryGrey,
+                                            fontSize: 12,
+                                          ),
                                         ),
+                                        initialValue: false,
+                                        onSaved: (bool? value) {
+                                          print(value);
+                                        },
+                                        validator: (bool? value) {
+                                          if (value! && agreementChecked) {
+                                            return null;
+                                          } else {
+                                            return 'Required';
+                                          }
+                                        },
+                                        onChanged: (value) {
+                                          agreementChecked = true;
+                                          if (value) {
+                                          } else {}
+                                        },
+                                        errorColor: Colors.red.shade300,
+                                        activeColor: Colors.teal,
+                                        checkColor: Colors.white,
+                                        autovalidateMode:
+                                            AutovalidateMode.disabled,
+                                        contentPadding:
+                                            EdgeInsets.only(right: 1),
                                       ),
-                                      initialValue: false,
-                                      onSaved: (bool? value) {
-                                        print(value);
-                                      },
-                                      validator: (bool? value) {
-                                        if (value! && agreementChecked) {
-                                          return null;
-                                        } else {
-                                          return 'Required';
-                                        }
-                                      },
-                                      onChanged: (value) {
-                                        agreementChecked = true;
-                                        if (value) {
-                                        } else {}
-                                      },
-                                      errorColor: Colors.red.shade300,
-                                      activeColor: Colors.teal,
-                                      checkColor: Colors.white,
-                                      autovalidateMode:
-                                          AutovalidateMode.disabled,
-                                      contentPadding: EdgeInsets.only(right: 1),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    width: constraint.maxWidth / 2 - 80,
-                                    child: TextButton(
-                                      child: Text(
-                                        'Forgot Password?',
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(
-                                            fontSize: 12, color: primaryGrey),
+                                    SizedBox(
+                                      width: constraint.maxWidth / 2 - 80,
+                                      child: TextButton(
+                                        child: Text(
+                                          'Forgot Password?',
+                                          textAlign: TextAlign.right,
+                                          style: TextStyle(
+                                              fontSize: 12, color: primaryGrey),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: ((context) =>
+                                                      ForgotPasswordPage())));
+                                        },
                                       ),
-                                      onPressed: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: ((context) =>
-                                                    ForgotPasswordPage())));
-                                      },
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 50),
-                            FilledButton(
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  _onAlertWithCustomContentPressed(context);
-                                }
-                              },
-                              style: ButtonStyle(
-                                minimumSize: MaterialStateProperty.all<Size>(
-                                    Size(200, 50)),
-                                backgroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                        Colors.teal),
-                                shape: MaterialStateProperty.all<
-                                    RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18.0),
-                                    side: BorderSide(
-                                        width: 2.0, color: loginDarkTeal),
+                              SizedBox(height: 50),
+                              FilledButton(
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    _onAlertWithCustomContentPressed(context);
+                                  }
+                                },
+                                style: ButtonStyle(
+                                  minimumSize: MaterialStateProperty.all<Size>(
+                                      Size(200, 50)),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.teal),
+                                  shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18.0),
+                                      side: BorderSide(
+                                          width: 2.0, color: loginDarkTeal),
+                                    ),
+                                  ),
+                                ),
+                                child: Text(
+                                  'LOGIN',
+                                  style: TextStyle(
+                                    fontFamily: 'Open Sans',
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
-                              child: Text(
-                                'LOGIN',
-                                style: TextStyle(
-                                  fontFamily: 'Open Sans',
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 50),
-                          ],
+                              SizedBox(height: 50),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
@@ -1011,109 +1041,126 @@ class ForgotPasswordState extends State<ForgotPasswordPage> {
   final forgotEmailController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Container(
-        color: backgroundColor,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              SizedBox(height: 20),
-              Image.asset(
-                'images/pmha_logo_rembg.png',
-                fit: BoxFit.fitHeight,
-                height: 200,
+    return LayoutBuilder(
+      builder: (context, constraint) {
+        return Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 80,
+            backgroundColor: Colors.teal,
+            automaticallyImplyLeading: false,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.elliptical(100, 20.0),
               ),
-              SizedBox(height: 20),
-              Column(
+            ),
+            title: Text(
+              "Verification",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white),
+            ),
+            centerTitle: true,
+          ),
+          body: Container(
+            color: backgroundColor,
+            child: Form(
+              key: _formKey,
+              child: ListView(
                 children: [
+                  SizedBox(height: 150),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      MainHeadingText(
-                        title: 'Philippine Mental\nHealth Association',
-                        isHeavy: true,
-                        isOverflow: true,
-                        customColor: primaryBlue,
+                      SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 80,
+                        child: Center(
+                          child: Text(
+                            "Please enter your email address",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: primaryGrey,
+                              fontFamily: 'Open Sans',
+                              fontWeight: FontWeight.normal,
+                              fontSize: 25,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 50.0, bottom: 15.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 80,
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter email';
+                                } else if (!EmailValidator.validate(value)) {
+                                  return 'Invalid email';
+                                }
+                                return null;
+                              },
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: getDecor(Icons.email, ""),
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 70),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SubHeadingText(
-                          title: 'Account Recovery',
-                          isOverflow: false,
-                          isHeavy: true,
-                          customColor: mainLightGreen),
+                      FilledButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            // TODO: REST API
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) =>
+                                        ForgotPasswordEmailVerifyPage())));
+                          }
+                        },
+                        style: ButtonStyle(
+                          minimumSize:
+                              MaterialStateProperty.all<Size>(Size(200, 50)),
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(Colors.teal),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side:
+                                  BorderSide(width: 2.0, color: loginDarkTeal),
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          'SEND',
+                          style: TextStyle(
+                            fontFamily: 'Open Sans',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
-              SizedBox(height: 100),
-              SizedBox(
-                width: MediaQuery.sizeOf(context).width - 80,
-                child: HeaderContentText(
-                    title: 'Enter the email associated\nwith your account',
-                    isOverflow: true,
-                    isHeavy: true,
-                    customColor: Colors.black54),
-              ),
-              SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                      child: InputDescription(desc: 'Email:'),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: SizedBox(
-                        width: MediaQuery.sizeOf(context).width - 40,
-                        child: TextFormField(
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter email';
-                            } else if (!EmailValidator.validate(value)) {
-                              return 'Invalid email';
-                            }
-                            return null;
-                          },
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: getDecor(Icons.email, ""),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 70),
-              FilledButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // TODO: REST API
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) =>
-                                ForgotPasswordEmailVerifyPage())));
-                  }
-                },
-                style: ButtonStyle(
-                    minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(mainBlue)),
-                child: Text('SEND'),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -1130,106 +1177,386 @@ class ForgotPasswordEmailVerifyPage extends StatefulWidget {
 class ForgotPasswordEmailVerifyState
     extends State<ForgotPasswordEmailVerifyPage> {
   final _formKey = GlobalKey<FormState>();
-  final forgotEmailController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Container(
-        color: backgroundColor,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              SizedBox(height: 20),
-              Image.asset(
-                'images/pmha_logo_rembg.png',
-                fit: BoxFit.fitHeight,
-                height: 200,
+    return LayoutBuilder(
+      builder: (context, constraint) {
+        return Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 80,
+            backgroundColor: Colors.teal,
+            automaticallyImplyLeading: false,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.elliptical(100, 20.0),
               ),
-              SizedBox(height: 20),
-              Column(
+            ),
+            title: Text(
+              "Forgot Password",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white),
+            ),
+            centerTitle: true,
+          ),
+          body: Container(
+            color: backgroundColor,
+            child: Form(
+              key: _formKey,
+              child: ListView(
                 children: [
+                  SizedBox(height: 150),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      MainHeadingText(
-                        title: 'Philippine Mental\nHealth Association',
-                        isHeavy: true,
-                        isOverflow: true,
-                        customColor: primaryBlue,
+                      SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 80,
+                        child: Center(
+                          child: Text(
+                            "An email with a verification code was sent to {email}",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: primaryGrey,
+                              fontFamily: 'Open Sans',
+                              fontWeight: FontWeight.normal,
+                              fontSize: 25,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 30),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SubHeadingText(
-                          title: 'Account Recovery',
-                          isOverflow: false,
-                          isHeavy: true,
-                          customColor: mainLightGreen),
-                    ],
+                  SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10.0),
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 80,
+                            child: Center(
+                              child: Text(
+                                "Enter Code",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: mainLightGreen,
+                                  fontFamily: 'Open Sans',
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 80,
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter email';
+                                } else if (!EmailValidator.validate(value)) {
+                                  return 'Invalid email';
+                                }
+                                return null;
+                              },
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: getDecor(Icons.code, ""),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 70),
+                        FilledButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              // TODO: REST API
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          ChangePasswordPage())));
+                            }
+                          },
+                          style: ButtonStyle(
+                            minimumSize:
+                                MaterialStateProperty.all<Size>(Size(200, 50)),
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(Colors.teal),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(
+                                    width: 2.0, color: loginDarkTeal),
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'SEND',
+                            style: TextStyle(
+                              fontFamily: 'Open Sans',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: 100),
-              SizedBox(
-                width: MediaQuery.sizeOf(context).width - 80,
-                child: HeaderContentText(
-                    title:
-                        'Enter the verification code we just sent on your email address',
-                    isOverflow: true,
-                    isHeavy: true,
-                    customColor: Colors.black54),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ChangePasswordPage extends StatefulWidget {
+  const ChangePasswordPage({super.key});
+
+  @override
+  _ChangePasswordState createState() {
+    return _ChangePasswordState();
+  }
+}
+
+class _ChangePasswordState extends State<ChangePasswordPage> {
+  final _formKey = GlobalKey<FormState>();
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraint) {
+        return Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 80,
+            backgroundColor: Colors.teal,
+            automaticallyImplyLeading: false,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.elliptical(100, 20.0),
               ),
-              SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
-                child: Column(
+            ),
+            title: Text(
+              "Change Password",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white),
+            ),
+            centerTitle: true,
+          ),
+          body: Container(
+            color: backgroundColor,
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                children: [
+                  SizedBox(height: 150),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.sizeOf(context).width - 80,
+                        child: Center(
+                          child: Text(
+                            "Create a new, strong password for your account",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: primaryGrey,
+                              fontFamily: 'Open Sans',
+                              fontWeight: FontWeight.normal,
+                              fontSize: 25,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding:
+                              EdgeInsets.only(bottom: 3.0, left: 40.0, top: 20),
+                          child: InputDescription(desc: 'New Password:'),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 80,
+                            child: TextFormField(
+                              validator: (value) {
+                                String validPattern = '[^ a-zA-Z]';
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter password';
+                                }
+                                if (value.contains(RegExp(validPattern))) {
+                                  return 'Must not contain invalid characters';
+                                }
+                                if (value.length > 128 || value.length < 8) {
+                                  return 'Invalid password length';
+                                }
+                                return null;
+                              },
+                              //keyboardType: TextInputType.name,
+                              decoration: getDecor(Icons.remove_red_eye, ""),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(
+                              bottom: 3.0, left: 40.0, top: 20.0),
+                          child: InputDescription(desc: 'Confirm Password:'),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width - 80,
+                            child: TextFormField(
+                              validator: (value) {
+                                String validPattern = '[^ a-zA-Z]';
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter password';
+                                }
+                                if (value.contains(RegExp(validPattern))) {
+                                  return 'Must not contain invalid characters';
+                                }
+                                if (value.length > 128 || value.length < 8) {
+                                  return 'Invalid password length';
+                                }
+                                return null;
+                              },
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: getDecor(Icons.remove_red_eye, ""),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 70),
+                        FilledButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              // TODO: REST API
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) =>
+                                          ChangePasswordSuccessPage())));
+                            }
+                          },
+                          style: ButtonStyle(
+                            minimumSize:
+                                MaterialStateProperty.all<Size>(Size(200, 50)),
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(Colors.teal),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(
+                                    width: 2.0, color: loginDarkTeal),
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'SAVE',
+                            style: TextStyle(
+                              fontFamily: 'Open Sans',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ChangePasswordSuccessPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {},
+          child: Container(
+            color: backgroundColor,
+            child: Column(
+              children: [
+                SizedBox(height: 100),
+                Image.asset(
+                  'images/success_logo.png',
+                  fit: BoxFit.fitHeight,
+                  height: 300,
+                ),
+                SizedBox(height: 30),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                      child: InputDescription(desc: 'Email:'),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: SizedBox(
-                        width: MediaQuery.sizeOf(context).width - 40,
-                        child: TextFormField(
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter email';
-                            } else if (!EmailValidator.validate(value)) {
-                              return 'Invalid email';
-                            }
-                            return null;
-                          },
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: getDecor(Icons.email, ""),
+                      padding: const EdgeInsets.only(bottom: 15.0),
+                      child: Text(
+                        "Success!",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: mainLightGreen,
+                          fontFamily: 'Proza Libre',
+                          fontWeight: FontWeight.w900,
+                          fontSize: 50,
                         ),
                       ),
-                    ),
+                    )
                   ],
                 ),
-              ),
-              SizedBox(height: 70),
-              FilledButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // TODO: REST API
-                    Navigator.pop(context);
-                  }
-                },
-                style: ButtonStyle(
+                SizedBox(height: 40),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 80,
+                  child: HeaderContentText(
+                      title:
+                          'Congratulations! Your password has successfully been changed',
+                      isOverflow: true,
+                      isHeavy: true,
+                      customColor: Colors.black87),
+                ),
+                SizedBox(height: 70),
+                FilledButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: ((context) => LoginMainPage())));
+                  },
+                  style: ButtonStyle(
                     minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
                     backgroundColor:
-                        MaterialStateProperty.all<Color>(mainBlue)),
-                child: Text('SEND'),
-              ),
-            ],
+                        MaterialStateProperty.all<Color>(Colors.teal),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(width: 2.0, color: loginDarkTeal),
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    'CONTINUE',
+                    style: TextStyle(
+                        fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1251,298 +1578,590 @@ class SignupState extends State<SignupPage> {
   SignupController signupController = Get.put(SignupController());
   bool? checkboxIconFormFieldValue = false;
   bool agreementChecked = false;
+  bool pwEditActive = true;
+  final GlobalKey<FlutterPwValidatorState> validatorKey =
+      GlobalKey<FlutterPwValidatorState>();
 
   @override
-  Widget build(BuildContext context) {
+  void dispose() {
     signupController.firstNameController.clear();
     signupController.lastNameController.clear();
     signupController.passwordController.clear();
+    signupController.confirmPwdController.clear();
     signupController.emailController.clear();
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      extendBody: true,
-      body: Container(
-        color: backgroundColor,
-        child: ListView(
-          children: [
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  SizedBox(height: 30),
-                  Image.asset(
-                    'images/pmha_logo_rembg.png',
-                    fit: BoxFit.fitHeight,
-                    height: 200,
-                  ),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width,
-                    // decoration: BoxDecoration(
-                    //     //color: Color.fromARGB(255, 240, 242, 243),
-                    //     color: primaryBlue,
-                    //     borderRadius: BorderRadius.only(
-                    //         topLeft: Radius.circular(70),
-                    //         topRight: Radius.circular(70))),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Column(
+
+    super.dispose();
+  }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   signupController.firstNameController.clear();
+  //   signupController.lastNameController.clear();
+  //   signupController.passwordController.clear();
+  //   signupController.confirmPwdController.clear();
+  //   signupController.emailController.clear();
+  // }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraint) {
+        return Scaffold(
+          extendBody: true,
+          body: Container(
+            color: Colors.teal,
+            child: ListView(
+              children: [
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      SizedBox(height: 80),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: SizedBox(
+                          width: constraint.maxWidth - 40,
+                          height: 150,
+                          child: Text(
+                            "Create an\nAccount",
+                            softWrap: true,
+                            maxLines: 2,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Proza Libre',
+                              fontWeight: FontWeight.w900,
+                              fontSize: 50,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: MediaQuery.sizeOf(context).width,
+                        decoration: BoxDecoration(
+                            color: backgroundColor,
+                            border: Border(
+                              top: BorderSide(color: backgroundColor, width: 2),
+                              left:
+                                  BorderSide(color: backgroundColor, width: 2),
+                              right:
+                                  BorderSide(color: backgroundColor, width: 2),
+                            ),
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.elliptical(50, 20),
+                                topRight: Radius.elliptical(100, 50))),
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.only(top: 15.0, bottom: 15.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: MediaQuery.sizeOf(context).width,
-                                    child: MainHeadingText(
-                                      title:
-                                          'Philippine Mental\nHealth Association',
-                                      isHeavy: true,
-                                      isOverflow: true,
-                                      customColor: primaryBlue,
-                                    ),
+                              Column(
+                                children: [],
+                              ),
+                              SizedBox(height: 10),
+                              Padding(
+                                padding:
+                                    EdgeInsets.only(bottom: 3.0, left: 40.0),
+                                child: InputDescription(desc: 'First Name:'),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    bottom: 5.0, left: 40, right: 40.0),
+                                child: SizedBox(
+                                  width: constraint.maxWidth - 80,
+                                  height: 60,
+                                  child: TextFormField(
+                                    style: inputStyle,
+                                    validator: (value) {
+                                      String validPattern = '[^ a-zA-Z]';
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter your name';
+                                      }
+                                      if (value
+                                          .contains(RegExp(validPattern))) {
+                                        return 'Must not contain invalid characters';
+                                      }
+                                      if (value.length > 128) {
+                                        return 'Invalid name length.';
+                                      }
+                                      return null;
+                                    },
+                                    controller:
+                                        signupController.firstNameController,
+                                    initialValue: null,
+                                    decoration: getDecor(Icons.person, ""),
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
                                   ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: MediaQuery.sizeOf(context).width,
-                                    child: SubHeadingText(
-                                      title: 'PALAWAN',
-                                      isHeavy: true,
-                                      isOverflow: false,
-                                      customColor: mainLightGreen,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 20),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                            child: InputDescription(desc: 'First Name:'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 5.0),
-                            child: SizedBox(
-                              width: MediaQuery.sizeOf(context).width - 40,
-                              height: 60,
-                              child: TextFormField(
-                                  style: inputStyle,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter your name';
-                                    }
-                                    return null;
-                                  },
-                                  controller:
-                                      signupController.firstNameController,
-                                  initialValue: null,
-                                  decoration: getDecor(Icons.person, "")),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                            child: InputDescription(desc: 'Last Name:'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 5.0),
-                            child: SizedBox(
-                              width: MediaQuery.sizeOf(context).width - 40,
-                              height: 60,
-                              child: TextFormField(
-                                style: inputStyle,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your last name';
-                                  }
-                                  return null;
-                                },
-                                controller: signupController.lastNameController,
-                                initialValue: null,
-                                decoration: getDecor(Icons.person, ""),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                              padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                              child: InputDescription(desc: 'Email:')),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 5.0),
-                            child: SizedBox(
-                              width: MediaQuery.sizeOf(context).width - 40,
-                              height: 60,
-                              child: TextFormField(
-                                style: inputStyle,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter email';
-                                  } else if (!EmailValidator.validate(value)) {
-                                    return 'Invalid email';
-                                  }
-                                  return null;
-                                },
-                                controller: signupController.emailController,
-                                keyboardType: TextInputType.emailAddress,
-                                decoration: getDecor(Icons.email, ""),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                            child: InputDescription(desc: 'Password:'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 5.0),
-                            child: SizedBox(
-                              width: MediaQuery.sizeOf(context).width - 40,
-                              height: 60,
-                              child: TextFormField(
-                                  style: inputStyle,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter password';
-                                    }
-                                    return null;
-                                  },
-                                  controller:
-                                      signupController.passwordController,
-                                  obscureText: true,
-                                  initialValue: null,
-                                  decoration:
-                                      getDecor(Icons.remove_red_eye, "")),
-                            ),
-                          ),
-                          SizedBox(
-                            width: MediaQuery.sizeOf(context).width - 35,
-                            child: CheckboxListTileFormField(
-                              title: Text(
-                                "Pursuant to the Data Privacy Act of 2012, I hereby give my consent to PMHA to process my personal data as a member of the Association. I understand the processing of my personal data shall be limited to the purpose specified.",
-                                softWrap: true,
-                                maxLines: 5,
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 8,
                                 ),
                               ),
-                              initialValue: false,
-                              onSaved: (bool? value) {
-                                print(value);
-                              },
-                              validator: (bool? value) {
-                                if (value! && agreementChecked) {
-                                  return null;
-                                } else {
-                                  return 'Please agree to policy before proceeding';
-                                }
-                              },
-                              onChanged: (value) {
-                                agreementChecked = true;
-                                if (value) {
-                                  print("Agreement Checked :)");
-                                } else {
-                                  print("Agreement Not Checked :(");
-                                }
-                              },
-                              errorColor: Colors.red.shade300,
-                              checkColor: Colors.white,
-                              autovalidateMode: AutovalidateMode.disabled,
-                              contentPadding: EdgeInsets.all(1),
-                            ),
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    bottom: 5.0, left: 40, right: 40.0),
+                                child: InputDescription(desc: 'Last Name:'),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 5.0),
+                                child: SizedBox(
+                                  width: constraint.maxWidth - 80,
+                                  height: 60,
+                                  child: TextFormField(
+                                    style: inputStyle,
+                                    validator: (value) {
+                                      String validPattern = '[^ a-zA-Z]';
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter your last name';
+                                      }
+                                      if (value
+                                          .contains(RegExp(validPattern))) {
+                                        return 'Must not contain invalid characters';
+                                      }
+                                      if (value.length > 128) {
+                                        return 'Invalid name length.';
+                                      }
+                                      return null;
+                                    },
+                                    controller:
+                                        signupController.lastNameController,
+                                    initialValue: null,
+                                    decoration: getDecor(Icons.person, ""),
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                  padding:
+                                      EdgeInsets.only(bottom: 3.0, left: 40.0),
+                                  child: InputDescription(desc: 'Email:')),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    bottom: 5.0, left: 40, right: 40.0),
+                                child: SizedBox(
+                                  width: constraint.maxWidth - 80,
+                                  height: 60,
+                                  child: TextFormField(
+                                    style: inputStyle,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter email';
+                                      } else if (!EmailValidator.validate(
+                                          value)) {
+                                        return 'Invalid email';
+                                      }
+                                      return null;
+                                    },
+                                    controller:
+                                        signupController.emailController,
+                                    keyboardType: TextInputType.emailAddress,
+                                    decoration: getDecor(Icons.email, ""),
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    EdgeInsets.only(bottom: 3.0, left: 40.0),
+                                child: InputDescription(desc: 'Password:'),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    bottom: 5.0, left: 40, right: 40.0),
+                                child: SizedBox(
+                                  width: constraint.maxWidth - 80,
+                                  height: 60,
+                                  child: TextFormField(
+                                    style: inputStyle,
+                                    validator: (value) {
+                                      String upperPattern = '^(.*?[A-Z]){1,}';
+                                      String lowerPattern = '^(.*?[a-z]){1,}';
+                                      String validPattern = '[^a-zA-Z]';
+
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter password';
+                                      }
+                                      if (value
+                                          .contains(RegExp(validPattern))) {
+                                        return 'Must not contain invalid characters';
+                                      }
+                                      if (!value
+                                          .contains(RegExp(upperPattern))) {
+                                        return 'Must contain 1 uppercase character';
+                                      }
+                                      if (!value
+                                          .contains(RegExp(lowerPattern))) {
+                                        return 'Must contain 1 lowercase character';
+                                      }
+                                      if (value.length > 128 ||
+                                          value.length < 8) {
+                                        return 'Invalid password length';
+                                      }
+
+                                      return null;
+                                    },
+                                    controller:
+                                        signupController.passwordController,
+                                    obscureText: true,
+                                    initialValue: null,
+                                    decoration:
+                                        getDecor(Icons.remove_red_eye, ""),
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
+                                    // onTap: () {
+                                    //   setState(() {
+                                    //     if (pwEditActive == true) {
+                                    //       pwEditActive = false;
+                                    //     } else {
+                                    //       pwEditActive = true;
+                                    //     }
+                                    //   });
+                                    // },
+                                  ),
+                                ),
+                              ),
+                              // pwEditActive == true
+                              //     ? Padding(
+                              //         padding:
+                              //             const EdgeInsets.only(bottom: 10.0),
+                              //         child: SizedBox(
+                              //           width: constraint.maxWidth - 100,
+                              //           child: FlutterPwValidator(
+                              //             key: validatorKey,
+                              //             controller: signupController
+                              //                 .passwordController,
+                              //             minLength: 8,
+                              //             uppercaseCharCount: 1,
+                              //             lowercaseCharCount: 1,
+                              //             width: 400,
+                              //             height: 100,
+                              //             onSuccess: () {
+                              //               print("MATCHED");
+                              //               ScaffoldMessenger.of(context)
+                              //                   .showSnackBar(new SnackBar(
+                              //                       content: new Text(
+                              //                           "Password is matched")));
+                              //             },
+                              //             onFail: () {
+                              //               print("NOT MATCHED");
+                              //             },
+                              //           ),
+                              //         ),
+                              //       )
+                              //     : SizedBox(height: 0),
+                              Padding(
+                                padding:
+                                    EdgeInsets.only(bottom: 3.0, left: 40.0),
+                                child:
+                                    InputDescription(desc: 'Confirm Password:'),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    bottom: 5.0, left: 40, right: 40.0),
+                                child: SizedBox(
+                                  width: constraint.maxWidth - 80,
+                                  height: 60,
+                                  child: TextFormField(
+                                    style: inputStyle,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter password';
+                                      } else if (value !=
+                                          signupController
+                                              .passwordController.text) {
+                                        print("value: $value");
+                                        print(
+                                            "controller: ${signupController.passwordController.text}");
+                                        return 'Passwords do not match';
+                                      } else if (value.length > 128) {
+                                        return 'Invalid password length';
+                                      }
+                                      return null;
+                                    },
+                                    controller:
+                                        signupController.confirmPwdController,
+                                    obscureText: true,
+                                    initialValue: null,
+                                    decoration:
+                                        getDecor(Icons.remove_red_eye, ""),
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: constraint.maxWidth - 80,
+                                child: CheckboxListTileFormField(
+                                  title: Text(
+                                    "By continuing, you agree to Philippine Mental Health Association - Mental Wellness Mobile Application's Terms and Conditions and Privacy Policy",
+                                    softWrap: true,
+                                    maxLines: 5,
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 8,
+                                    ),
+                                  ),
+                                  initialValue: false,
+                                  onSaved: (bool? value) {
+                                    print(value);
+                                  },
+                                  validator: (bool? value) {
+                                    if (value! && agreementChecked) {
+                                      return null;
+                                    } else {
+                                      return 'Please agree to policy before proceeding';
+                                    }
+                                  },
+                                  onChanged: (value) {
+                                    agreementChecked = true;
+                                    if (value) {
+                                      print("Agreement Checked :)");
+                                    } else {
+                                      print("Agreement Not Checked :(");
+                                    }
+                                  },
+                                  errorColor: Colors.red.shade300,
+                                  activeColor: Colors.teal,
+                                  checkColor: Colors.white,
+                                  autovalidateMode: AutovalidateMode.disabled,
+                                  contentPadding: EdgeInsets.all(1),
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              FilledButton(
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    signupController.registerWithEmail();
+
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: ((context) =>
+                                                SignupValidatePage())));
+                                  }
+                                },
+                                style: ButtonStyle(
+                                  minimumSize: MaterialStateProperty.all<Size>(
+                                      Size(200, 50)),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.teal),
+                                  shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18.0),
+                                      side: BorderSide(
+                                          width: 2.0, color: loginDarkTeal),
+                                    ),
+                                  ),
+                                ),
+                                child: Text('SIGN UP'),
+                              ),
+                              SizedBox(height: 50),
+                            ],
                           ),
-                          FilledButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                signupController.registerWithEmail();
-                              }
-                            },
-                            style: ButtonStyle(
-                                minimumSize: MaterialStateProperty.all<Size>(
-                                    Size(200, 50)),
-                                backgroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                        primaryLightBlue)),
-                            child: Text('SIGN UP'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class SignupValidatePage extends StatefulWidget {
+  const SignupValidatePage({super.key});
+
+  @override
+  _SignupValidateState createState() {
+    return _SignupValidateState();
+  }
+}
+
+class _SignupValidateState extends State<SignupValidatePage> {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 80,
+          backgroundColor: Colors.teal,
+          automaticallyImplyLeading: false,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.elliptical(100, 20.0),
+            ),
+          ),
+          title: Text(
+            "Verification",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white),
+          ),
+          centerTitle: true,
+        ),
+        body: Container(
+          color: backgroundColor,
+          child: ListView(
+            children: [
+              Container(
+                color: backgroundColor,
+                width: constraint.maxWidth,
+                height: (constraint.maxHeight / 8) * 7,
+                child: Column(
+                  children: [
+                    SizedBox(height: 200),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: SizedBox(
+                        height: 150,
+                        child: Text(
+                          "Please enter the verification\ncode was sent to\n{email}",
+                          softWrap: true,
+                          maxLines: 4,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: primaryGrey,
+                            fontSize: 25,
+                            fontFamily: 'Asap',
+                            decoration: TextDecoration.none,
                           ),
-                          SizedBox(height: 50),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(
+                      width: 100,
+                      height: 60,
+                      child: TextField(
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          //labelText: 'Password',
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 50.0),
+                      child: FilledButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => SignupSuccessPage())));
+                        },
+                        style: ButtonStyle(
+                          minimumSize:
+                              MaterialStateProperty.all<Size>(Size(200, 50)),
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(Colors.teal),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side:
+                                  BorderSide(width: 2.0, color: loginDarkTeal),
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          'Verify',
+                          style: TextStyle(
+                              fontFamily: 'Open Sans',
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
 class SignupSuccessPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: ((context) => LoginMainPage())));
-        },
-        child: Container(
-          color: backgroundColor,
-          child: Column(
-            children: [
-              SizedBox(height: 100),
-              Image.asset(
-                'images/welcome_logo.png',
-                fit: BoxFit.fitHeight,
-                height: 300,
-              ),
-              SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: MainHeadingText(
-                        title: "Success!",
-                        isOverflow: true,
-                        isHeavy: true,
-                        customColor: mainLightGreen),
-                  )
-                ],
-              ),
-              SizedBox(height: 70),
-              SizedBox(
-                width: MediaQuery.sizeOf(context).width - 80,
-                child: HeaderContentText(
-                    title:
-                        'Congratulations! Your account has been successfully created',
-                    isOverflow: true,
-                    isHeavy: true,
-                    customColor: Colors.black87),
-              ),
-              SizedBox(height: 70),
-              FilledButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => LoginMainPage())));
-                },
-                style: ButtonStyle(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {},
+          child: Container(
+            color: backgroundColor,
+            child: Column(
+              children: [
+                SizedBox(height: 100),
+                Image.asset(
+                  'images/success_logo.png',
+                  fit: BoxFit.fitHeight,
+                  height: 300,
+                ),
+                SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 15.0),
+                      child: Text(
+                        "Success!",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: mainLightGreen,
+                          fontFamily: 'Proza Libre',
+                          fontWeight: FontWeight.w900,
+                          fontSize: 50,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(height: 40),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 80,
+                  child: HeaderContentText(
+                      title:
+                          'Congratulations! Your account has been successfully created',
+                      isOverflow: true,
+                      isHeavy: true,
+                      customColor: Colors.black87),
+                ),
+                SizedBox(height: 70),
+                FilledButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: ((context) => LoginMainPage())));
+                  },
+                  style: ButtonStyle(
                     minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
                     backgroundColor:
-                        MaterialStateProperty.all<Color>(primaryLightBlue)),
-                child: Text('CONTINUE'),
-              ),
-            ],
+                        MaterialStateProperty.all<Color>(Colors.teal),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18.0),
+                        side: BorderSide(width: 2.0, color: loginDarkTeal),
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    'CONTINUE',
+                    style: TextStyle(
+                        fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1553,110 +2172,117 @@ class SignupSuccessPage extends StatelessWidget {
 class WelcomePage extends StatelessWidget {
   Future<String?> getUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? name;
 
-    String? name = prefs.getString('first_name')!;
+    if (prefs.containsKey('first_name')) {
+      name = prefs.getString('first_name');
+    }
     return name;
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: ((context) => MoodModalPage())));
-        },
-        child: Container(
-          child: Center(
-            child: FutureBuilder(
-              future: getUserName(),
-              initialData: null,
-              builder: (BuildContext context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.deepPurpleAccent,
-                    ),
-                  );
-                }
-                if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        'An ${snapshot.error} occurred',
-                        style: const TextStyle(fontSize: 18, color: Colors.red),
+    return PopScope(
+      canPop: false,
+      child: SafeArea(
+          child: Scaffold(
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: ((context) => MoodModalPage())));
+          },
+          child: Container(
+            child: Center(
+              child: FutureBuilder(
+                future: getUserName(),
+                initialData: null,
+                builder: (BuildContext context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.deepPurpleAccent,
                       ),
                     );
-                  } else if (snapshot.hasData) {
-                    final data = snapshot.data;
-                    String welcomeString = 'Welcome,  $data!';
-                    return ListView(
-                      children: [
-                        SizedBox(height: 100),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 15.0),
-                              child: MainHeadingText(
-                                  title: welcomeString,
+                  }
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'An ${snapshot.error} occurred',
+                          style:
+                              const TextStyle(fontSize: 18, color: Colors.red),
+                        ),
+                      );
+                    } else if (snapshot.hasData) {
+                      final data = snapshot.data;
+                      String welcomeString = 'Welcome,  $data!';
+                      return ListView(
+                        children: [
+                          SizedBox(height: 100),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 15.0),
+                                child: MainHeadingText(
+                                    title: welcomeString,
+                                    isOverflow: false,
+                                    isHeavy: true,
+                                    customColor: Colors.teal),
+                              )
+                            ],
+                          ),
+                          Image.asset(
+                            'images/welcome_logo.png',
+                            fit: BoxFit.fitHeight,
+                            height: 400,
+                          ),
+                          SizedBox(height: 80),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              MainHeadingText(
+                                  title: 'Here for  ',
                                   isOverflow: false,
                                   isHeavy: true,
                                   customColor: Colors.teal),
-                            )
-                          ],
-                        ),
-                        Image.asset(
-                          'images/welcome_logo.png',
-                          fit: BoxFit.fitHeight,
-                          height: 400,
-                        ),
-                        SizedBox(height: 80),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            MainHeadingText(
-                                title: 'Here for  ',
-                                isOverflow: false,
-                                isHeavy: true,
-                                customColor: Colors.teal),
-                            MainHeadingText(
-                                title: 'you.',
-                                isOverflow: false,
-                                isHeavy: true,
-                                customColor: Colors.lightGreen),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            MainHeadingText(
-                                title: 'Here to  ',
-                                isOverflow: false,
-                                isHeavy: true,
-                                customColor: Colors.teal),
-                            MainHeadingText(
-                                title: 'stay.',
-                                isOverflow: false,
-                                isHeavy: true,
-                                customColor: Colors.lightGreen),
-                          ],
-                        ),
-                      ],
-                    );
+                              MainHeadingText(
+                                  title: 'you.',
+                                  isOverflow: false,
+                                  isHeavy: true,
+                                  customColor: Colors.lightGreen),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              MainHeadingText(
+                                  title: 'Here to  ',
+                                  isOverflow: false,
+                                  isHeavy: true,
+                                  customColor: Colors.teal),
+                              MainHeadingText(
+                                  title: 'stay.',
+                                  isOverflow: false,
+                                  isHeavy: true,
+                                  customColor: Colors.lightGreen),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
                   }
-                }
 
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              },
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+              ),
             ),
           ),
         ),
-      ),
-    ));
+      )),
+    );
   }
 }
