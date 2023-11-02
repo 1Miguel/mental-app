@@ -158,6 +158,35 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> Any:
     return await UserSchema.from_tortoise_orm(user)
 
 
+async def get_current_user_new(token: str = Depends(oauth2_scheme)) -> UserModel:
+    try:
+        user: UserModel = await UserModel.get(
+            email=jwt.decode(token, _JWT_SECRET, algorithms="HS256").get("email")
+        )
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
+    else:
+        try:
+            is_admin = await AdminModel.get(admin_user=user) is not None
+        except DoesNotExist:
+            is_admin = False
+
+    return UserProfileApi(
+        id=user.id,
+        email=user.email,
+        firstname=user.firstname,
+        lastname=user.lastname,
+        address=user.address,
+        age=user.age,
+        occupation=user.occupation,
+        birthday=user.birthday,
+        is_admin=is_admin,
+    )
+
+
 @app.post("/token", status_code=status.HTTP_200_OK)
 async def generate_token(
     form_data: OAuth2PasswordRequestForm = Depends(), response: Response = Response()
@@ -179,23 +208,13 @@ async def generate_token(
 
 
 @app.get("/login", response_model=UserProfileApi)
-async def login(user: UserSchema = Depends(get_current_user)) -> Any:
+async def login(user: UserProfileApi = Depends(get_current_user_new)) -> Any:
     """login route called when user wants to login. This depends on the user
     if the user has a token. If the user does not have a valid token, reject
     the login request.
     """
     # return the profile at login success
-    return UserProfileApi(
-        id=user.id,
-        email=user.email,
-        firstname=user.firstname,
-        lastname=user.lastname,
-        address=user.address,
-        age=user.age,
-        occupation=user.occupation,
-        birthday=user.birthday,
-        membership_type=MembershipType.NONE,
-    )
+    return user
 
 
 @app.post("/user/mood")
@@ -239,7 +258,10 @@ async def mood_get(month: str, user: UserSchema = Depends(get_current_user)) -> 
                 date=mood_db_data.date.isoformat(),
             )
         ]
-    response.percentages = [int(100 * p / len(response.mood_list)) for p in response.percentages]
+    response.percentages = [
+        0 if not response.mood_list else int(100 * p / len(response.mood_list))
+        for p in response.percentages
+    ]
     return response
 
 
@@ -291,41 +313,41 @@ async def mood_get(user: UserSchema = Depends(get_current_user)) -> MoodLog:
 #         ) from exc
 
 
-@app.post("/user/membership/register")
-async def membership_register_route(
-    membership_api: MembershipRegisterApi, user: UserSchema = Depends(get_current_user)
-) -> None:
-    user_model = await UserModel.get(email=user.email)
-    # create a new membership request
-    new_membership_req = MembershipModel(
-        user=user_model,
-        type=membership_api.membership_type,
-        status=MembershipStatus.PENDING,
-    )
-    await new_membership_req.save()
+# @app.post("/user/membership/register")
+# async def membership_register_route(
+#     membership_api: MembershipRegisterApi, user: UserSchema = Depends(get_current_user)
+# ) -> None:
+#     user_model = await UserModel.get(email=user.email)
+#     # create a new membership request
+#     new_membership_req = MembershipModel(
+#         user=user_model,
+#         type=membership_api.membership_type,
+#         status=MembershipStatus.PENDING,
+#     )
+#     await new_membership_req.save()
 
 
-@app.post("/user/membership/cancel")
-async def membership_cancel_route(
-    membership: MembershipCancelApi, user: UserSchema = Depends(get_current_user)
-) -> None:
-    """User cancels its membership route."""
-    user_model = await UserModel.get(email=user.email)
-    # check first if membership exists for this user
-    membership_profile: MembershipModel = MembershipModel.get(user=user_model)
-    if membership_profile is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Membership profile not found.")
-    if membership_profile.status in (
-        MembershipStatus.ACTIVE,
-        MembershipStatus.PENDING,
-        MembershipStatus.EXPIRED,
-    ):
-        # only cancel membership that are either
-        # currently active, expired or pending to be approved
-        membership_profile.status = MembershipStatus.CANCELLED
-        membership_profile.cancel_reason = membership.reason
-        membership_profile.cancel_suggestion = membership.suggestion
-        await membership_profile.save()
+# @app.post("/user/membership/cancel")
+# async def membership_cancel_route(
+#     membership: MembershipCancelApi, user: UserSchema = Depends(get_current_user)
+# ) -> None:
+#     """User cancels its membership route."""
+#     user_model = await UserModel.get(email=user.email)
+#     # check first if membership exists for this user
+#     membership_profile: MembershipModel = MembershipModel.get(user=user_model)
+#     if membership_profile is None:
+#         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Membership profile not found.")
+#     if membership_profile.status in (
+#         MembershipStatus.ACTIVE,
+#         MembershipStatus.PENDING,
+#         MembershipStatus.EXPIRED,
+#     ):
+#         # only cancel membership that are either
+#         # currently active, expired or pending to be approved
+#         membership_profile.status = MembershipStatus.CANCELLED
+#         membership_profile.cancel_reason = membership.reason
+#         membership_profile.cancel_suggestion = membership.suggestion
+#         await membership_profile.save()
 
 
 @app.post("/signup")
@@ -336,7 +358,7 @@ async def signup_route(user: UserApi) -> Any:
     """
     log.info("Create user %s", user)
     try:
-        user = UserModel(
+        user: UserModel = UserModel(
             email=user.email,
             password_hash=bcrypt.hash(user.password),
             firstname=user.firstname,
@@ -345,6 +367,7 @@ async def signup_route(user: UserApi) -> Any:
             age=0,
             occupation="",
             birthday=datetime(year=1900, month=1, day=1).isoformat(),
+            mobile_number="",
         )
         await user.save()
         # create a folder space for the user, this will serve as
@@ -390,6 +413,25 @@ async def thread_submit(
     ).save()
 
 
+@app.delete("/user/thread/{thread_id}/")
+async def thread_delete(
+    thread_id: int, user: UserProfileApi = Depends(get_current_user_new)
+) -> Any:
+    try:
+        thread_db = await ThreadModel.get(id=thread_id)
+    except DoesNotExist as exc:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
+        ) from exc
+    thread_creator: UserModel = await thread_db.user
+    if thread_creator.id != user.id:
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            detail="attempting to delete a thread not created by the User.",
+        )
+    await thread_db.delete()
+
+
 @app.post("/user/thread/{thread_id}/comment/")
 async def thread_comment(
     thread_id: int,
@@ -409,6 +451,42 @@ async def thread_comment(
         ) from exc
 
 
+@app.post("/user/{thread_id}/like/")
+async def thread_like(
+    thread_id: int,
+    thread_like_api: ThreadLikeApi,
+    user: UserProfileApi = Depends(get_current_user_new),
+) -> Any:
+    user_db = await UserModel.get(email=user.email)
+    try:
+        thread_db = await ThreadModel.get(id=thread_id)
+    except DoesNotExist as exc:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
+        ) from exc
+    else:
+        thread_like_db = await ThreadUserLikeModel.get_thread_like_by_user(user_db.id, thread_id)
+        if thread_like_db and not thread_like_api.like:
+            log.info(f"Thread {thread_id} unlike...")
+            # if the like is in the database, this means user already like the thread
+            # to unlike, delete the like item in the database.
+            await thread_like_db[0].delete()
+            # decrement thread likes
+            thread_db.num_likes -= 1
+            # then save
+            await thread_db.save()
+
+        elif not thread_like_db and thread_like_api.like:
+            log.info(f"Thread {thread_id} like...")
+            # thread is not yet liked by the user check if the API instruct
+            # us to like this thread - create a new model
+            await ThreadUserLikeModel(user=user_db, thread=thread_db).save()
+            # add thread like count
+            thread_db.num_likes += 1
+            # then save
+            await thread_db.save()
+
+
 @app.get("/user/thread/{thread_id}")
 async def get_thread(
     thread_id: int, user: UserSchema = Depends(get_current_user)
@@ -420,13 +498,14 @@ async def get_thread(
         raise HTTPException(
             status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
         ) from exc
-    creator = await thread.user
+    creator: UserModel = await thread.user
     # create the response model
     response = ThreadRequestApi(
         thread_id=thread_id,
         topic=thread.topic,
         content=thread.content,
         creator=creator.email,
+        num_likes=thread.num_likes,
         date_created=thread.created.isoformat(),
     )
     # build the list of responses
@@ -460,6 +539,7 @@ async def get_thread_list(
                 content=thread.content,
                 creator=creator.email,
                 date_created=thread.created.isoformat(),
+                num_likes=thread.num_likes,
             )
         ]
     return thread_req
