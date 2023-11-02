@@ -197,291 +197,299 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            automaticallyImplyLeading: false,
-            floating: false,
-            pinned: true,
-            snap: false,
-            centerTitle: false,
-            toolbarHeight: 100,
-            //backgroundColor: primaryBlue,
-            flexibleSpace: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: <Color>[primaryLightBlue, primaryBlue]),
-              ),
-            ),
-            leading: Builder(
-              builder: (BuildContext context) {
-                return SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.menu,
-                        size: 40.0,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: ((context) => AccountsPage())));
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
-            leadingWidth: 80,
-            actions: [
-              FutureBuilder(
-                future: getUserName(),
-                initialData: null,
-                builder: (BuildContext context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.deepPurpleAccent,
-                      ),
-                    );
-                  }
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text(
-                          'An ${snapshot.error} occurred',
-                          style:
-                              const TextStyle(fontSize: 18, color: Colors.red),
-                        ),
-                      );
-                    } else if (snapshot.hasData) {
-                      final data = snapshot.data;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 20.0),
-                        child: Text(
-                          'Hi, $data',
-                          textAlign: TextAlign.end,
-                          style: TextStyle(
-                              fontFamily: 'Proza Libre',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 30,
-                              color: Colors.white),
-                        ),
-                      );
-                    }
-                  }
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                },
-              ),
-            ],
-          ),
-          // Other Sliver Widgets
-          SliverList(
-            delegate: SliverChildListDelegate([
-              SizedBox(
-                width: MediaQuery.sizeOf(context).width,
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 20,
-                    ),
-                    SizedBox(
-                      height: 40,
-                      width: MediaQuery.sizeOf(context).width - 60,
-                      child: TextFormField(
-                        textAlign: TextAlign.center,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.only(top: 5.0),
-                          hintText: 'How may we help you today?',
-                          //suffixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(30)),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(30)),
-                            borderSide: BorderSide(
-                              color: primaryLightPurple,
-                              width: 1.0,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(30)),
-                            borderSide: BorderSide(
-                              color: primaryLightBlue,
-                              width: 1.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 380,
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 10.0),
-                        child: Text(
-                          'Trending',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                              fontFamily: 'Proza Libre',
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                              color: primaryBlue),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 380,
-                      child: Text(
-                        'Puerto Princesa, Palawan',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            fontFamily: 'Open Sans',
-                            fontSize: 12,
-                            color: mainLightGreen),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 380,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 15.0),
-                        child: Text(
-                          'EVENTS',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                              fontFamily: 'Open Sans',
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: primaryGrey),
-                        ),
-                      ),
-                    ),
-                    DashboardFeatureCarousel(),
-                  ],
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                height: 8,
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        key: scaffoldKey,
+        body: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              automaticallyImplyLeading: false,
+              floating: false,
+              pinned: true,
+              snap: false,
+              centerTitle: false,
+              toolbarHeight: 100,
+              //backgroundColor: primaryBlue,
+              flexibleSpace: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
-                      colors: <Color>[mainLightBlue, primaryBlue]),
+                      colors: <Color>[primaryLightBlue, primaryBlue]),
                 ),
               ),
-              Container(
-                height: 500,
-                color: Colors.white,
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 20.0, top: 20.0),
+              leading: Builder(
+                builder: (BuildContext context) {
+                  return SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.menu,
+                          size: 40.0,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => AccountsPage())));
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+              leadingWidth: 80,
+              actions: [
+                FutureBuilder(
+                  future: getUserName(),
+                  initialData: null,
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.deepPurpleAccent,
+                        ),
+                      );
+                    }
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      if (snapshot.hasError) {
+                        return Center(
                           child: Text(
-                            'Features',
+                            'An ${snapshot.error} occurred',
+                            style: const TextStyle(
+                                fontSize: 18, color: Colors.red),
+                          ),
+                        );
+                      } else if (snapshot.hasData) {
+                        final data = snapshot.data;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 20.0),
+                          child: Text(
+                            'Hi, $data',
+                            textAlign: TextAlign.end,
                             style: TextStyle(
-                                fontFamily: 'Roboto',
+                                fontFamily: 'Proza Libre',
+                                fontWeight: FontWeight.bold,
+                                fontSize: 30,
+                                color: Colors.white),
+                          ),
+                        );
+                      }
+                    }
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                ),
+              ],
+            ),
+            // Other Sliver Widgets
+            SliverList(
+              delegate: SliverChildListDelegate([
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 20,
+                      ),
+                      SizedBox(
+                        height: 40,
+                        width: MediaQuery.sizeOf(context).width - 60,
+                        child: TextFormField(
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(top: 5.0),
+                            hintText: 'How may we help you today?',
+                            //suffixIcon: Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
+                              borderSide: BorderSide(
+                                color: primaryLightPurple,
+                                width: 1.0,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30)),
+                              borderSide: BorderSide(
+                                color: primaryLightBlue,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 380,
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 10.0),
+                          child: Text(
+                            'Trending',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                                fontFamily: 'Proza Libre',
                                 fontSize: 25,
                                 fontWeight: FontWeight.bold,
                                 color: primaryBlue),
                           ),
                         ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      ),
+                      SizedBox(
+                        width: 380,
+                        child: Text(
+                          'Puerto Princesa, Palawan',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                              fontFamily: 'Open Sans',
+                              fontSize: 12,
+                              color: mainLightGreen),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 380,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 15.0),
+                          child: Text(
+                            'EVENTS',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                                fontFamily: 'Open Sans',
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: primaryGrey),
+                          ),
+                        ),
+                      ),
+                      DashboardFeatureCarousel(),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+                Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: <Color>[mainLightBlue, primaryBlue]),
+                  ),
+                ),
+                Container(
+                  height: 500,
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          DashboardCategoryButtons(
-                            title: 'Talk To Us',
-                            imageIcon: 'images/dashboard_category_talk.png',
-                            icon: Icons.question_answer,
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) =>
-                                          TalkToUsIntroPage())));
-                            },
-                          ),
-                          DashboardCategoryButtons(
-                            title: 'Discover',
-                            imageIcon:
-                                'images/dashboard_category_mental_health_care.png',
-                            icon: Icons.psychology,
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) =>
-                                          DiscoverIntroPage())));
-                            },
-                          ),
-                          DashboardCategoryButtons(
-                            title: 'Book Appointment',
-                            imageIcon: 'images/dashboard_category_book.png',
-                            icon: Icons.calendar_month,
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) =>
-                                          BookAppointmentIntroPage())));
-                            },
-                          ),
-                          DashboardCategoryButtons(
-                            title: 'Membership',
-                            imageIcon: 'images/dashboard_category_library.png',
-                            icon: Icons.diversity_2,
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) =>
-                                          MembershipIntroPage())));
-                              // final datenow = DateTime.now();
-                              // final later =
-                              //     datenow.addf(const Duration(hours: 24));
-
-                              // showDialog(
-                              //     context: Get.context!,
-                              //     builder: (context) {
-                              //       return SimpleDialog(
-                              //         title: Text('Error!'),
-                              //         contentPadding: EdgeInsets.all(20),
-                              //         children: [
-                              //           Text(datenow.toString()),
-                              //           Text(later.toString())
-                              //         ],
-                              //       );
-                              //     });
-                            },
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(left: 20.0, top: 20.0),
+                            child: Text(
+                              'Features',
+                              style: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                  color: primaryBlue),
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            DashboardCategoryButtons(
+                              title: 'Talk To Us',
+                              imageIcon: 'images/dashboard_category_talk.png',
+                              icon: Icons.question_answer,
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: ((context) =>
+                                            TalkToUsIntroPage())));
+                              },
+                            ),
+                            DashboardCategoryButtons(
+                              title: 'Discover',
+                              imageIcon:
+                                  'images/dashboard_category_mental_health_care.png',
+                              icon: Icons.psychology,
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: ((context) =>
+                                            DiscoverIntroPage())));
+                              },
+                            ),
+                            DashboardCategoryButtons(
+                              title: 'Book Appointment',
+                              imageIcon: 'images/dashboard_category_book.png',
+                              icon: Icons.calendar_month,
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: ((context) =>
+                                            BookAppointmentIntroPage())));
+                              },
+                            ),
+                            DashboardCategoryButtons(
+                              title: 'Membership',
+                              imageIcon:
+                                  'images/dashboard_category_library.png',
+                              icon: Icons.diversity_2,
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: ((context) =>
+                                            MembershipIntroPage())));
+                                // final datenow = DateTime.now();
+                                // final later =
+                                //     datenow.addf(const Duration(hours: 24));
+
+                                // showDialog(
+                                //     context: Get.context!,
+                                //     builder: (context) {
+                                //       return SimpleDialog(
+                                //         title: Text('Error!'),
+                                //         contentPadding: EdgeInsets.all(20),
+                                //         children: [
+                                //           Text(datenow.toString()),
+                                //           Text(later.toString())
+                                //         ],
+                                //       );
+                                //     });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ]),
-          ),
-        ],
+              ]),
+            ),
+          ],
+        ),
       ),
     );
   }

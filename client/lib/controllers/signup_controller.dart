@@ -16,52 +16,63 @@ class SignupController extends GetxController {
   TextEditingController lastNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPwdController = TextEditingController();
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String loginUrl = ApiEndPoints.checkPlatform();
 
   Future<void> registerWithEmail() async {
-    try {
-      final response = await http.post(
-        Uri.parse('$loginUrl/signup'),
-        headers: <String, String>{
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'email': emailController.text,
-          'password': passwordController.text,
-          'firstname': firstNameController.text,
-          'lastname': lastNameController.text,
-        }),
-      );
+    // TODO: uncomment once email validation is available
+    print(emailController.text);
+    print(passwordController.text);
+    print(firstNameController.text);
+    print(lastNameController.text);
+    emailController.clear();
+    passwordController.clear();
+    firstNameController.clear();
+    lastNameController.clear();
+    confirmPwdController.clear();
+    // try {
+    //   final response = await http.post(
+    //     Uri.parse('$loginUrl/signup'),
+    //     headers: <String, String>{
+    //       'Accept': 'application/json',
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: jsonEncode({
+    //       'email': emailController.text,
+    //       'password': passwordController.text,
+    //       'firstname': firstNameController.text,
+    //       'lastname': lastNameController.text,
+    //     }),
+    //   );
 
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        // final SharedPreferences? prefs = await _prefs;
+    //   if (response.statusCode == 200) {
+    //     final json = jsonDecode(response.body);
+    //     // final SharedPreferences? prefs = await _prefs;
 
-        // await prefs?.setString('token', token);
-        firstNameController.clear();
-        lastNameController.clear();
-        emailController.clear();
-        passwordController.clear();
-        //go to home
-        Get.off(() => SignupSuccessPage());
-      } else if (response.statusCode == 409) {
-        throw jsonDecode(response.body)['Message'] ?? "Account already exists";
-      } else {
-        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
-      }
-    } catch (e) {
-      Get.back();
-      showDialog(
-          context: Get.context!,
-          builder: (context) {
-            return SimpleDialog(
-              title: Text('Error!'),
-              contentPadding: EdgeInsets.all(20),
-              children: [Text(e.toString())],
-            );
-          });
-    }
+    //     // await prefs?.setString('token', token);
+    //     firstNameController.clear();
+    //     lastNameController.clear();
+    //     emailController.clear();
+    //     passwordController.clear();
+    //     //go to home
+    //     Get.off(() => SignupSuccessPage());
+    //   } else if (response.statusCode == 409) {
+    //     throw jsonDecode(response.body)['Message'] ?? "Account already exists";
+    //   } else {
+    //     throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+    //   }
+    // } catch (e) {
+    //   Get.back();
+    //   showDialog(
+    //       context: Get.context!,
+    //       builder: (context) {
+    //         return SimpleDialog(
+    //           title: Text('Error!'),
+    //           contentPadding: EdgeInsets.all(20),
+    //           children: [Text(e.toString())],
+    //         );
+    //       });
+    // }
   }
 }
