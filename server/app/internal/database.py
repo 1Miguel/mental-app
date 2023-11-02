@@ -83,7 +83,7 @@ class UserModel(Model):
     age = IntField()
     occupation = CharField(128)
     birthday = CharField(128)
-    mobile_number = CharField(max_length=13)
+    mobile_number = CharField(max_length=13, default="")
 
     @classmethod
     async def get_user(cls, email: str) -> Self:

@@ -67,7 +67,7 @@ class AppointmentApi(BaseModel):
     concerns: str = ""
 
 
-class UserApi(BaseModel):
+class UserSignUpApi(BaseModel):
     """API model of a users.
 
     Supported Method: POST
