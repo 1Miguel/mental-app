@@ -154,10 +154,13 @@ class ThreadRequestApi(BaseModel):
     thread_id: int = 0
     creator: str = ""
     date_created: str = ""
+    num_likes: int = 0
     comments: List[ThreadCommentApi] = Field(default_factory=list)
+
 
 class ThreadLikeApi(BaseModel):
     """Thread like REST API.
     If like is set to True, this means like, else unlike.
     """
+
     like: bool

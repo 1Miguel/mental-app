@@ -165,7 +165,8 @@ async def get_current_user_new(token: str = Depends(oauth2_scheme)) -> UserModel
         )
     except:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
         )
     else:
         try:
@@ -182,7 +183,7 @@ async def get_current_user_new(token: str = Depends(oauth2_scheme)) -> UserModel
         age=user.age,
         occupation=user.occupation,
         birthday=user.birthday,
-        is_admin=is_admin
+        is_admin=is_admin,
     )
 
 
@@ -257,7 +258,10 @@ async def mood_get(month: str, user: UserSchema = Depends(get_current_user)) -> 
                 date=mood_db_data.date.isoformat(),
             )
         ]
-    response.percentages = [int(100 * p / len(response.mood_list)) for p in response.percentages]
+    response.percentages = [
+        0 if not response.mood_list else int(100 * p / len(response.mood_list))
+        for p in response.percentages
+    ]
     return response
 
 
@@ -354,7 +358,7 @@ async def signup_route(user: UserApi) -> Any:
     """
     log.info("Create user %s", user)
     try:
-        user = UserModel(
+        user: UserModel = UserModel(
             email=user.email,
             password_hash=bcrypt.hash(user.password),
             firstname=user.firstname,
@@ -363,6 +367,7 @@ async def signup_route(user: UserApi) -> Any:
             age=0,
             occupation="",
             birthday=datetime(year=1900, month=1, day=1).isoformat(),
+            mobile_number="",
         )
         await user.save()
         # create a folder space for the user, this will serve as
@@ -409,7 +414,9 @@ async def thread_submit(
 
 
 @app.delete("/user/thread/{thread_id}/")
-async def thread_delete(thread_id: int, user: UserProfileApi = Depends(get_current_user_new)) ->Any:
+async def thread_delete(
+    thread_id: int, user: UserProfileApi = Depends(get_current_user_new)
+) -> Any:
     try:
         thread_db = await ThreadModel.get(id=thread_id)
     except DoesNotExist as exc:
@@ -419,7 +426,8 @@ async def thread_delete(thread_id: int, user: UserProfileApi = Depends(get_curre
     thread_creator: UserModel = await thread_db.user
     if thread_creator.id != user.id:
         raise HTTPException(
-            status.HTTP_401_UNAUTHORIZED, detail="attempting to delete a thread not created by the User."
+            status.HTTP_401_UNAUTHORIZED,
+            detail="attempting to delete a thread not created by the User.",
         )
     await thread_db.delete()
 
@@ -445,9 +453,10 @@ async def thread_comment(
 
 @app.post("/user/{thread_id}/like/")
 async def thread_like(
-    thread_id: int, thread_like_api: ThreadLikeApi, user: UserProfileApi = Depends(get_current_user_new),
+    thread_id: int,
+    thread_like_api: ThreadLikeApi,
+    user: UserProfileApi = Depends(get_current_user_new),
 ) -> Any:
-    
     user_db = await UserModel.get(email=user.email)
     try:
         thread_db = await ThreadModel.get(id=thread_id)
@@ -458,13 +467,24 @@ async def thread_like(
     else:
         thread_like_db = await ThreadUserLikeModel.get_thread_like_by_user(user_db.id, thread_id)
         if thread_like_db and not thread_like_api.like:
+            log.info(f"Thread {thread_id} unlike...")
             # if the like is in the database, this means user already like the thread
             # to unlike, delete the like item in the database.
             await thread_like_db[0].delete()
-        elif thread_like_api.like:
+            # decrement thread likes
+            thread_db.num_likes -= 1
+            # then save
+            await thread_db.save()
+
+        elif not thread_like_db and thread_like_api.like:
+            log.info(f"Thread {thread_id} like...")
             # thread is not yet liked by the user check if the API instruct
             # us to like this thread - create a new model
-            await ThreadUserLikeModel(user = user_db, thread = thread_db).save()
+            await ThreadUserLikeModel(user=user_db, thread=thread_db).save()
+            # add thread like count
+            thread_db.num_likes += 1
+            # then save
+            await thread_db.save()
 
 
 @app.get("/user/thread/{thread_id}")
@@ -478,13 +498,14 @@ async def get_thread(
         raise HTTPException(
             status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
         ) from exc
-    creator = await thread.user
+    creator: UserModel = await thread.user
     # create the response model
     response = ThreadRequestApi(
         thread_id=thread_id,
         topic=thread.topic,
         content=thread.content,
         creator=creator.email,
+        num_likes=thread.num_likes,
         date_created=thread.created.isoformat(),
     )
     # build the list of responses
@@ -518,6 +539,7 @@ async def get_thread_list(
                 content=thread.content,
                 creator=creator.email,
                 date_created=thread.created.isoformat(),
+                num_likes=thread.num_likes,
             )
         ]
     return thread_req

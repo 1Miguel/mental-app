@@ -19,7 +19,7 @@ from tortoise.fields import (
     ForeignKeyField,
     CharEnumField,
     ReverseRelation,
-    BooleanField
+    BooleanField,
 )
 
 
@@ -188,7 +188,7 @@ class ThreadModel(Model):
     topic = CharField(max_length=160)
     content = CharField(max_length=1024)
     comments = ReverseRelation["ThreadCommentModel"]
-    num_likes = IntField()
+    num_likes = IntField(default=0)
 
 
 class ThreadCommentModel(Model):
@@ -214,7 +214,9 @@ class ThreadUserLikeModel(Model):
         return await cls.filter(user__id=user_id)
 
     @classmethod
-    async def get_thread_like_by_user(cls, user_id: int, thread_id: int) -> List["ThreadUserLikeModel"]:
+    async def get_thread_like_by_user(
+        cls, user_id: int, thread_id: int
+    ) -> List["ThreadUserLikeModel"]:
         return await cls.filter(user__id=user_id, thread__id=thread_id)
 
 
