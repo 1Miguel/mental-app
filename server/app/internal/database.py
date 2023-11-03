@@ -187,9 +187,10 @@ class ThreadModel(Model):
     user = ForeignKeyField("models.UserModel")
     created = DatetimeField(auto_now=True)
     topic = CharField(max_length=160)
-    content = CharField(max_length=1024)
+    content = CharField(max_length=256)
     comments = ReverseRelation["ThreadCommentModel"]
     num_likes = IntField(default=0)
+    num_comments = IntField(default=0)
 
 
 class ThreadCommentModel(Model):
@@ -197,7 +198,7 @@ class ThreadCommentModel(Model):
     user = ForeignKeyField("models.UserModel")
     thread = ForeignKeyField("models.ThreadModel")
     created = DatetimeField(auto_now=True)
-    content = CharField(max_length=1024)
+    content = CharField(max_length=256)
 
     @classmethod
     async def get_thread_comments(cls, thread_id: int) -> List["ThreadCommentModel"]:

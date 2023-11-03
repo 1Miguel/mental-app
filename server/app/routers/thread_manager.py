@@ -118,6 +118,8 @@ class ThreadManager:
             await ThreadCommentModel(
                 user=commenter, thread=thread, content=thread_comment.content
             ).save()
+            thread.num_comments += 1
+            await thread.save()
         except DoesNotExist as exc:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
@@ -167,16 +169,8 @@ class ThreadManager:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
             ) from exc
-        creator: UserModel = await thread.user
         # create the response model
-        response = ThreadRequestApi(
-            thread_id=thread_id,
-            topic=thread.topic,
-            content=thread.content,
-            creator=creator.email,
-            num_likes=thread.num_likes,
-            date_created=thread.created,
-        )
+        response: ThreadRequestApi = await ThreadRequestApi.from_model(thread)
         # build the list of responses
         for comment in await ThreadCommentModel.get_thread_comments(thread_id):
             response.comments += [
@@ -186,8 +180,6 @@ class ThreadManager:
                     content=comment.content,
                 )
             ]
-
-        # get all comments related to this thread
         return response
 
     async def get_thread_list(
@@ -197,16 +189,8 @@ class ThreadManager:
         thread_list = await ThreadModel.all().order_by("-created").offset(page * 5).limit(limit)
         thread_req = []
         for thread in thread_list:
-            creator = await thread.user
-            thread_req += [
-                ThreadRequestApi(
-                    thread_id=thread.id,
-                    topic=thread.topic,
-                    content=thread.content,
-                    creator=creator.email,
-                    date_created=thread.created.isoformat(),
-                )
-            ]
+            _th = await ThreadRequestApi.from_model(thread)
+            thread_req.append(_th)
         return thread_req
 
     async def get_all_thread_with_filter(self, filter: str, limit: int=100, user: UserProfileApi = Depends(get_current_user)) -> List[ThreadRequestApi]:

@@ -9,12 +9,14 @@ from typing import List, Tuple, Dict
 from datetime import datetime
 from pydantic import BaseModel, Field
 from internal.database import (
+    UserModel,
     MembershipType,
     MembershipStatus,
     AppointmentStatus,
     AppointmentServices,
     AppointmentModel,
-    ThreadModel
+    ThreadModel,
+    ThreadUserLikeModel
 )
 
 
@@ -176,18 +178,23 @@ class ThreadRequestApi(BaseModel):
     thread_id: int = 0
     creator: str = ""
     date_created: datetime = datetime.today()
+    is_liked: bool = False
     num_likes: int = 0
+    num_comments: int = 0
     comments: List[ThreadCommentApi] = Field(default_factory=list)
 
     @classmethod
     async def from_model(cls, model: ThreadModel) -> "ThreadRequestApi":
+        user: UserModel = await model.user
         return cls(
             thread_id=model.id,
             topic=model.topic,
             content=model.content,
-            creator=(await model.user).email,
+            creator=user.email,
             num_likes=model.num_likes,
+            num_comments=model.num_comments,
             date_created=model.created,
+            is_liked = await ThreadUserLikeModel.exists(user__id=user.id, thread__id = model.id)
         )
 
 class ThreadLikeApi(BaseModel):
