@@ -16,7 +16,7 @@ from internal.database import (
     AppointmentServices,
     AppointmentModel,
     ThreadModel,
-    ThreadUserLikeModel
+    ThreadUserLikeModel,
 )
 
 
@@ -194,8 +194,9 @@ class ThreadRequestApi(BaseModel):
             num_likes=model.num_likes,
             num_comments=model.num_comments,
             date_created=model.created,
-            is_liked = await ThreadUserLikeModel.exists(user__id=user.id, thread__id = model.id)
+            is_liked=await ThreadUserLikeModel.exists(user__id=user.id, thread__id=model.id),
         )
+
 
 class ThreadLikeApi(BaseModel):
     """Thread like REST API.

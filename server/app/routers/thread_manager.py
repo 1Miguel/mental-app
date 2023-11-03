@@ -139,7 +139,9 @@ class ThreadManager:
                 status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
             ) from exc
         else:
-            thread_like_db = await ThreadUserLikeModel.filter(user__id=user_db.id, thread__id=thread_id)
+            thread_like_db = await ThreadUserLikeModel.filter(
+                user__id=user_db.id, thread__id=thread_id
+            )
 
             if thread_like_db and not thread_like_api.like:
                 # if the like is in the database, this means user already like the thread
@@ -193,16 +195,22 @@ class ThreadManager:
             thread_req.append(_th)
         return thread_req
 
-    async def get_all_thread_with_filter(self, filter: str, limit: int=100, user: UserProfileApi = Depends(get_current_user)) -> List[ThreadRequestApi]:
+    async def get_all_thread_with_filter(
+        self, filter: str, limit: int = 100, user: UserProfileApi = Depends(get_current_user)
+    ) -> List[ThreadRequestApi]:
         if filter == "liked":
             thread = [
                 await ThreadRequestApi.from_model(await liked_thread.thread)
-                for liked_thread in await ThreadUserLikeModel.filter(user__id=user.id).order_by("-liked_at").limit(limit)
+                for liked_thread in await ThreadUserLikeModel.filter(user__id=user.id)
+                .order_by("-liked_at")
+                .limit(limit)
             ]
         elif filter == "posted":
             thread = [
                 await ThreadRequestApi.from_model(thread)
-                for thread in await ThreadModel.filter(user__id=user.id).order_by("-created").limit(limit)
+                for thread in await ThreadModel.filter(user__id=user.id)
+                .order_by("-created")
+                .limit(limit)
             ]
         else:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=f"invalid filter {filter}")

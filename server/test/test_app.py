@@ -403,11 +403,11 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
         print("------------############------", test_response.json())
         expect_num_likes = test_response.json()["num_likes"] + 1
 
-        test_like_rest_json = {
-            "like": True
-        }
+        test_like_rest_json = {"like": True}
         test_response = self.client.post(
-            f"http://127.0.0.1:8000/user/thread/{test_thread_id}/like/", headers=headers, json=test_like_rest_json
+            f"http://127.0.0.1:8000/user/thread/{test_thread_id}/like/",
+            headers=headers,
+            json=test_like_rest_json,
         )
         self.assertTrue(test_response.ok)
 

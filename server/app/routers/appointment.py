@@ -194,7 +194,9 @@ class Appointment:
         appointments = [
             await AppointmentInfoApi.from_model(appointment)
             for appointment in await AppointmentModel.filter(
-                start_time__gte=datetime.today(), status=AppointmentStatus.RESERVED, patient__id=user.id
+                start_time__gte=datetime.today(),
+                status=AppointmentStatus.RESERVED,
+                patient__id=user.id,
             )
             .order_by("start_time")
             .limit(limit)
@@ -209,7 +211,9 @@ class Appointment:
         appointments = [
             await AppointmentInfoApi.from_model(appointment)
             for appointment in await AppointmentModel.filter(
-                start_time__lt=datetime.today(), status=AppointmentStatus.RESERVED, patient__id=user.id
+                start_time__lt=datetime.today(),
+                status=AppointmentStatus.RESERVED,
+                patient__id=user.id,
             )
             .order_by("-start_time")
             .limit(limit)

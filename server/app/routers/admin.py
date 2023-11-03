@@ -19,7 +19,6 @@ from internal.schema import *
 
 
 class AdminManager:
-
     def __init__(
         self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
     ) -> None:
@@ -31,14 +30,14 @@ class AdminManager:
             self.admin_get_appointments,
             methods=["GET"],
             response_model=List[AppointmentInfoApi],
-            description="Returns all appointment data stored in the database."
+            description="Returns all appointment data stored in the database.",
         )
         self._routing.add_api_route(
             "/admin/appointment/{appointment_id}/update",
             self.admin_update_appointment,
             methods=["GET"],
             response_model=AppointmentInfoApi,
-            description="Updates the appointment status."
+            description="Updates the appointment status.",
         )
 
     @property
