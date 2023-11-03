@@ -104,6 +104,7 @@ class AppointmentStatus(str, Enum):
     PENDING = "PENDING"
     RESERVED = "RESERVED"
     CANCELLED = "CANCELLED"
+    RESCHEDULE = "RESCHEDULE"
 
 
 class AppointmentServices(str, Enum):
@@ -228,7 +229,7 @@ class Doctor(Model):
     # center = ForeignKeyField("models.HealthCenter")
 
 
-class Appointment(Model):
+class AppointmentModel(Model):
     """Model the describe an appointment.
 
     An appointment basically consists of a patient(user), doctor(user) and the

@@ -6,12 +6,14 @@ uses pydantic base model.
 date: 10/07/2023
 """
 from typing import List, Tuple, Dict
+from datetime import datetime
 from pydantic import BaseModel, Field
 from internal.database import (
     MembershipType,
     MembershipStatus,
     AppointmentStatus,
     AppointmentServices,
+    AppointmentModel
 )
 
 
@@ -45,14 +47,33 @@ class AppointmentInfoApi(BaseModel):
     id: int
     patient_id: int
     center: str
-    start_time: str
-    end_time: str
+    start_time: datetime
+    end_time: datetime
     status: AppointmentStatus
+
+    @classmethod
+    async def from_model(cls, model: AppointmentModel) -> "AppointmentInfoApi":
+        patient = await model.patient
+        return cls(
+            id=model.id,
+            patient_id=patient.id,
+            center="",
+            start_time=model.start_time,
+            end_time=model.end_time,
+            status=model.status,      
+        )
 
 
 class AppointmentBlockedSlot(BaseModel):
-    start_time: str
-    end_time: str
+    start_time: datetime
+    end_time: datetime
+
+    @classmethod
+    async def from_model(cls, model: AppointmentModel) -> "AppointmentBlockedSlot":
+        return cls(
+            start_time=model.start_time,
+            end_time=model.end_time,
+        )
 
 
 class AppointmentApi(BaseModel):
@@ -61,8 +82,8 @@ class AppointmentApi(BaseModel):
     Supported Method: POST
     """
 
-    start_time: str
-    end_time: str
+    start_time: datetime
+    end_time: datetime
     service: AppointmentServices
     concerns: str = ""
 

@@ -13,13 +13,7 @@ from typing import Any, Optional
 # third-party imports
 import jwt
 from passlib.hash import bcrypt
-from fastapi import (
-    HTTPException,
-    Response,
-    status,
-    Depends,
-    APIRouter
-)
+from fastapi import HTTPException, Response, status, Depends, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from tortoise.exceptions import DoesNotExist, IntegrityError
 from tortoise.contrib.pydantic import pydantic_model_creator
@@ -48,7 +42,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserModel:
     """Returns the user database model from given token. This is the validation
     routine when a user attempts to access a page that requries authentication
-    via token. 
+    via token.
 
     Args:
         token (str, optional): User Token. Defaults to Depends(oauth2_scheme).
@@ -57,12 +51,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserModel:
         HTTPException: HTTP_401_UNAUTHORIZED for invalid access.
     """
     try:
-    # ---- check if this email has valid auth
+        # ---- check if this email has valid auth
         user: UserModel = await UserModel.get(
             email=jwt.decode(token, _JWT_SECRET, algorithms="HS256").get("email")
         )
     except:
-    # ---- account invalid or user does not exist
+        # ---- account invalid or user does not exist
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
@@ -86,7 +80,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserModel:
 
 
 class AccountManager:
-
     # temporary file where all files will be stored
     _temp_file_storage: TemporaryDirectory = "./files"
 
@@ -97,12 +90,14 @@ class AccountManager:
             "/login", self.login, methods=["POST"], response_model=UserProfileApi
         )
         self._routing.add_api_route(
-            "/signup", self.signup, methods=["POST"],
+            "/signup",
+            self.signup,
+            methods=["POST"],
         )
         self._routing.add_api_route(
             "/token", self._generate_token, methods=["POST"], response_model=Any
         )
-    
+
     @property
     def router(self) -> APIRouter:
         """FastAPI Router Instance.
@@ -148,7 +143,7 @@ class AccountManager:
         """
         # return the profile at login success
         return user
-    
+
     async def signup(self, user: UserSignUpApi) -> None:
         """Route to call when user wishes to create a new account.
         This requires unique credential. if email or email is already used,

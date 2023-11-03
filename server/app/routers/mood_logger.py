@@ -5,7 +5,7 @@ date: 02/11/2023
 # ---- Standard
 import logging
 from typing import List, Optional
-from datetime import datetime, date
+from datetime import date
 
 # ---- Thirdparty
 from fastapi import HTTPException, status, Depends
@@ -19,19 +19,12 @@ from internal.schema import *
 
 
 class MoodLogger:
-    """Appointment Class that contains all routes that is 
-    related to appointment services.
-    
-      Supported Routes:
-    ---------------------
+    """Mood Logger Class that contains all routes that is
+    related to Mood logging services."""
 
-        1. "user/mood/{year}/{month}/{day}/"
-            Methods:
-                POST: Log mood on given date
-                GET: Get list of mood on given date
-    """
-
-    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
+    def __init__(
+        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
+    ) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         # ---- Set all routes
@@ -62,11 +55,13 @@ class MoodLogger:
         """
         return self._routing
 
-    async def set_mood(self, mood: MoodLog, user: UserProfileApi = Depends(get_current_user)) -> None:
+    async def set_mood(
+        self, mood: MoodLog, user: UserProfileApi = Depends(get_current_user)
+    ) -> None:
         """Daily Mood Logging. if mood score has been log for today, dont lot anymore
         and return an HTTP_409_CONFLICT error."""
         user = await UserModel.get(email=user.email)
-        today = datetime.today().date() if not mood.date else mood.date
+        today = date.today() if not mood.date else mood.date
         mood_id = MoodId(mood.mood)
         try:
             mood_db = await MoodModel.get(date=today)
@@ -82,13 +77,18 @@ class MoodLogger:
         await mood_db.save()
 
     async def get_mood_list(
-        self, year: int, month: int, day: Optional[int]=None, limit: Optional[int]=None, user: UserProfileApi = Depends(get_current_user)
+        self,
+        year: int,
+        month: int,
+        day: Optional[int] = None,
+        limit: Optional[int] = None,
+        user: UserProfileApi = Depends(get_current_user),
     ) -> MoodListResponse:
-        
         # ---- 1. Query list of mood data base on date and user
         date_time_q = f"{year:04}-{month:02}"
         if day is not None:
             date_time_q += f"-{day:02}"
+        self._log.info("Filter all moods at %s", date_time_q)
         mood_db_list: List[MoodModel] = await MoodModel.filter(
             user__id=user.id, date__startswith=date_time_q
         ).all()
