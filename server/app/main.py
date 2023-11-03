@@ -20,6 +20,7 @@ from tortoise.contrib.fastapi import register_tortoise
 from routers.account import AccountManager
 from routers.appointment import Appointment
 from routers.mood_logger import MoodLogger
+from routers.thread_manager import ThreadManager
 
 # ------------------------------------------------------ #
 # Debug
@@ -65,9 +66,11 @@ register_tortoise(
 account_manager = AccountManager()
 appointment = Appointment()
 mood_logger = MoodLogger()
+thread_manager = ThreadManager()
 app.include_router(account_manager.router)
 app.include_router(appointment.router)
 app.include_router(mood_logger.router)
+app.include_router(thread_manager.router)
 
 
 # ------------------------------------------------------ #

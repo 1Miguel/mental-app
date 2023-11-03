@@ -4,11 +4,10 @@ import logging
 import unittest
 import requests
 import random
-import datetime
-from typing import Dict, Tuple
+from datetime import datetime
+from typing import Dict, Tuple, Any
 
-# logger module
-log = logging.getLogger("requests_oauthlib")
+log = logging.getLogger(__name__)
 # TODO: Add a flag if logging must be displayed in the terminal
 #       flag can either be an env variable or from a file.
 #       another option is for this to be in the unit test file.
@@ -19,8 +18,9 @@ handler.setFormatter(logging.Formatter("%(levelname)s: %(asctime)-15s : %(messag
 log.addHandler(handler)
 
 
-class TestServer(unittest.TestCase):
-    client: requests.Session
+class _Helpers:
+    """Baseclass that contains all helper functions.
+    A TestCase child class must inherit this class."""
 
     def setUp(self):
         self.client = requests.Session()
@@ -28,7 +28,7 @@ class TestServer(unittest.TestCase):
     def tearDown(self):
         self.client.close()
 
-    def login_routine(self) -> Tuple[str, Dict[str, str]]:
+    def helper_login_routine(self) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """Helper function for logging in.
 
         Returns:
@@ -52,18 +52,19 @@ class TestServer(unittest.TestCase):
         user = self.client.get("http://127.0.0.1:8000/login", headers=headers)
         return headers, user.json()
 
-    def test_root_response(self):
-        """Test Root Response.
 
-        Given: Server is running
-         When: Client GET index page
-         Then: Server must respond with hello message.
-        """
-        response = self.client.get("http://127.0.0.1:8000")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.text, '{"message":"Hello World"}')
+class TestFeature1AccountFeature(_Helpers, unittest.TestCase):
+    """Feature 1: Account Features.
 
-    def test_create_a_new_user(self) -> None:
+      Requirements
+    ----------------
+        1. As a user I must be able to sign up and create an account.
+            > email must be a valid email
+            > must provide firstname and lastname
+        2. As a user I must be able to login.
+    """
+
+    def test_account_feature_1p1_signup_create_an_account(self) -> None:
         """Test Creating a new user profile.
 
         Given: Server is running
@@ -77,16 +78,15 @@ class TestServer(unittest.TestCase):
         new_user_req = {
             "email": "johndoe@gmail.com",
             "password": "testpassword",
-            "firstname": "john",
-            "lastname": "doe",
+            "firstname": "John",
+            "lastname": "Doe",
         }
         response = self.client.post(
             "http://127.0.0.1:8000/signup", headers=headers, json=new_user_req
         )
-        print(response.json())
         self.assertEqual(response.status_code, 200)
 
-    def test_user_login(self) -> None:
+    def test_account_feature_1p2_user_login(self) -> None:
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
@@ -102,41 +102,43 @@ class TestServer(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("access_token", token)
         self.assertIn("token_type", token)
-
         access_token = token["access_token"]
         token_type = token["token_type"]
         headers = {"Authorization": f"{token_type} {access_token}"}
         response = self.client.get("http://127.0.0.1:8000/login", headers=headers)
         self.assertEqual(response.status_code, 200)
 
-    def test_log_mood_today(self) -> None:
-        """Test Logging Mood today.
+        log.info("Succesfully login...")
 
-        Given: Today is a new day
-         When: Attempt to log mood
-         Then: Server response must be ok
-         When: Attempt to log mood again
-         Then: Server response must be
-        """
-        headers, _ = self.login_routine()
-        headers["accept"]: "application/json"
-        new_mood = {"mood": 0, "note": "Feeling happy!"}
-        # first time setting mood today
-        response = self.client.post(
-            f"http://127.0.0.1:8000/user/mood", headers=headers, json=new_mood
-        )
-        self.assertTrue(response.ok)
 
-    def test_log_mood_rand_a_month(self) -> None:
+class TestFeature2MoodLoggingFeature(_Helpers, unittest.TestCase):
+    """Feature 2: Mood Logging.
+
+      Requirements
+    ----------------
+        2.1. As a user I must be able to log my mood every day.
+            > Must contain mood score
+                HAPPY(1), SAD(2), CONFUSED(3), SCARED(4), ANGRY(5)
+        2.2. As a user I must be able to GET all mood logs within a month.
+            > With percentage statistics for each mood scores.
+    """
+
+    def __init__(self, methodName: str = "runTest") -> None:
+        super().__init__(methodName)
+        # test vars, this will be used consistently while testing the
+        # mood logging feature.
+        self.test_year = 2023
+        self.test_month = 10
+
+    def test_mood_logging_2p1_random_log_month(self) -> None:
         """Test Logging Mood today.
 
         Given: User is logged in
          When: Attempt to log mood for entire month
          Then: Server response must be ok
         """
-        headers, _ = self.login_routine()
+        headers, _ = self.helper_login_routine()
         headers["accept"]: "application/json"
-
         notes = [
             "Feeling Happy!",
             "Feeling Sad",
@@ -144,18 +146,24 @@ class TestServer(unittest.TestCase):
             "Feeling Scared",
             "Feeling Angry",
         ]
-
         for day in range(1, 24):
-            today = datetime.datetime(2023, 10, day)
+            # NOTE: This simulates logging mood thru out a month.
+            # for each day, a random mood will be logged.
             rand_mood = int(random.random() * 4)
-            new_mood = {"mood": rand_mood, "note": notes[rand_mood], "date": today.isoformat()}
+            new_mood = {
+                "mood": rand_mood,
+                "note": notes[rand_mood],
+                "date": datetime(2023, 10, day).isoformat(),
+            }
+            log.info("Random mood logging %s", new_mood)
             # first time setting mood today
             response = self.client.post(
-                f"http://127.0.0.1:8000/user/mood", headers=headers, json=new_mood
+                f"http://127.0.0.1:8000/user/mood/log/", headers=headers, json=new_mood
             )
-        self.assertTrue(response.ok)
+            log.info("Returned response: %s", response)
+            self.assertTrue(response.ok)
 
-    def test_get_log_mood_this_month(self) -> None:
+    def test_mood_logging_2p2_get_all_moods_this_month(self) -> None:
         """Test Requesting list of log moods for a given month.
 
         Given: Logged in
@@ -163,99 +171,241 @@ class TestServer(unittest.TestCase):
          Then: Server response must be ok
           And: Data must be returned.
         """
-        headers, _ = self.login_routine()
+        headers, _ = self.helper_login_routine()
         headers["accept"]: "application/json"
         test_params = {"month": "2023-10-11"}
 
+        log.info("Get Moods in %s-%s", self.test_year, self.test_month)
         test_response = self.client.get(
-            "http://127.0.0.1:8000/user/mood/", headers=headers, params=test_params
+            f"http://127.0.0.1:8000/user/mood/{self.test_year}/{self.test_month}/",
+            headers=headers,
+            params=test_params,
+        )
+        log.debug("Mood logs %s", test_response.json())
+        self.assertTrue(test_response.ok)
+
+
+class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
+    """Feature 3: appointment scheduling.
+
+      Requirements:
+    -------------------
+        3.1. As a user I must be able to schedule an appointment.
+        3.2. As a user I must be able to GET all blocked schedule.
+        3.3. As a user I must be able to CANCEL appointment.
+        3.4. As a user I must be able to GET UPCOMING appointments.
+        3.5. As a user I must be able to GET PREVIOUS appointment.
+        3.6. As a user I must be able to RESCHEDULE appointment.
+    """
+
+    def __init__(self, methodName: str = "runTest") -> None:
+        super().__init__(methodName)
+        self.test_month = 11
+        self.test_year = 2023
+
+    def test_appointment_schedule_3p1_schedule_appointment(self) -> None:
+        headers, _ = self.helper_login_routine()
+        headers["accept"]: "application/json"
+
+        test_day = int(random.random() * 30)
+        test_hour = 9
+        test_duration = 1
+        test_json = {
+            "start_time": datetime(
+                self.test_year, self.test_month, test_day, test_hour, 0
+            ).isoformat(),
+            "end_time": datetime(
+                self.test_year, self.test_month, test_day, test_hour + test_duration, 0
+            ).isoformat(),
+            "service": "COUNSELING",
+            "concerns": "No Concerns.",
+        }
+        test_response = self.client.post(
+            f"http://127.0.0.1:8000/user/appointment/new/",
+            headers=headers,
+            json=test_json,
+        )
+        self.assertTrue(test_response.ok)
+        log.info("scheduling: %s", test_json)
+
+    def test_appointment_schedule_3p2_get_blocked_schedules(self) -> None:
+        headers, _ = self.helper_login_routine()
+        headers["accept"]: "application/json"
+
+        test_day = int(random.random() * 30)
+        test_hour = 9
+        test_duration = 1
+        test_json = {
+            "start_time": datetime(
+                self.test_year, self.test_month, test_day, test_hour, 0
+            ).isoformat(),
+            "end_time": datetime(
+                self.test_year, self.test_month, test_day, test_hour + test_duration, 0
+            ).isoformat(),
+            "service": "COUNSELING",
+            "concerns": "No Concerns.",
+        }
+        test_response = self.client.get(
+            f"http://127.0.0.1:8000/user/appointment/schedule/{self.test_year}/{self.test_month}/",
+            headers=headers,
+            json=test_json,
         )
         self.assertTrue(test_response.ok)
 
-    def test_set_scheduling_appointment_month(self) -> None:
-        """Test Scheduling appointments for a given month.
+        for i in test_response.json():
+            log.info("Block Schedule: %s", i)
 
-        Given: Logged in
-         When: Mood log list is requested with a given date
-         Then: Server response must be ok
-          And: Data must be returned.
-        """
-        headers, _ = self.login_routine()
+    def test_appointment_schedule_3p3_cancel_appointment(self) -> None:
+        headers, _ = self.helper_login_routine()
         headers["accept"]: "application/json"
-        test_params = {"month": "2023-10-11"}
 
+        test_appointment_id = 1
+        test_response = self.client.post(
+            f"http://127.0.0.1:8000/user/appointment/myschedule/{test_appointment_id}/cancel/",
+            headers=headers,
+        )
         test_response = self.client.get(
-            "http://127.0.0.1:8000/user/mood/", headers=headers, params=test_params
+            f"http://127.0.0.1:8000/user/appointment/myschedule/{test_appointment_id}",
+            headers=headers,
         )
         self.assertTrue(test_response.ok)
+        self.assertEqual("CANCELLED", test_response.json()["status"])
+        log.debug("Appointment: %s", test_response.json())
 
-    def test_user_logout(self) -> None:
-        """Test User logout.
-
-        Given: User is login and user has token
-         When: User logout
-         Then: Server must return unauthorize access to all API request.
-        """
-
-    def test_membership_registration(self) -> None:
-        """Test User Membership Registration"""
-        headers, _ = self.login_routine()
+    def test_appointment_schedule_3p4_get_upcoming_appointment(self) -> None:
+        headers, _ = self.helper_login_routine()
         headers["accept"]: "application/json"
-        with open("./test_file.txt", "rb") as file, open("./test_file_2.txt", "rb") as file_2:
+        test_response = self.client.get(
+            f"http://127.0.0.1:8000/user/appointment/myschedule/upcoming/",
+            headers=headers,
+        )
+        self.assertTrue(test_response.ok)
+        log.debug("Upcoming Appointment: %s", test_response.json())
+
+    def test_appointment_schedule_3p5_get_previous_appointment(self) -> None:
+        headers, _ = self.helper_login_routine()
+        headers["accept"]: "application/json"
+        test_response = self.client.get(
+            f"http://127.0.0.1:8000/user/appointment/myschedule/previous/",
+            headers=headers,
+            params={
+                "limit": 5,
+            },
+        )
+        self.assertTrue(test_response.ok)
+        log.debug("Previous Appointment: %s", test_response.json())
+
+    def test_appointment_schedule_3p6_reschedule_appointment(self) -> None:
+        headers, _ = self.helper_login_routine()
+        headers["accept"]: "application/json"
+
+        # ---- 1. Get list of upcoming reschedule, pick the first one and reschedule
+        test_response = self.client.get(
+            f"http://127.0.0.1:8000/user/appointment/myschedule/upcoming/",
+            headers=headers,
+        )
+        test_upcoming_appointment = test_response.json()[0]
+        test_appointment_id = test_upcoming_appointment["id"]
+        log.info("upcoming appointment: %s", test_upcoming_appointment)
+
+        # ---- 2. choose a random day
+        test_day = int(random.random() * 30)
+        test_hour = 9
+        test_duration = 1
+        test_new_appointment_json = {
+            "start_time": datetime(
+                self.test_year, self.test_month, test_day, test_hour, 0
+            ).isoformat(),
+            "end_time": datetime(
+                self.test_year, self.test_month, test_day, test_hour + test_duration, 0
+            ).isoformat(),
+            "service": "COUNSELING",
+            "concerns": "No Concerns.",
+        }
+
+        log.info("reschedule new appointment: %s", test_new_appointment_json)
+        test_response = self.client.post(
+            f"http://127.0.0.1:8000/user/appointment/myschedule/{test_appointment_id}/reschedule/",
+            headers=headers,
+            json=test_new_appointment_json,
+        )
+        self.assertTrue(test_response.ok)
+        self.assertEqual("RESCHEDULE", test_response.json()["status"])
+
+
+class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
+    """Feature 4: Community Thread scheduling.
+
+      Requirements:
+    -------------------
+        4.1. As a user I must be able post in community thread.
+            > Thread must contain:
+                4.1.1. Subject
+                4.1.2. Content
+                4.1.3. Alias
+        4.2. As a user I must be able to GET and see all thread in a front page.
+            > must be able to GET and see number of likes a thread has.
+            > As a user I must be able to GET and see the thread creator.
+            > must be able to GET and see all comments in a thread.
+        4.3. As a user I must be able to like a thread I find I like.
+        4.4. As a user I must be able to POST a comment in a thread.
+    """
+
+    def __init__(self, methodName: str = "runTest") -> None:
+        super().__init__(methodName)
+
+    def test_thread_feature_4p1_user_post_thread(self) -> None:
+        headers, _ = self.helper_login_routine()
+        for thread_id in range(0, 10):
+            thread_api = {
+                "topic": f"My Test Topic {thread_id}",
+                "content": f"My Test Content {thread_id}",
+            }
             test_response = self.client.post(
-                "http://127.0.0.1:8000/user/membership/register",
-                headers=headers,
-                # [('files', open('images/1.png', 'rb')), ('files', open('images/2.png', 'rb'))]
-                files=[("files", file), ("files", file_2)],
-                data={
-                    "membership_api": json.dumps({"membership_type": 0}),
-                },
+                "http://127.0.0.1:8000/user/thread/submit", headers=headers, json=thread_api
             )
             self.assertTrue(test_response.ok)
 
-    def test_submit_new_thread(self) -> None:
-        """Test Submitting a new threads.
+    def test_thread_feature_4p2_GET_all_threads(self) -> None:
+        """Test GET thread list.
 
         Given: User is logged in
-         When: User submits a new thread
-         Then: Server must respond with 200 OK
-         When: Thread is queried
-         Then: Thread queried must contain recently submitted threads.
+         When: User GET all thread
+         With: given limit
+         Then: Server must respond with list of threads
+          And: Length of list must be within limit given
+          And: Server must respond with 200 OK
         """
-        headers, _ = self.login_routine()
+        headers, _ = self.helper_login_routine()
         headers["accept"]: "application/json"
-        test_submit_req = {
-            "topic": "My Test Topic",
-            "content": "My Test Content",
-        }
+
+        test_limit = 5
+        test_response = self.client.get(
+            f"http://127.0.0.1:8000/user/thread/0/?limit={test_limit}", headers=headers
+        )
+        self.assertTrue(test_response.ok)
+        self.assertLessEqual(len(test_response.json()), test_limit)
+        for res in test_response.json():
+            log.info("%s", res)
+
+    def test_thread_feature_4p3_like_a_thread(self) -> None:
+        headers, _ = self.helper_login_routine()
+        headers["accept"]: "application/json"
+
+        test_response = self.client.get("http://127.0.0.1:8000/user/thread/3/", headers=headers)
+        self.assertTrue(test_response.ok)
+
+        expect_num_likes = test_response.json()["num_likes"] + 1
         test_response = self.client.post(
-            "http://127.0.0.1:8000/user/thread/submit", headers=headers, json=test_submit_req
+            "http://127.0.0.1:8000/user/thread/3/like/", headers=headers
         )
         self.assertTrue(test_response.ok)
 
-    def test_get_thread_info(self) -> None:
-        """Test GET thread info.
-
-        Given: User is logged in
-         When: User GET a thread with a given thread_id
-         Then: Server must respond with the thread data
-          And: Server must respond with 200 OK
-
-        But:
-          When: User GET a thread that does not exist
-          Then: Server must respond with 404 NOT FOUND
-        """
-
-        headers, _ = self.login_routine()
-        headers["accept"]: "application/json"
-
-        test_response = self.client.get("http://127.0.0.1:8000/user/thread/1", headers=headers)
+        test_response = self.client.get("http://127.0.0.1:8000/user/thread/3/", headers=headers)
         self.assertTrue(test_response.ok)
+        self.assertEqual(expect_num_likes, test_response.json()["num_likes"])
 
-        test_response = self.client.get("http://127.0.0.1:8000/user/thread/99", headers=headers)
-        self.assertEqual(test_response.status_code, 404)
-
-    def test_thread_comment(self) -> None:
+    def test_thread_feature_4p4_post_a_comment_in_thread(self) -> None:
         """Test POST thread comment.
 
         Given: User is logged in
@@ -267,40 +417,30 @@ class TestServer(unittest.TestCase):
          Then: Server must respond with 404 NOT FOUND
 
         """
-        headers, _ = self.login_routine()
+        headers, _ = self.helper_login_routine()
         headers["accept"]: "application/json"
 
         test_data = {"content": "Test Comment"}
 
         test_response = self.client.post(
-            "http://127.0.0.1:8000/user/thread/1/comment/", headers=headers, json=test_data
+            "http://127.0.0.1:8000/user/thread/3/comment/", headers=headers, json=test_data
         )
         self.assertTrue(test_response.ok)
-
         test_response = self.client.post(
             "http://127.0.0.1:8000/user/thread/99/comment/", headers=headers, json=test_data
         )
         self.assertEqual(test_response.status_code, 404)
 
-    def test_get_thread_list(self) -> None:
-        """Test GET thread list.
 
-        Given: User is logged in
-         When: User GET all thread
-         With: given limit
-         Then: Server must respond with list of threads
-          And: Length of list must be within limit given
-          And: Server must respond with 200 OK
-        """
-        headers, _ = self.login_routine()
-        headers["accept"]: "application/json"
+class TestFeature5AdminFeature(_Helpers, unittest.TestCase):
+    """Feature 4:  AAdmin Features.
 
-        test_limit = 5
-        test_response = self.client.get(
-            f"http://127.0.0.1:8000/user/thread/0/?limit={test_limit}", headers=headers
-        )
-        self.assertTrue(test_response.ok)
-        self.assertLessEqual(len(test_response.json()), test_limit)
+      Requirements:
+    ----------------
+        [4.1. Appointments]
+            4.1.1. As an Admin I must be able to view all appointments.
+            4.1.2. As an Admin I must be able to approve/decline/ignore appointment schedule.
+    """
 
 
 if __name__ == "__main__":

@@ -87,7 +87,7 @@ class AccountManager:
         self._routing = router if router else APIRouter()
         #: ---- Set all routes
         self._routing.add_api_route(
-            "/login", self.login, methods=["POST"], response_model=UserProfileApi
+            "/login", self.login, methods=["GET"], response_model=UserProfileApi
         )
         self._routing.add_api_route(
             "/signup",

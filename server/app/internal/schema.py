@@ -13,7 +13,7 @@ from internal.database import (
     MembershipStatus,
     AppointmentStatus,
     AppointmentServices,
-    AppointmentModel
+    AppointmentModel,
 )
 
 
@@ -60,7 +60,7 @@ class AppointmentInfoApi(BaseModel):
             center="",
             start_time=model.start_time,
             end_time=model.end_time,
-            status=model.status,      
+            status=model.status,
         )
 
 

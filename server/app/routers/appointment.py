@@ -17,12 +17,6 @@ from routers.account import get_current_user
 from internal.database import *
 from internal.schema import *
 
-def _is_iso_format(dt: str) -> bool:
-    try:
-        datetime.fromisoformat(dt)
-    except ValueError as exc:
-        return False
-    return True
 
 class Appointment:
     """Appointment Class that contains all routes that is
@@ -63,31 +57,45 @@ class Appointment:
             "/user/appointment/new/",
             self.new_appointment,
             methods=["POST"],
+            response_model=AppointmentInfoApi,
         )
         self._routing.add_api_route(
-            "/user/appointment/{appointment_id}",
-            self.get_appointment,
+            "/user/appointment/myschedule/upcoming/",
+            self.get_user_upcoming_appointment_schedules,
+            methods=["GET"],
+            response_model=List[AppointmentInfoApi],
+        )
+        self._routing.add_api_route(
+            "/user/appointment/myschedule/previous/",
+            self.get_user_previous_appointment_schedules,
+            methods=["GET"],
+            response_model=List[AppointmentInfoApi],
+        )
+        self._routing.add_api_route(
+            "/user/appointment/myschedule/{appointment_id}",
+            self.get_user_appointment,
             methods=["GET"],
             response_model=AppointmentInfoApi,
         )
         self._routing.add_api_route(
-            "/user/appointment/{appointment_id}/reschedule",
-            self.reschedule_appointment,
+            "/user/appointment/myschedule/{appointment_id}/reschedule/",
+            self.reschedule_user_appointment,
+            methods=["POST"],
+            response_model=AppointmentInfoApi,
+        )
+        self._routing.add_api_route(
+            "/user/appointment/myschedule/{appointment_id}/cancel/",
+            self.cancel_user_appointment,
             methods=["POST"],
         )
         self._routing.add_api_route(
-            "/user/appointment/scheduled/{appointment_id}/cancel",
-            self.cancel_appointment,
-            methods=["POST"],
-        )
-        self._routing.add_api_route(
-            "/user/appointment/{year}/{month}/{day}/",
+            "/user/appointment/schedule/{year}/{month}/{day}/",
             self.get_blocked_day_appointment_slots,
             methods=["GET"],
             response_model=List[AppointmentBlockedSlot],
         )
         self._routing.add_api_route(
-            "/user/appointment/{year}/{month}/",
+            "/user/appointment/schedule/{year}/{month}/",
             self.get_blocked_month_appointment_slots,
             methods=["GET"],
             response_model=List[AppointmentBlockedSlot],
@@ -101,12 +109,6 @@ class Appointment:
             APIRouter: This class api router.
         """
         return self._routing
-
-    async def get_appointment(
-        self, appointment_id: int, user: UserProfileApi = Depends(get_current_user)
-    ) -> AppointmentInfoApi:
-        pass
-
 
     async def get_blocked_month_appointment_slots(
         self,
@@ -135,47 +137,123 @@ class Appointment:
         limit: int,
         user: UserProfileApi,
     ) -> List[AppointmentBlockedSlot]:
-
         date_time_q = f"{year:04}"
         if month is not None:
             date_time_q += f"-{month:02}"
         if day is not None:
             date_time_q += f"-{day:02}"
         self._log.info("get all available appointments %s", date_time_q)
-        
+
         response = [
             await AppointmentBlockedSlot.from_model(ap)
-            for ap in await AppointmentModel.filter(start_time__startswith=date_time_q).all().limit(limit)
-        ]    
+            for ap in await AppointmentModel.filter(start_time__startswith=date_time_q).all()
+        ]
         return response
 
-    async def new_appointment(
-        self, appointment_api: AppointmentApi, user: UserProfileApi = Depends(get_current_user)
-    ) -> None:
-        """A user sets a new appointment"""
+    async def _schedule_new_appointment(
+        self, appointment_api: AppointmentApi, user: UserProfileApi
+    ) -> AppointmentInfoApi:
+        # ----- 1. check if this slot is already taken
         if await AppointmentModel.exists(start_time__startswith=appointment_api.start_time):
             # appointment is already blocked
             self._log.critical("Attempted to set appointment to an already blocked slot.")
             raise HTTPException(status.HTTP_409_CONFLICT, "Appointment slot already blocked.")
+
+        # ----- 2. Create a new appointment
         self._log.info("Setting appointment...")
-        await AppointmentModel(
+        new_appointment = AppointmentModel(
             patient=await UserModel.get(id=user.id),
             service=appointment_api.service,
             start_time=appointment_api.start_time,
             end_time=appointment_api.end_time,
-            status=AppointmentStatus.PENDING
-        ).save()
+            status=AppointmentStatus.PENDING,
+        )
+        # ----- 3. Save this to database
+        await new_appointment.save()
 
-    async def reschedule_appointment(
+        # ----- 4. Return a response
+        return await AppointmentInfoApi.from_model(new_appointment)
+
+    async def new_appointment(
+        self, appointment_api: AppointmentApi, user: UserProfileApi = Depends(get_current_user)
+    ) -> AppointmentInfoApi:
+        """A user sets a new appointment"""
+        return await self._schedule_new_appointment(appointment_api, user)
+
+    async def get_user_upcoming_appointment_schedules(
+        self, limit: int = 1, user: UserProfileApi = Depends(get_current_user)
+    ) -> List[AppointmentInfoApi]:
+        """Returns all the schedule slots that belong to the user."""
+        appointments = [
+            await AppointmentInfoApi.from_model(appointment)
+            for appointment in await AppointmentModel.filter(
+                start_time__gte=datetime.today(), patient__id=user.id
+            ).limit(limit)
+        ]
+        self._log.info("Query Upcoming Appointments %s", appointments)
+        return appointments
+
+    async def get_user_previous_appointment_schedules(
+        self, limit: int = 5, user: UserProfileApi = Depends(get_current_user)
+    ) -> List[AppointmentInfoApi]:
+        """Returns all the schedule slots that belong to the user."""
+        appointments = [
+            await AppointmentInfoApi.from_model(appointment)
+            for appointment in await AppointmentModel.filter(
+                start_time__lt=datetime.today(), patient__id=user.id
+            )
+            .order_by("-start_time")
+            .limit(limit)
+        ]
+        self._log.info("Query previous Appointments %s", appointments)
+        return appointments
+
+    async def get_user_appointment(
         self, appointment_id: int, user: UserProfileApi = Depends(get_current_user)
-    ) -> None:
-        self._log.critical("Rescheduling appointment %s.", appointment_id)
+    ) -> AppointmentInfoApi:
+        """Returns the info of a schedule slot the belong to a user by ID."""
         try:
-            prev_appointment: AppointmentModel = AppointmentModel.get()
+            return await AppointmentInfoApi.from_model(
+                await AppointmentModel.first(id=appointment_id, user__id=user.id)
+            )
+        except DoesNotExist as exc:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, "Appointment slot already blocked."
+            ) from exc
+
+    async def reschedule_user_appointment(
+        self,
+        appointment_id: int,
+        new_appointment_req: AppointmentApi,
+        user: UserProfileApi = Depends(get_current_user),
+    ) -> AppointmentInfoApi:
+        """Reschedule user appointment."""
+        self._log.critical("Rescheduling appointment %s.", appointment_id)
+        # ----- 1. Check if this is a valid appointment
+        try:
+            prev_appointment: AppointmentModel = await AppointmentModel.get(id=appointment_id)
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Appointment slot already blocked.")
+        # ----- 2. Schedule a new appointment
+        response = await self._schedule_new_appointment(new_appointment_req, user)
+        # ----- 3. set this previous appointment status as reschedule
         prev_appointment.status = AppointmentStatus.RESCHEDULE
-    async def cancel_appointment(
+        # ----- 4. and save
+        await prev_appointment.save()
+
+        return response
+
+    async def cancel_user_appointment(
         self, appointment_id: int, user: UserProfileApi = Depends(get_current_user)
     ) -> None:
-        pass
+        """Cancel user appointment."""
+        self._log.critical("Cancelling appointment %s.", appointment_id)
+        # ----- 1. Check if this is a valid appointment
+        try:
+            prev_appointment: AppointmentModel = await AppointmentModel.get(id=appointment_id)
+        except DoesNotExist as exc:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Appointment slot already blocked.")
+        # ----- 2. set this previous appointment status as cancelled
+        prev_appointment.status = AppointmentStatus.CANCELLED
+        # ----- 3. and save
+        await prev_appointment.save()
