@@ -185,8 +185,18 @@ class DashboardLoaderPage extends StatelessWidget {
   }
 }
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
+
+  @override
+  _DashboardPageState createState() {
+    return _DashboardPageState();
+  }
+}
+
+class _DashboardPageState extends State<DashboardPage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  int _selectedIndex = 0;
 
   Future<String?> getUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -195,64 +205,49 @@ class DashboardPage extends StatelessWidget {
     return name;
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       child: Scaffold(
         key: scaffoldKey,
-        body: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              automaticallyImplyLeading: false,
-              floating: false,
-              pinned: true,
-              snap: false,
-              centerTitle: false,
-              toolbarHeight: 100,
-              //backgroundColor: primaryBlue,
-              flexibleSpace: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: <Color>[primaryLightBlue, primaryBlue]),
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("images/bg_teal_bod.png"),
+              fit: BoxFit.fill,
+            ),
+          ),
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                automaticallyImplyLeading: false,
+                floating: false,
+                pinned: true,
+                snap: false,
+                centerTitle: false,
+                toolbarHeight: 80,
+                flexibleSpace: Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage('images/bg_teal_hd.png'),
+                        fit: BoxFit.fill),
+                  ),
                 ),
-              ),
-              leading: Builder(
-                builder: (BuildContext context) {
-                  return SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.menu,
-                          size: 40.0,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: ((context) => AccountsPage())));
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-              leadingWidth: 80,
-              actions: [
-                FutureBuilder(
+                title: FutureBuilder(
                   future: getUserName(),
                   initialData: null,
                   builder: (BuildContext context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
                         child: CircularProgressIndicator(
-                          color: Colors.deepPurpleAccent,
+                          color: Colors.transparent,
                         ),
                       );
                     }
@@ -268,7 +263,7 @@ class DashboardPage extends StatelessWidget {
                       } else if (snapshot.hasData) {
                         final data = snapshot.data;
                         return Padding(
-                          padding: const EdgeInsets.only(right: 20.0),
+                          padding: const EdgeInsets.only(right: 20.0, left: 20),
                           child: Text(
                             'Hi, $data',
                             textAlign: TextAlign.end,
@@ -286,245 +281,307 @@ class DashboardPage extends StatelessWidget {
                     );
                   },
                 ),
-              ],
-            ),
-            // Other Sliver Widgets
-            SliverList(
-              delegate: SliverChildListDelegate([
-                SizedBox(
-                  width: MediaQuery.sizeOf(context).width,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 20,
+                leadingWidth: 80,
+                actions: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(right: 15.0),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.menu,
+                        color: Colors.white,
+                        size: 40,
                       ),
-                      SizedBox(
-                        height: 40,
-                        width: MediaQuery.sizeOf(context).width - 60,
-                        child: TextFormField(
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.only(top: 5.0),
-                            hintText: 'How may we help you today?',
-                            //suffixIcon: Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(30)),
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(30)),
-                              borderSide: BorderSide(
-                                color: primaryLightPurple,
-                                width: 1.0,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(30)),
-                              borderSide: BorderSide(
-                                color: primaryLightBlue,
-                                width: 1.0,
-                              ),
+                      tooltip: 'Show Snackbar',
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => AccountsPage())));
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              // Other Sliver Widgets
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  Container(
+                    decoration: BoxDecoration(
+                        color: backgroundColor,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(50),
+                          topLeft: Radius.circular(50),
+                        )),
+                    width: MediaQuery.sizeOf(context).width,
+                    height: (MediaQuery.sizeOf(context).height - 150) / 2,
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10),
+                        SizedBox(
+                          width: 380,
+                          height: 50,
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 10.0, left: 15),
+                            child: Text(
+                              'Discover',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontFamily: 'Proza Libre',
+                                  fontSize: 35,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.teal),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 380,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 10.0),
+                        SizedBox(
+                            width: MediaQuery.sizeOf(context).width,
+                            height: ((MediaQuery.sizeOf(context).height - 150) /
+                                    2) -
+                                60,
+                            child: DashboardDiscoverCarousel()),
+                      ],
+                    ),
+                  ),
+                  //SizedBox(height: 10),
+                  Container(
+                    height: 5,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: <Color>[
+                            unselectedLightBlue,
+                            Colors.blueAccent
+                          ]),
+                    ),
+                  ),
+                  Container(
+                    width: MediaQuery.sizeOf(context).width,
+                    height: (MediaQuery.sizeOf(context).height - 150) / 2,
+                    color: Colors.white,
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10),
+                        SizedBox(
+                          width: 380,
+                          height: 40,
                           child: Text(
-                            'Trending',
+                            'Featured',
                             textAlign: TextAlign.left,
                             style: TextStyle(
                                 fontFamily: 'Proza Libre',
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                color: primaryBlue),
+                                fontSize: 35,
+                                fontWeight: FontWeight.w900,
+                                color: HexColor("#5ce1e6")),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        width: 380,
-                        child: Text(
-                          'Puerto Princesa, Palawan',
-                          textAlign: TextAlign.left,
-                          style: TextStyle(
-                              fontFamily: 'Open Sans',
-                              fontSize: 12,
-                              color: mainLightGreen),
+                        SizedBox(
+                          width: MediaQuery.sizeOf(context).width,
+                          height:
+                              ((MediaQuery.sizeOf(context).height - 150) / 2) -
+                                  80,
+                          child: DashboardFeatureCarousel(),
                         ),
-                      ),
-                      SizedBox(
-                        width: 380,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 15.0),
-                          child: Text(
-                            'EVENTS',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                                fontFamily: 'Open Sans',
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: primaryGrey),
-                          ),
-                        ),
-                      ),
-                      DashboardFeatureCarousel(),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 10),
-                Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: <Color>[mainLightBlue, primaryBlue]),
-                  ),
-                ),
-                Container(
-                  height: 500,
-                  color: Colors.white,
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(left: 20.0, top: 20.0),
-                            child: Text(
-                              'Features',
-                              style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                  color: primaryBlue),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            DashboardCategoryButtons(
-                              title: 'Talk To Us',
-                              imageIcon: 'images/dashboard_category_talk.png',
-                              icon: Icons.question_answer,
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: ((context) =>
-                                            TalkToUsIntroPage())));
-                              },
-                            ),
-                            DashboardCategoryButtons(
-                              title: 'Discover',
-                              imageIcon:
-                                  'images/dashboard_category_mental_health_care.png',
-                              icon: Icons.psychology,
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: ((context) =>
-                                            DiscoverIntroPage())));
-                              },
-                            ),
-                            DashboardCategoryButtons(
-                              title: 'Book Appointment',
-                              imageIcon: 'images/dashboard_category_book.png',
-                              icon: Icons.calendar_month,
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: ((context) =>
-                                            BookAppointmentIntroPage())));
-                              },
-                            ),
-                            DashboardCategoryButtons(
-                              title: 'Membership',
-                              imageIcon:
-                                  'images/dashboard_category_library.png',
-                              icon: Icons.diversity_2,
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: ((context) =>
-                                            MembershipIntroPage())));
-                                // final datenow = DateTime.now();
-                                // final later =
-                                //     datenow.addf(const Duration(hours: 24));
+                        // Padding(
+                        //   padding: const EdgeInsets.only(top: 10.0),
+                        //   child: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.center,
+                        //     children: [
+                        //       DashboardCategoryButtons(
+                        //         title: 'Talk To Us',
+                        //         imageIcon: 'images/dashboard_category_talk.png',
+                        //         icon: Icons.question_answer,
+                        //         onPressed: () {
+                        //           Navigator.push(
+                        //               context,
+                        //               MaterialPageRoute(
+                        //                   builder: ((context) =>
+                        //                       TalkToUsIntroPage())));
+                        //         },
+                        //       ),
+                        //       DashboardCategoryButtons(
+                        //         title: 'Discover',
+                        //         imageIcon:
+                        //             'images/dashboard_category_mental_health_care.png',
+                        //         icon: Icons.psychology,
+                        //         onPressed: () {
+                        //           Navigator.push(
+                        //               context,
+                        //               MaterialPageRoute(
+                        //                   builder: ((context) =>
+                        //                       DiscoverIntroPage())));
+                        //         },
+                        //       ),
+                        //       DashboardCategoryButtons(
+                        //         title: 'Book Appointment',
+                        //         imageIcon: 'images/dashboard_category_book.png',
+                        //         icon: Icons.calendar_month,
+                        //         onPressed: () {
+                        //           Navigator.push(
+                        //               context,
+                        //               MaterialPageRoute(
+                        //                   builder: ((context) =>
+                        //                       BookAppointmentIntroPage())));
+                        //         },
+                        //       ),
+                        //       DashboardCategoryButtons(
+                        //         title: 'Membership',
+                        //         imageIcon:
+                        //             'images/dashboard_category_library.png',
+                        //         icon: Icons.diversity_2,
+                        //         onPressed: () {
+                        //           Navigator.push(
+                        //               context,
+                        //               MaterialPageRoute(
+                        //                   builder: ((context) =>
+                        //                       MembershipIntroPage())));
+                        //           // final datenow = DateTime.now();
+                        //           // final later =
+                        //           //     datenow.addf(const Duration(hours: 24));
 
-                                // showDialog(
-                                //     context: Get.context!,
-                                //     builder: (context) {
-                                //       return SimpleDialog(
-                                //         title: Text('Error!'),
-                                //         contentPadding: EdgeInsets.all(20),
-                                //         children: [
-                                //           Text(datenow.toString()),
-                                //           Text(later.toString())
-                                //         ],
-                                //       );
-                                //     });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                        //           // showDialog(
+                        //           //     context: Get.context!,
+                        //           //     builder: (context) {
+                        //           //       return SimpleDialog(
+                        //           //         title: Text('Error!'),
+                        //           //         contentPadding: EdgeInsets.all(20),
+                        //           //         children: [
+                        //           //           Text(datenow.toString()),
+                        //           //           Text(later.toString())
+                        //           //         ],
+                        //           //       );
+                        //           //     });
+                        //         },
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
+                      ],
+                    ),
                   ),
-                ),
-              ]),
-            ),
-          ],
+                ]),
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: SizedBox(
+          width: MediaQuery.sizeOf(context).width,
+          height: 60,
+          child: BottomNavigationBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Home',
+                backgroundColor: HexColor("#67ddd8"),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.email),
+                label: 'Messages',
+                backgroundColor: HexColor("#5ce1e6"),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.event),
+                label: 'Appointment',
+                backgroundColor: HexColor("#67ddd8"),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.account_circle),
+                label: 'Profile',
+                backgroundColor: HexColor("#5ce1e6"),
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            selectedItemColor: Colors.teal,
+            onTap: _onItemTapped,
+          ),
         ),
       ),
     );
   }
 }
 
+class DashboardDiscoverCarousel extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return Container(
+        height: constraint.maxHeight,
+        child: ImageSlideshow(
+          indicatorColor: Colors.blue,
+          onPageChanged: (value) {
+            debugPrint('Page changed: $value');
+          },
+          isLoop: false,
+          children: [
+            DashboardFeatureContext(
+              title: 'FORUM',
+              image: 'images/forum_dashboard.png',
+              content:
+                  "Share, discuss and exchange thoughts with other users related to a person's well-being.",
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => CommunityIntroPage())));
+              },
+            ),
+            DashboardFeatureContext(
+              title: 'MEDIA',
+              image: 'images/media_dashboard.png',
+              content:
+                  "Discover articles, videos, and infographics about mental health and mental wellbeing",
+              onTap: () {},
+            ),
+            DashboardFeatureContext(
+              title: 'MOOD',
+              image: 'images/mood_dashboard.png',
+              content:
+                  "Keep track and understand your moods to help you manage them better.",
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => MoodHistoryPage())));
+              },
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+
 class DashboardFeatureCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 330,
-      child: ImageSlideshow(
-        indicatorColor: Colors.blue,
-        onPageChanged: (value) {
-          debugPrint('Page changed: $value');
-        },
-        autoPlayInterval: 4000,
-        isLoop: true,
-        children: [
-          DashboardFeatureContext(
-            title:
-                'SECOND MENTAL HEALTH SUMMIT: "INCLUSIVITY\nAMIDST DIVERSITY"',
-            image: 'images/cover_1.png',
-            content:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',",
-          ),
-          DashboardFeatureContext(
-            title:
-                'THIRD MENTAL HEALTH SUMMIT: "INCLUSIVITY\nAMIDST DIVERSITY"',
-            image: 'images/cover_2.png',
-            content:
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',",
-          ),
-        ],
-      ),
-    );
+    return LayoutBuilder(builder: (context, constraint) {
+      return Container(
+        height: constraint.maxHeight,
+        child: ImageSlideshow(
+          indicatorColor: Colors.blue,
+          onPageChanged: (value) {
+            debugPrint('Page changed: $value');
+          },
+          isLoop: false,
+          children: [
+            DashboardFeatureContext(
+              title: 'CALM',
+              image: 'images/calm_dashboard.png',
+              content:
+                  "Find wellness, peace, and balance using the app's guided meditation and mindfulness techniques.",
+              onTap: () {},
+            ),
+            DashboardFeatureContext(
+              title: 'BOOK APPOINTMENT',
+              image: 'images/book_dashboard.png',
+              content:
+                  "We will continue to enhance individual and collective well-being for a mentally healthy Philippines!",
+              onTap: () {},
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
 
@@ -582,85 +639,52 @@ class DashboardFeatureContext extends StatelessWidget {
   final String image;
   final String title;
   final String content;
+  final VoidCallback onTap;
 
   const DashboardFeatureContext({
     super.key,
     required this.title,
     required this.image,
     required this.content,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: MediaQuery.sizeOf(context).width - 28.0,
-        height: 320,
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0.0),
-          ),
-          elevation: 0,
-          child: Column(
-            children: <Widget>[
-              // SizedBox(
-              //   width: MediaQuery.sizeOf(context).width,
-              //   child: Padding(
-              //     padding: const EdgeInsets.all(10.0),
-              //     child: Text(
-              //       title,
-              //       textAlign: TextAlign.left,
-              //       style: TextStyle(
-              //         fontFamily: 'Open Sans',
-              //         fontSize: 15,
-              //         fontWeight: FontWeight.bold,
-              //         color: HexColor('#424242'),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              SizedBox(
-                width: MediaQuery.sizeOf(context).width,
-                child: Image.asset(
-                  image,
-                  fit: BoxFit.fitWidth,
+    return LayoutBuilder(builder: (context, constraint) {
+      return Container(
+        width: constraint.maxWidth,
+        height: constraint.maxHeight,
+        child: Column(
+          //color: Colors.pink,
+          // elevation: 0,
+          children: <Widget>[
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                print("Clicked Forum");
+                onTap();
+              },
+              child: SizedBox(
+                width: constraint.maxWidth,
+                height: (constraint.maxHeight / 4) * 3,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.asset(image),
                 ),
               ),
-              // Padding(
-              //   padding: const EdgeInsets.all(10.0),
-              //   child: Text(
-              //     content,
-              //     maxLines: 2,
-              //     softWrap: true,
-              //     textAlign: TextAlign.justify,
-              //     style: TextStyle(
-              //         fontFamily: 'Asap',
-              //         fontSize: 12,
-              //         color: HexColor('#424242')),
-              //   ),
-              // ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    child: Text(
-                      'Read more',
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                          fontFamily: 'Open Sans',
-                          fontSize: 10,
-                          //fontWeight: FontWeight.bold,
-                          color: Colors.black87),
-                    ),
-                    onPressed: () {/* ... */},
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 25.0, right: 20.0),
+              child: SizedBox(
+                  width: constraint.maxWidth,
+                  height: constraint.maxHeight / 4,
+                  child: Text(content, style: TextStyle(color: primaryGrey))),
+            ),
+          ],
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -696,13 +720,19 @@ class AccountsPage extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 80,
+        automaticallyImplyLeading: false,
         //backgroundColor: primaryBlue,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: <Color>[primaryLightBlue, primaryBlue]),
+        // flexibleSpace: Container(
+        //   decoration: BoxDecoration(
+        //     gradient: LinearGradient(
+        //         begin: Alignment.centerLeft,
+        //         end: Alignment.centerRight,
+        //         colors: <Color>[primaryLightBlue, primaryBlue]),
+        //   ),
+        //),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.elliptical(100, 20.0),
           ),
         ),
         leading: SizedBox(

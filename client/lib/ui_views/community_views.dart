@@ -1,12 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/model/thread.dart';
 import 'package:flutter_intro/ui_views/comment_box_app.dart';
+import 'package:flutter_intro/ui_views/dashboard_views.dart';
 
 // Local import
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:flutter_intro/controllers/thread_controller.dart';
 
 import 'package:get/get.dart';
+import 'package:hexcolor/hexcolor.dart';
+import 'package:intl/intl.dart';
+
+class MenuTile extends StatelessWidget {
+  final String menu;
+  final IconData menuIcon;
+  final VoidCallback onTap;
+
+  const MenuTile({
+    super.key,
+    required this.menu,
+    required this.menuIcon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
+            leading: Icon(menuIcon, size: 30, color: Colors.teal),
+            trailing: Icon(Icons.navigate_next, size: 30, color: Colors.grey),
+            horizontalTitleGap: 30.0,
+            title: MenuTitleText(menuText: menu),
+            onTap: () {
+              onTap();
+            },
+          ),
+          Divider(),
+        ],
+      ),
+    );
+  }
+}
 
 class CommunityIntroPage extends StatelessWidget {
   @override
@@ -15,45 +52,33 @@ class CommunityIntroPage extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () {},
       child: Scaffold(
+        backgroundColor: forumMainBg,
         resizeToAvoidBottomInset: false,
         body: Container(
           child: Column(
             children: [
-              SizedBox(height: 80),
+              SizedBox(height: 120),
               Image.asset(
-                'images/therapy_logo.png',
+                'images/forum_intro.png',
                 width: 300,
                 fit: BoxFit.fitWidth,
                 height: 400,
               ),
               SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Community',
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 40,
-                        fontWeight: FontWeight.w800,
-                        color: primaryPurple),
-                  ),
-                ],
-              ),
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: MediaQuery.sizeOf(context).width,
+                    width: MediaQuery.sizeOf(context).width - 60,
                     child: Text(
                       "Share, discuss, and exchange thoughts with other users related to a person's well-being",
                       softWrap: true,
-                      maxLines: 2,
+                      maxLines: 3,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontFamily: 'Open Sans',
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87),
                     ),
@@ -69,10 +94,21 @@ class CommunityIntroPage extends StatelessWidget {
                           builder: ((context) => CommunityMainpage())));
                 },
                 style: ButtonStyle(
-                    minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(mainBlue)),
-                child: Text('GET STARTED'),
+                  minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(forumButton),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                      side: BorderSide(width: 2.0, color: loginDarkTeal),
+                    ),
+                  ),
+                ),
+                child: Text(
+                  'GET STARTED',
+                  style: TextStyle(
+                      fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -139,117 +175,141 @@ class _CommunityMainPageState extends State<CommunityMainpage> {
     return futureThreadList;
   }
 
+  _onPagePop(context) {
+    Navigator.push(
+        context, MaterialPageRoute(builder: ((context) => DashboardPage())));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        toolbarHeight: 60,
-        leading: SizedBox(
-          width: 20,
-          height: 20,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-            child: IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                size: 30,
-                color: primaryGrey,
+    return PopScope(
+      onPopInvoked: (value) {
+        _onPagePop(context);
+      },
+      canPop: false,
+      child: LayoutBuilder(builder: (context, constraint) {
+        return Scaffold(
+          backgroundColor: Colors.teal,
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            backgroundColor: Colors.teal,
+            toolbarHeight: 60,
+            title: Text("Forum", style: TextStyle(color: Colors.white)),
+            centerTitle: true,
+            leading: SizedBox(
+              width: 20,
+              height: 20,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.arrow_back,
+                    size: 30,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: ((context) => DashboardPage())));
+                  },
+                ),
               ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
             ),
+            actions: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: 15.0),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.menu,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: ((context) => ForumMenu())));
+                  },
+                ),
+              ),
+            ],
           ),
-        ),
-      ),
-      body: Container(
-        child: ListView(
-          children: [
-            Column(
+          body: Container(
+            color: Colors.teal,
+            width: constraint.maxWidth,
+            height: constraint.maxHeight - 84,
+            child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                      top: 0.0, bottom: 0.0, left: 20, right: 10),
-                  child: SizedBox(
-                    width: MediaQuery.sizeOf(context).width,
-                    child: Text(
-                      "Community",
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: mainBlue),
+                Container(
+                  width: constraint.maxWidth,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.teal,
+                    image: DecorationImage(
+                      image: AssetImage(
+                        "images/forum_logo_hd.png",
+                      ),
+                      fit: BoxFit.fitHeight,
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                      top: 0.0, bottom: 10.0, left: 20, right: 10),
-                  child: SizedBox(
-                    width: MediaQuery.sizeOf(context).width,
-                    child: Text(
-                      "Share, discuss ideas with other users!",
-                      style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: primaryGrey),
-                    ),
-                  ),
-                ),
-                Divider(
-                  color: mainLightBlue,
-                  thickness: 2,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                      top: 20.0, bottom: 10.0, left: 20, right: 10),
-                  child: SizedBox(
-                    width: MediaQuery.sizeOf(context).width,
-                    child: Text("Topics",
-                        style: TextStyle(
-                            fontFamily: 'Roboto',
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            color: mainLightBlue)),
                   ),
                 ),
                 Container(
-                  height: 550,
-                  child: FutureBuilder<List<Thread>>(
-                    future: fetchThreads(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        final threads = snapshot.data!;
-                        return buildThreads(threads);
-                      } else {
-                        return const Text('No topics available');
-                      }
-                    },
-                  ),
-                ),
-                FilledButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: ((context) => CreatePost()),
+                  height: constraint.maxHeight - 100 - 84,
+                  decoration: BoxDecoration(
+                      color: backgroundColor,
+                      border: Border(
+                        top: BorderSide(color: backgroundColor, width: 2),
+                        left: BorderSide(color: backgroundColor, width: 2),
+                        right: BorderSide(color: backgroundColor, width: 2),
                       ),
-                    );
-                  },
-                  style: ButtonStyle(
-                      minimumSize:
-                          MaterialStateProperty.all<Size>(Size(120, 30)),
-                      backgroundColor:
-                          MaterialStateProperty.all<Color>(mainLightBlue)),
-                  child: Text('Create Post'),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.elliptical(40, 20),
+                          topRight: Radius.elliptical(50, 20))),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 10),
+                      Container(
+                        height: constraint.maxHeight - 100 - 90 - 30 - 10 - 20,
+                        width: constraint.maxWidth,
+                        child: FutureBuilder<List<Thread>>(
+                          future: fetchThreads(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              final threads = snapshot.data!;
+                              return buildThreads(threads);
+                            } else {
+                              return waitThreads(context);
+                            }
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        height: 30,
+                        child: FilledButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: ((context) => CreatePost()),
+                              ),
+                            );
+                          },
+                          style: ButtonStyle(
+                              minimumSize: MaterialStateProperty.all<Size>(
+                                  Size(120, 30)),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  Colors.lightGreen)),
+                          child: Text('Post'),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }),
     );
   }
 
@@ -257,15 +317,30 @@ class _CommunityMainPageState extends State<CommunityMainpage> {
         itemCount: threads.length,
         itemBuilder: (context, index) {
           final thread = threads[index];
-          return PostCard(
-            id: thread.threadId,
-            title: thread.topic,
-            username: thread.creator,
-            content: thread.content,
-            count: 1,
-            onTap: () {},
-          );
+          return LayoutBuilder(builder: (context, constraint) {
+            return Column(
+              children: [
+                PostCard(
+                  id: thread.threadId,
+                  title: thread.topic,
+                  username: thread.creator,
+                  content: thread.content,
+                  date: thread.date,
+                  count: 1,
+                  onTap: () {},
+                ),
+                Divider(),
+              ],
+            );
+          });
         },
+      );
+
+  Widget waitThreads(context) => Container(
+        width: MediaQuery.sizeOf(context).width,
+        child: CircularProgressIndicator(
+          color: primaryGrey,
+        ),
       );
 }
 
@@ -281,9 +356,9 @@ class PostTitle extends StatelessWidget {
       textAlign: TextAlign.start,
       style: TextStyle(
         color: Colors.black87,
-        fontWeight: FontWeight.bold,
-        fontFamily: 'Open Sans',
-        fontSize: 17,
+        fontWeight: FontWeight.normal,
+        fontFamily: 'Asap',
+        fontSize: 15,
       ),
     );
   }
@@ -300,10 +375,30 @@ class PostUser extends StatelessWidget {
       username,
       textAlign: TextAlign.start,
       style: TextStyle(
-        color: mainDeepPurple,
+        color: mainBlue,
         fontWeight: FontWeight.normal,
         fontFamily: 'Open Sans',
         fontSize: 12,
+      ),
+    );
+  }
+}
+
+class PostDate extends StatelessWidget {
+  final String date;
+
+  const PostDate({super.key, required this.date});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      date,
+      textAlign: TextAlign.start,
+      style: TextStyle(
+        color: Colors.grey,
+        fontWeight: FontWeight.normal,
+        fontFamily: 'Open Sans',
+        fontSize: 10,
       ),
     );
   }
@@ -325,7 +420,7 @@ class PostContent extends StatelessWidget {
         color: primaryGrey,
         fontWeight: FontWeight.normal,
         fontFamily: 'Open Sans',
-        fontSize: 14,
+        fontSize: 12,
       ),
     );
   }
@@ -336,6 +431,7 @@ class PostCard extends StatelessWidget {
   final String title;
   final String username;
   final String content;
+  final String date;
   final int count;
   final VoidCallback onTap;
 
@@ -345,99 +441,155 @@ class PostCard extends StatelessWidget {
     required this.title,
     required this.username,
     required this.content,
+    required this.date,
     required this.count,
     required this.onTap,
   });
 
+  String formatDate(String date) {
+    String updStartTime =
+        DateFormat('yyyy-MM-dd').format(DateTime.parse(date)).toString();
+    return updStartTime;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: ((context) => TopicThread(
-                  topicId: id,
-                  topicName: title,
-                  content: content,
-                )),
-          ),
-        );
-      },
-      child: Container(
-        child: Card(
-          elevation: 0.0,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                    top: 10.0, bottom: 0.0, right: 10.0, left: 10.0),
-                child: SizedBox(
-                  width: MediaQuery.sizeOf(context).width,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                    child: PostTitle(title: title),
-                  ),
-                ),
+    print("PostCard Date: $date");
+    return LayoutBuilder(
+      builder: (context, constraint) {
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: ((context) => TopicThread(
+                      topicId: id,
+                      topicName: title,
+                      content: content,
+                    )),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                child: SizedBox(
-                  width: MediaQuery.sizeOf(context).width,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                    child: PostUser(username: "anonymous"),
-                  ),
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0),
-                child: SizedBox(
-                  width: MediaQuery.sizeOf(context).width,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                    child: PostContent(content: content),
-                  ),
-                ),
-              ),
-              Row(
+            );
+          },
+          child: Container(
+            width: constraint.maxWidth,
+            child: Card(
+              elevation: 0.0,
+              surfaceTintColor: Colors.teal,
+              child: Column(
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(
-                        left: 25.0, top: 10.0, bottom: 10),
-                    child: Text(
-                      count.toString(),
-                      style: TextStyle(
-                        color: primaryGrey,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Open Sans',
-                      ),
+                        top: 10.0, bottom: 0.0, right: 10.0, left: 10.0),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: constraint.maxWidth - 30,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.only(left: 10.0, right: 10.0),
+                            child: PostTitle(title: title),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 5.0),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.comment,
-                        size: 20.0,
-                        color: primaryGrey,
-                      ),
-                      onPressed: () {
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: ((context) => AccountsPage())));
-                      },
+                    padding:
+                        const EdgeInsets.only(left: 20.0, right: 10.0, top: 2),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                            minRadius: 15, child: Icon(Icons.eco, size: 13)),
+                        Column(
+                          children: [
+                            SizedBox(
+                              width: 100,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 10.0, right: 10.0),
+                                child: PostUser(username: "anonymous"),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 100,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 10.0, right: 10.0),
+                                child: PostDate(date: formatDate(date)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 10.0, right: 10.0, top: 10.0),
+                    child: SizedBox(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                        child: PostContent(content: content),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 25.0, top: 10.0, bottom: 10, right: 10),
+                        child: Text(
+                          count.toString(),
+                          style: TextStyle(
+                            color: primaryGrey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                            fontFamily: 'Asap',
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5.0),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.comment,
+                            size: 15.0,
+                            color: primaryGrey,
+                          ),
+                          onPressed: () {
+                            // Navigator.push(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //         builder: ((context) => AccountsPage())));
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5.0),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.favorite,
+                            size: 15.0,
+                            color: primaryGrey,
+                          ),
+                          onPressed: () {
+                            // Navigator.push(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //         builder: ((context) => AccountsPage())));
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -451,6 +603,7 @@ class CreatePost extends StatefulWidget {
 
 class _CreatePostState extends State<CreatePost> {
   bool anonymous = true;
+  bool notify = false;
   final _formKey = GlobalKey<FormState>();
   ThreadController threadController = Get.put(ThreadController());
 
@@ -459,17 +612,15 @@ class _CreatePostState extends State<CreatePost> {
     threadController.topicController.clear();
     threadController.contentController.clear();
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: <Color>[primaryLightBlue, primaryBlue]),
+        backgroundColor: Colors.teal,
+        toolbarHeight: 60,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.elliptical(100, 20.0),
           ),
         ),
-        toolbarHeight: 60,
+        centerTitle: true,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -507,114 +658,191 @@ class _CreatePostState extends State<CreatePost> {
               key: _formKey,
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: SizedBox(
-                      width: MediaQuery.sizeOf(context).width,
-                      child: Text(
-                        'Title',
-                        style: TextStyle(
-                          fontFamily: 'Open Sans',
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                  SizedBox(height: 95),
+                  Container(
+                    width: MediaQuery.sizeOf(context).width,
+                    height: 300,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      image: DecorationImage(
+                        image: AssetImage("images/thought.gif"),
+                        fit: BoxFit.fitHeight,
                       ),
                     ),
                   ),
-                  TextFormField(
-                    minLines: 1,
-                    maxLines: 2,
-                    keyboardType: TextInputType.multiline,
-                    controller: threadController.topicController,
-                    initialValue: null,
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87),
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.all(10),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a topic title';
-                      }
-                      return null;
-                    },
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: SizedBox(
-                      width: MediaQuery.sizeOf(context).width,
-                      child: Text(
-                        'Description',
-                        style: TextStyle(
-                          fontFamily: 'Open Sans',
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                  TextFormField(
-                    minLines: 5,
-                    maxLines: 6,
-                    keyboardType: TextInputType.multiline,
-                    controller: threadController.contentController,
-                    style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 20,
-                        fontWeight: FontWeight.normal,
-                        color: primaryGrey),
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.all(10),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter content description';
-                      }
-                      return null;
-                    },
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20.0, right: 10),
-                        child: Text(
-                          'Anonymous: ',
-                          style: TextStyle(
-                            fontFamily: 'Roboto',
-                            fontSize: 15,
-                            fontWeight: FontWeight.normal,
-                            color: primaryGrey,
+                  Container(
+                    width: MediaQuery.sizeOf(context).width,
+                    decoration: BoxDecoration(
+                        color: lightBlueBg,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(50),
+                          topLeft: Radius.circular(50),
+                        )),
+                    // decoration: BoxDecoration(
+                    //     color: lightBlueBg,
+                    //     border: Border(
+                    //       top: BorderSide(color: backgroundColor, width: 2),
+                    //       left: BorderSide(color: backgroundColor, width: 2),
+                    //       right: BorderSide(color: backgroundColor, width: 2),
+                    //     ),
+                    //     borderRadius: BorderRadius.only(
+                    //         topLeft: Radius.elliptical(40, 20),
+                    //         topRight: Radius.elliptical(50, 20))),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 50),
+                        Container(
+                          width: MediaQuery.sizeOf(context).width,
+                          child: TextFormField(
+                            minLines: 1,
+                            maxLines: 2,
+                            keyboardType: TextInputType.text,
+                            controller: threadController.topicController,
+                            initialValue: null,
+                            style: TextStyle(
+                              fontFamily: 'Roboto',
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: "Title",
+                              hintStyle: TextStyle(color: Colors.white),
+                              errorStyle: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: Colors.red,
+                              ),
+                              contentPadding:
+                                  EdgeInsets.only(left: 20, right: 20),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a topic title';
+                              }
+                              return null;
+                            },
                           ),
                         ),
-                      ),
-                      Switch(
-                        // This bool value toggles the switch.
-                        value: anonymous,
-                        activeColor: Colors.green,
-                        onChanged: (bool value) {
-                          // This is called when the user toggles the switch.
-                          setState(() {
-                            anonymous = value;
-                          });
-                        },
-                      ),
-                    ],
+                        Container(
+                          color: lightBlueBg,
+                          width: MediaQuery.sizeOf(context).width,
+                          child: TextFormField(
+                            minLines: 6,
+                            maxLines: 6,
+                            keyboardType: TextInputType.multiline,
+                            controller: threadController.contentController,
+                            style: TextStyle(
+                                fontFamily: 'Roboto',
+                                fontSize: 20,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.white),
+                            decoration: InputDecoration(
+                              hintText: "Body",
+                              hintStyle: TextStyle(color: Colors.white),
+                              contentPadding:
+                                  EdgeInsets.only(left: 20, right: 20, top: 20),
+                              errorStyle: TextStyle(
+                                fontFamily: 'Roboto',
+                                color: Colors.red,
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter content description';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  SizedBox(
-                    child: MaterialButton(
-                      color: primaryLightBlue,
-                      child: Text("Create Post",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          threadController.createPost();
-                        }
-                      },
+                  Container(
+                    height: 90,
+                    color: greenBlueBg,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 20.0, right: 10),
+                              child: Text(
+                                'Anonymous',
+                                style: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.normal,
+                                  color: primaryGrey,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 50,
+                              height: 30,
+                              child: FittedBox(
+                                fit: BoxFit.fill,
+                                child: Switch(
+                                  // This bool value toggles the switch.
+                                  value: anonymous,
+                                  activeColor: unselectedLightBlue,
+                                  onChanged: (bool value) {
+                                    // This is called when the user toggles the switch.
+                                    setState(() {
+                                      anonymous = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 20.0, right: 10),
+                              child: Text(
+                                'Notify for replies',
+                                style: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.normal,
+                                  color: primaryGrey,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 50,
+                              height: 30,
+                              child: FittedBox(
+                                fit: BoxFit.fill,
+                                child: Switch(
+                                  // This bool value toggles the switch.
+                                  value: notify,
+                                  activeColor: unselectedLightBlue,
+                                  onChanged: (bool value) {
+                                    // This is called when the user toggles the switch.
+                                    setState(() {
+                                      notify = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          child: MaterialButton(
+                            color: mainLightBlue,
+                            child: Text("Post",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold)),
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                threadController.createPost();
+                              }
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -624,5 +852,178 @@ class _CreatePostState extends State<CreatePost> {
         ),
       ),
     );
+  }
+}
+
+class ForumMenu extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.teal,
+          toolbarHeight: 60,
+          title: Text("Forum", style: TextStyle(color: Colors.white)),
+          centerTitle: true,
+          leading: SizedBox(
+            width: 20,
+            height: 20,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
+                  size: 30,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ),
+        ),
+        body: Container(
+          child: ListView(
+            children: [
+              MenuTile(
+                menu: 'My Post',
+                menuIcon: Icons.edit_square,
+                onTap: () {
+                  // Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //         builder: ((context) => EditProfilePage())));
+                },
+              ),
+              MenuTile(
+                menu: 'Favorites',
+                menuIcon: Icons.favorite,
+                onTap: () {
+                  // Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //         builder: ((context) => EditProfilePage())));
+                },
+              ),
+              MenuTile(
+                menu: 'Delete Post',
+                menuIcon: Icons.delete,
+                onTap: () {
+                  // Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //         builder: ((context) => EditProfilePage())));
+                },
+              ),
+              MenuTile(
+                menu: 'Members',
+                menuIcon: Icons.group,
+                onTap: () {
+                  // Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //         builder: ((context) => EditProfilePage())));
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class SuccessPostPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+        canPop: false,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            // Navigator.push(context,
+            //     MaterialPageRoute(builder: ((context) => MoodModalPage())));
+          },
+          child: Scaffold(
+            body: Container(
+              color: backgroundColor,
+              child: Center(
+                child: ListView(
+                  children: [
+                    SizedBox(height: 100),
+                    Image.asset(
+                      'images/welcome_logo.png',
+                      fit: BoxFit.fitHeight,
+                      height: 300,
+                    ),
+                    SizedBox(height: 80),
+                    SizedBox(
+                      child: Text(
+                        "Great!",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.lightGreen,
+                          fontFamily: 'Proza Libre',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 40,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    SizedBox(
+                      child: Text(
+                        "Your post has been published",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontFamily: 'Proza Libre',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 50),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) =>
+                                        CommunityMainpage())));
+                          },
+                          style: ButtonStyle(
+                            minimumSize:
+                                MaterialStateProperty.all<Size>(Size(200, 50)),
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(Colors.teal),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(
+                                    width: 2.0, color: loginDarkTeal),
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'CONTINUE',
+                            style: TextStyle(
+                              fontFamily: 'Open Sans',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ));
   }
 }

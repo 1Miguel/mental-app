@@ -57,7 +57,7 @@ class Thread {
     def_topic = json['topic'] ?? '';
     def_content = json['content'] ?? '';
     def_creator = json['creator'] ?? '';
-    def_date = json['date'] ?? '';
+    def_date = json['date_created'] ?? '';
     //def_comments = json['comments'] ?? [];
 
     return Thread(

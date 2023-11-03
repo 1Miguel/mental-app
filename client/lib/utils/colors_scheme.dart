@@ -46,3 +46,9 @@ final HexColor solidPink = HexColor('#e258c0');
 // Login
 final HexColor inputTextBoxFill = HexColor("#F5F5F5");
 final HexColor loginDarkTeal = HexColor("#004D40");
+
+// Forum
+final HexColor forumMainBg = HexColor("#38b6ff");
+final HexColor forumButton = HexColor("#17bbb0");
+final HexColor lightBlueBg = HexColor("#67ddd8");
+final HexColor greenBlueBg = HexColor("#17bbb0");

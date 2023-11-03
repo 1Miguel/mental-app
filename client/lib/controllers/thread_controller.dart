@@ -155,7 +155,7 @@ class ThreadController extends GetxController {
         topicController.clear();
         contentController.clear();
         //go to home
-        Get.off(() => CommunityMainpage());
+        Get.off(() => SuccessPostPage());
       } else {
         print(response.body);
         print(response.statusCode);
