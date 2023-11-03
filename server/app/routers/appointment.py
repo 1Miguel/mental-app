@@ -214,7 +214,7 @@ class Appointment:
         """Returns the info of a schedule slot the belong to a user by ID."""
         try:
             return await AppointmentInfoApi.from_model(
-                await AppointmentModel.first(id=appointment_id, user__id=user.id)
+                await AppointmentModel.get(id=appointment_id, patient__id=user.id)
             )
         except DoesNotExist as exc:
             raise HTTPException(

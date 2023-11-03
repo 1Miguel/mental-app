@@ -50,13 +50,13 @@ class ThreadManager:
             methods=["POST"],
         )
         self._routing.add_api_route(
-            "/user/thread/{thread_id}",
+            "/user/thread/{thread_id}/",
             self.get_thread,
             methods=["GET"],
             response_model=ThreadRequestApi,
         )
         self._routing.add_api_route(
-            "/user/thread/{page}/",
+            "/user/thread/page/{page}/",
             self.get_thread_list,
             methods=["GET"],
             response_model=List[ThreadRequestApi],

@@ -64,9 +64,9 @@ register_tortoise(
 # API Routers
 # ------------------------------------------------------ #
 account_manager = AccountManager()
-appointment = Appointment()
-mood_logger = MoodLogger()
-thread_manager = ThreadManager()
+appointment = Appointment(log=log)
+mood_logger = MoodLogger(log=log)
+thread_manager = ThreadManager(log=log)
 app.include_router(account_manager.router)
 app.include_router(appointment.router)
 app.include_router(mood_logger.router)

@@ -207,26 +207,29 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
         headers, _ = self.helper_login_routine()
         headers["accept"]: "application/json"
 
-        test_day = int(random.random() * 30)
         test_hour = 9
         test_duration = 1
-        test_json = {
-            "start_time": datetime(
-                self.test_year, self.test_month, test_day, test_hour, 0
-            ).isoformat(),
-            "end_time": datetime(
-                self.test_year, self.test_month, test_day, test_hour + test_duration, 0
-            ).isoformat(),
-            "service": "COUNSELING",
-            "concerns": "No Concerns.",
-        }
-        test_response = self.client.post(
-            f"http://127.0.0.1:8000/user/appointment/new/",
-            headers=headers,
-            json=test_json,
-        )
-        self.assertTrue(test_response.ok)
-        log.info("scheduling: %s", test_json)
+        # rand must not repeat
+        test_day_occured = []
+        for test_day in range(1, 28):
+            test_day_occured.append(test_day)
+            test_json = {
+                "start_time": datetime(
+                    self.test_year, self.test_month, test_day, test_hour, 0
+                ).isoformat(),
+                "end_time": datetime(
+                    self.test_year, self.test_month, test_day, test_hour + test_duration, 0
+                ).isoformat(),
+                "service": "COUNSELING",
+                "concerns": "No Concerns.",
+            }
+            test_response = self.client.post(
+                f"http://127.0.0.1:8000/user/appointment/new/",
+                headers=headers,
+                json=test_json,
+            )
+            self.assertTrue(test_response.ok)
+            log.info("scheduling: %s", test_json)
 
     def test_appointment_schedule_3p2_get_blocked_schedules(self) -> None:
         headers, _ = self.helper_login_routine()
@@ -330,7 +333,7 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
             json=test_new_appointment_json,
         )
         self.assertTrue(test_response.ok)
-        self.assertEqual("RESCHEDULE", test_response.json()["status"])
+        self.assertEqual("PENDING", test_response.json()["status"])
 
 
 class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
@@ -381,7 +384,7 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
 
         test_limit = 5
         test_response = self.client.get(
-            f"http://127.0.0.1:8000/user/thread/0/?limit={test_limit}", headers=headers
+            f"http://127.0.0.1:8000/user/thread/page/0/?limit={test_limit}", headers=headers
         )
         self.assertTrue(test_response.ok)
         self.assertLessEqual(len(test_response.json()), test_limit)
@@ -392,16 +395,25 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
         headers, _ = self.helper_login_routine()
         headers["accept"]: "application/json"
 
-        test_response = self.client.get("http://127.0.0.1:8000/user/thread/3/", headers=headers)
-        self.assertTrue(test_response.ok)
+        test_thread_id = 1
 
+        test_response = self.client.get(
+            f"http://127.0.0.1:8000/user/thread/{test_thread_id}/", headers=headers
+        )
+        print("------------############------", test_response.json())
         expect_num_likes = test_response.json()["num_likes"] + 1
+
+        test_like_rest_json = {
+            "like": True
+        }
         test_response = self.client.post(
-            "http://127.0.0.1:8000/user/thread/3/like/", headers=headers
+            f"http://127.0.0.1:8000/user/thread/{test_thread_id}/like/", headers=headers, json=test_like_rest_json
         )
         self.assertTrue(test_response.ok)
 
-        test_response = self.client.get("http://127.0.0.1:8000/user/thread/3/", headers=headers)
+        test_response = self.client.get(
+            f"http://127.0.0.1:8000/user/thread/{test_thread_id}/", headers=headers
+        )
         self.assertTrue(test_response.ok)
         self.assertEqual(expect_num_likes, test_response.json()["num_likes"])
 

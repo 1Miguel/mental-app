@@ -164,7 +164,7 @@ class AccountManager:
             await user.save()
             # create a folder space for the user, this will serve as
             # file storage path where all files user uploads will be stored.
-            Path(self._temp_file_storage.name).joinpath(str(user.id)).mkdir(exist_ok=True)
+            # Path(self._temp_file_storage.name).joinpath(str(user.id)).mkdir(exist_ok=True)
 
         except IntegrityError as err:
             log.critical("Attempt to create user that already exist.")
