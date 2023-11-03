@@ -66,7 +66,9 @@ class AdminManager:
         """
         return self._routing
 
-    async def admin_get_appointments(self, admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
+    async def admin_get_appointments(
+        self, admin: UserProfileApi = Depends(get_admin_user)
+    ) -> List[AppointmentInfoApi]:
         ap: AppointmentModel
         appointment_list = []
         for ap in await AppointmentModel.all():
@@ -84,7 +86,10 @@ class AdminManager:
         return appointment_list
 
     async def admin_update_appointment(
-        self, appointment_id: int, update_status: AppointmentUpdateStatusApi, admin: UserProfileApi = Depends(get_admin_user)
+        self,
+        appointment_id: int,
+        update_status: AppointmentUpdateStatusApi,
+        admin: UserProfileApi = Depends(get_admin_user),
     ) -> AppointmentInfoApi:
         try:
             ap: AppointmentModel = await AppointmentModel.get(id=appointment_id)
@@ -92,7 +97,7 @@ class AdminManager:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND, detail="Appointment {appointment_id} invalid"
             ) from exc
-    
+
         if ap.status != update_status.status:
             ap.status = update_status.status
             await ap.save()
