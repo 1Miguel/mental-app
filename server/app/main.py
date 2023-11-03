@@ -21,6 +21,7 @@ from routers.account import AccountManager
 from routers.appointment import Appointment
 from routers.mood_logger import MoodLogger
 from routers.thread_manager import ThreadManager
+from routers.admin import AdminManager
 
 # ------------------------------------------------------ #
 # Debug
@@ -63,15 +64,17 @@ register_tortoise(
 # ------------------------------------------------------ #
 # API Routers
 # ------------------------------------------------------ #
-account_manager = AccountManager()
+account_manager = AccountManager(log=log)
 appointment = Appointment(log=log)
 mood_logger = MoodLogger(log=log)
 thread_manager = ThreadManager(log=log)
+admin_manager = AdminManager(log=log)
+
 app.include_router(account_manager.router)
 app.include_router(appointment.router)
 app.include_router(mood_logger.router)
 app.include_router(thread_manager.router)
-
+app.include_router(admin_manager.router)
 
 # ------------------------------------------------------ #
 # Main Routes
@@ -80,6 +83,7 @@ app.include_router(thread_manager.router)
 async def startup() -> None:
     """Routine at application startup."""
     log.info("App start up routine...")
+    await admin_manager.setup_default_admin()
 
 
 @app.on_event("shutdown")

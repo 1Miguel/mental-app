@@ -109,7 +109,10 @@ class AccountManager:
     # temporary file where all files will be stored
     _temp_file_storage: TemporaryDirectory = "./files"
 
-    def __init__(self, router: Optional[APIRouter] = None) -> None:
+    def __init__(
+        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
+    ) -> None:
+        self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         #: ---- Set all routes
         self._routing.add_api_route(
@@ -168,6 +171,7 @@ class AccountManager:
         if the user has a token. If the user does not have a valid token, reject
         the login request.
         """
+        self._log.info("A  user log in...")
         # return the profile at login success
         return user
 

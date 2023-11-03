@@ -78,6 +78,8 @@ class AppointmentBlockedSlot(BaseModel):
             end_time=model.end_time,
         )
 
+class AppointmentUpdateStatusApi(BaseModel):
+    status: AppointmentStatus
 
 class AppointmentApi(BaseModel):
     """API model for appointment booking.
