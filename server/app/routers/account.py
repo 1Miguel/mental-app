@@ -38,11 +38,13 @@ UserSchema = pydantic_model_creator(UserModel, name="User", exclude_readonly=Fal
 # oauth authentication scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserModel:
+async def _get_authenticated_user(token: str, *, check_admin: bool = False) -> UserProfileApi:
     """Returns the user database model from given token. This is the validation
     routine when a user attempts to access a page that requries authentication
     via token.
+
+    When check_admin is set to True, authentication would require to validate if
+    the token credential is an admin account. If not, would raise an 401 Error.
 
     Args:
         token (str, optional): User Token. Defaults to Depends(oauth2_scheme).
@@ -63,6 +65,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserModel:
         )
     # ---- check if this account is an admin
     is_admin = await AdminModel.exists(admin_user=user)
+    if check_admin and not is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User attempts to login with invalid admin account.",
+        )
 
     # ---- return account json profile
     # TODO: should I just return the actual database item?
@@ -78,6 +85,21 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserModel:
         is_admin=is_admin,
     )
 
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserProfileApi:
+    """Returns the user database model from given token. This is the validation
+    routine when a user attempts to access a page that requries authentication
+    via token.
+
+    Args:
+        token (str, optional): User Token. Defaults to Depends(oauth2_scheme).
+
+    Raises:
+        HTTPException: HTTP_401_UNAUTHORIZED for invalid access.
+    """
+    return await _get_authenticated_user(token)
+
+async def get_admin_user(token: str = Depends(oauth2_scheme)) -> UserProfileApi:
+    return await _get_authenticated_user(token, check_admin=True)
 
 class AccountManager:
     # temporary file where all files will be stored

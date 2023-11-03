@@ -52,13 +52,25 @@ class Appointment:
     ) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
-        # ---- Set all routes
+        # ---- POST methods
         self._routing.add_api_route(
             "/user/appointment/new/",
             self.new_appointment,
             methods=["POST"],
             response_model=AppointmentInfoApi,
         )
+        self._routing.add_api_route(
+            "/user/appointment/myschedule/{appointment_id}/reschedule/",
+            self.reschedule_user_appointment,
+            methods=["POST"],
+            response_model=AppointmentInfoApi,
+        )
+        self._routing.add_api_route(
+            "/user/appointment/myschedule/{appointment_id}/cancel/",
+            self.cancel_user_appointment,
+            methods=["POST"],
+        )
+        # ---- GET methods
         self._routing.add_api_route(
             "/user/appointment/myschedule/upcoming/",
             self.get_user_upcoming_appointment_schedules,
@@ -72,21 +84,16 @@ class Appointment:
             response_model=List[AppointmentInfoApi],
         )
         self._routing.add_api_route(
+            "/user/appointment/myschedule/pending/",
+            self.get_user_pending_appointment_schedules,
+            methods=["GET"],
+            response_model=List[AppointmentInfoApi],
+        )
+        self._routing.add_api_route(
             "/user/appointment/myschedule/{appointment_id}",
             self.get_user_appointment,
             methods=["GET"],
             response_model=AppointmentInfoApi,
-        )
-        self._routing.add_api_route(
-            "/user/appointment/myschedule/{appointment_id}/reschedule/",
-            self.reschedule_user_appointment,
-            methods=["POST"],
-            response_model=AppointmentInfoApi,
-        )
-        self._routing.add_api_route(
-            "/user/appointment/myschedule/{appointment_id}/cancel/",
-            self.cancel_user_appointment,
-            methods=["POST"],
         )
         self._routing.add_api_route(
             "/user/appointment/schedule/{year}/{month}/{day}/",
@@ -187,8 +194,10 @@ class Appointment:
         appointments = [
             await AppointmentInfoApi.from_model(appointment)
             for appointment in await AppointmentModel.filter(
-                start_time__gte=datetime.today(), patient__id=user.id
-            ).limit(limit)
+                start_time__gte=datetime.today(), status=AppointmentStatus.RESERVED, patient__id=user.id
+            )
+            .order_by("start_time")
+            .limit(limit)
         ]
         self._log.info("Query Upcoming Appointments %s", appointments)
         return appointments
@@ -200,12 +209,26 @@ class Appointment:
         appointments = [
             await AppointmentInfoApi.from_model(appointment)
             for appointment in await AppointmentModel.filter(
-                start_time__lt=datetime.today(), patient__id=user.id
+                start_time__lt=datetime.today(), status=AppointmentStatus.RESERVED, patient__id=user.id
             )
             .order_by("-start_time")
             .limit(limit)
         ]
         self._log.info("Query previous Appointments %s", appointments)
+        return appointments
+
+    async def get_user_pending_appointment_schedules(
+        self, limit: int = 5, user: UserProfileApi = Depends(get_current_user)
+    ) -> List[AppointmentInfoApi]:
+        appointments = [
+            await AppointmentInfoApi.from_model(appointment)
+            for appointment in await AppointmentModel.filter(
+                status=AppointmentStatus.PENDING, patient__id=user.id
+            )
+            .order_by("-created")
+            .limit(limit)
+        ]
+        self._log.info("Query pending Appointments %s", appointments)
         return appointments
 
     async def get_user_appointment(

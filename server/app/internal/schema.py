@@ -14,6 +14,7 @@ from internal.database import (
     AppointmentStatus,
     AppointmentServices,
     AppointmentModel,
+    ThreadModel
 )
 
 
@@ -174,10 +175,20 @@ class ThreadRequestApi(BaseModel):
     content: str
     thread_id: int = 0
     creator: str = ""
-    date_created: str = ""
+    date_created: datetime = datetime.today()
     num_likes: int = 0
     comments: List[ThreadCommentApi] = Field(default_factory=list)
 
+    @classmethod
+    async def from_model(cls, model: ThreadModel) -> "ThreadRequestApi":
+        return cls(
+            thread_id=model.id,
+            topic=model.topic,
+            content=model.content,
+            creator=(await model.user).email,
+            num_likes=model.num_likes,
+            date_created=model.created,
+        )
 
 class ThreadLikeApi(BaseModel):
     """Thread like REST API.

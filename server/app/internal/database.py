@@ -215,10 +215,8 @@ class ThreadUserLikeModel(Model):
         return await cls.filter(user__id=user_id)
 
     @classmethod
-    async def get_thread_like_by_user(
-        cls, user_id: int, thread_id: int
-    ) -> List["ThreadUserLikeModel"]:
-        return await cls.filter(user__id=user_id, thread__id=thread_id)
+    async def get_thread_like_by_user(cls, user_id: int, thread_id: int) -> "ThreadUserLikeModel":
+        return await cls.first(user__id=user_id, thread__id=thread_id)
 
 
 class Doctor(Model):
@@ -243,6 +241,7 @@ class AppointmentModel(Model):
     start_time = DatetimeField()
     end_time = DatetimeField()
     status = CharEnumField(AppointmentStatus, max_length=64)
+    created = DatetimeField(auto_now=True)
 
     @classmethod
     async def get_by_month(cls, date: datetime) -> List[Self]:

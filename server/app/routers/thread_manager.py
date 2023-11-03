@@ -28,16 +28,17 @@ class ThreadManager:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
 
-        # ---- Set all routes
-        self._routing.add_api_route(
-            "/user/thread/submit",
-            self.thread_submit,
-            methods=["POST"],
-        )
+        # ---- DELETE methods
         self._routing.add_api_route(
             "/user/thread/{thread_id}/",
             self.thread_delete,
             methods=["DELETE"],
+        )
+        # ---- POST methods
+        self._routing.add_api_route(
+            "/user/thread/submit",
+            self.thread_submit,
+            methods=["POST"],
         )
         self._routing.add_api_route(
             "/user/thread/{thread_id}/comment/",
@@ -49,11 +50,17 @@ class ThreadManager:
             self.thread_like,
             methods=["POST"],
         )
+        # ---- GET methods
         self._routing.add_api_route(
             "/user/thread/{thread_id}/",
             self.get_thread,
             methods=["GET"],
             response_model=ThreadRequestApi,
+        )
+        self._routing.add_api_route(
+            "/user/thread/{thread_id}/query/",
+            self.get_all_thread_with_filter,
+            methods=["GET"],
         )
         self._routing.add_api_route(
             "/user/thread/page/{page}/",
@@ -130,9 +137,8 @@ class ThreadManager:
                 status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
             ) from exc
         else:
-            thread_like_db = await ThreadUserLikeModel.get_thread_like_by_user(
-                user_db.id, thread_id
-            )
+            thread_like_db = await ThreadUserLikeModel.filter(user__id=user_db.id, thread__id=thread_id)
+
             if thread_like_db and not thread_like_api.like:
                 # if the like is in the database, this means user already like the thread
                 # to unlike, delete the like item in the database.
@@ -142,7 +148,7 @@ class ThreadManager:
                 # then save
                 await thread_db.save()
 
-            elif thread_like_api.like:
+            elif not thread_like_db and thread_like_api.like:
                 # thread is not yet liked by the user check if the API instruct
                 # us to like this thread - create a new model
                 await ThreadUserLikeModel(user=user_db, thread=thread_db).save()
@@ -169,14 +175,13 @@ class ThreadManager:
             content=thread.content,
             creator=creator.email,
             num_likes=thread.num_likes,
-            date_created=thread.created.isoformat(),
+            date_created=thread.created,
         )
         # build the list of responses
         for comment in await ThreadCommentModel.get_thread_comments(thread_id):
-            creator = await comment.user
             response.comments += [
                 ThreadCommentApi(
-                    creator=creator.email,
+                    creator=(await comment.user).email,
                     date_created=comment.created.isoformat(),
                     content=comment.content,
                 )
@@ -203,3 +208,18 @@ class ThreadManager:
                 )
             ]
         return thread_req
+
+    async def get_all_thread_with_filter(self, filter: str, limit: int=100, user: UserProfileApi = Depends(get_current_user)) -> List[ThreadRequestApi]:
+        if filter == "liked":
+            thread = [
+                await ThreadRequestApi.from_model(await liked_thread.thread)
+                for liked_thread in await ThreadUserLikeModel.filter(user__id=user.id).order_by("-liked_at").limit(limit)
+            ]
+        elif filter == "posted":
+            thread = [
+                await ThreadRequestApi.from_model(thread)
+                for thread in await ThreadModel.filter(user__id=user.id).order_by("-created").limit(limit)
+            ]
+        else:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=f"invalid filter {filter}")
+        return thread
