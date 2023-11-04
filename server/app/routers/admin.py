@@ -5,7 +5,7 @@ date: 02/11/2023
 # ---- Standard
 import logging
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, date
 
 # ---- Thirdparty
 from fastapi import HTTPException, status, Depends, Path
@@ -25,6 +25,13 @@ class AdminManager:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         # ---- Set all routes
+        self._routing.add_api_route(
+            "/admin/",
+            self.admin_get_stats,
+            methods=["GET"],
+            response_model=AdminStatsApi,
+            description="Admin Index Page.",
+        )
         self._routing.add_api_route(
             "/admin/appointment/",
             self.admin_get_appointments,
@@ -103,3 +110,16 @@ class AdminManager:
             await ap.save()
 
         return await AppointmentInfoApi.from_model(ap)
+
+    async def admin_get_stats(
+        self, admin: UserProfileApi = Depends(get_admin_user)
+    ) -> AdminStatsApi:
+        return AdminStatsApi(
+            num_patients=await UserModel.all().count() - await AdminModel.all().count(),
+            num_appointments_req=await AppointmentModel.filter(
+                status=AppointmentStatus.PENDING
+            ).count(),
+            num_todays_sessions=await AppointmentModel.filter(
+                start_time__startswith=date.today().isoformat()
+            ).count(),
+        )

@@ -208,3 +208,9 @@ class ThreadLikeApi(BaseModel):
     """
 
     like: bool
+
+
+class AdminStatsApi(BaseModel):
+    num_patients: int
+    num_appointments_req: int
+    num_todays_sessions: int
