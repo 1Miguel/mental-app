@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/dashboard_messages.dart';
+import 'package:flutter_intro/dashboard_profile.dart';
 import 'dart:convert';
 
 // Local import
@@ -208,6 +210,16 @@ class _DashboardPageState extends State<DashboardPage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      if (index == 1) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: ((context) => MessagesTab())));
+      } else if (index == 2) {
+        Navigator.push(context,
+            MaterialPageRoute(builder: ((context) => AppointmentTab())));
+      } else if (index == 3) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: ((context) => ProfileTab())));
+      }
     });
   }
 
@@ -475,7 +487,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 backgroundColor: HexColor("#67ddd8"),
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.email),
+                icon: Icon(Icons.mail),
                 label: 'Messages',
                 backgroundColor: HexColor("#5ce1e6"),
               ),
@@ -576,7 +588,12 @@ class DashboardFeatureCarousel extends StatelessWidget {
               image: 'images/book_dashboard.png',
               content:
                   "We will continue to enhance individual and collective well-being for a mentally healthy Philippines!",
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => BookAppointmentIntroPage())));
+              },
             ),
           ],
         ),

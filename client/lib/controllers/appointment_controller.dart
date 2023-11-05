@@ -14,6 +14,7 @@ import 'package:http/http.dart' as http;
 
 class AppointmentController extends GetxController {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  TextEditingController concernController = TextEditingController();
 
   String baseUrl = ApiEndPoints.checkPlatform();
 
@@ -145,6 +146,7 @@ class AppointmentController extends GetxController {
         print(json);
         final SharedPreferences? prefs = await _prefs;
         //go to home
+        concernController.clear();
         Get.to(() => BookScheduleSuccessPage());
       } else {
         print(response.body);

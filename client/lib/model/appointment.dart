@@ -57,7 +57,7 @@ class Appointment {
     def_startTime = json['start_time'] ?? DateTime.now.toString();
     def_endTime = json['end_time'] ?? DateTime.now.toString();
     def_service = json['service'] ?? '';
-    def_concerns = json['concenrs'] ?? '';
+    def_concerns = json['concerns'] ?? '';
 
     return Appointment(
       startTime: def_startTime as String,

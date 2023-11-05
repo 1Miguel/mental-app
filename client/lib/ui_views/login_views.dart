@@ -2189,8 +2189,10 @@ class WelcomePage extends StatelessWidget {
         body: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: ((context) => MoodModalPage())));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: ((context) => MoodLogCarouselPage())));
           },
           child: Container(
             child: Center(

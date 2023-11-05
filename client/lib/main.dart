@@ -1,5 +1,6 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/ui_views/book_appointment.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'ui_views/login_views.dart';
@@ -27,8 +28,8 @@ class MyApp extends StatelessWidget {
               platform: TargetPlatform.android),
           initialRoute: '/',
           routes: {
-            //'/': (context) => MyHomePage(),
             '/': (context) => LoginMainPage(),
+            //'/': (context) => BookScheduleSuccessPage(),
             //'/': (context) => kIsWeb ? AdminApp() : LoginMainPage(),
             '/admin': (context) => AdminApp(),
           }),

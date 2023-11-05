@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
 import 'dart:convert';
 
 // Local import
@@ -1099,5 +1100,262 @@ class TodayMoodInfo extends StatelessWidget {
             }),
       ),
     );
+  }
+}
+
+class MoodLogCarouselPage extends StatelessWidget {
+  MoodController moodController = Get.put(MoodController());
+  User emptyUser = User(
+    id: 0,
+    email: "",
+    password_hash: "",
+    firstname: "",
+    lastname: "",
+    address: "",
+    age: 0,
+    occupation: "",
+    contact_number: "",
+  );
+
+  getUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    return prefs.getString('user_data') ?? jsonEncode(emptyUser).toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return Scaffold(
+        body: FutureBuilder(
+            future: getUserData(),
+            builder: (BuildContext context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.deepPurpleAccent,
+                  ),
+                );
+              }
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'An ${snapshot.error} occurred',
+                      style: const TextStyle(fontSize: 18, color: Colors.red),
+                    ),
+                  );
+                } else if (snapshot.hasData) {
+                  final data = snapshot.data;
+                  String mystring = data.toString();
+                  //Map<String, dynamic> myjson = jsonDecode(mystring);
+                  User userdata = User.fromJson(jsonDecode(mystring));
+                  String firstname = userdata.firstname;
+                  return Container(
+                      width: constraint.maxWidth,
+                      height: constraint.maxHeight,
+                      child: MoodSlides(name: firstname));
+                }
+              }
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }),
+      );
+    });
+  }
+}
+
+class MoodSlides extends StatelessWidget {
+  final String name;
+  const MoodSlides({
+    super.key,
+    required this.name,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return Container(
+        height: constraint.maxHeight,
+        child: ImageSlideshow(
+          indicatorColor: Colors.blue,
+          onPageChanged: (value) {
+            debugPrint('Page changed: $value');
+          },
+          isLoop: false,
+          children: [
+            MoodContext(
+              name: name,
+              title: 'HAPPY',
+              image: 'images/happy_img.png',
+              content:
+                  "Find wellness, peace, and balance using the app's guided meditation and mindfulness techniques.",
+              customColor: moodHappy,
+              onTap: () {},
+            ),
+            MoodContext(
+              name: name,
+              title: 'SAD',
+              image: 'images/sad_img.png',
+              content:
+                  "We will continue to enhance individual and collective well-being for a mentally healthy Philippines!",
+              customColor: moodSad,
+              onTap: () {},
+            ),
+            MoodContext(
+              name: name,
+              title: 'CONFUSED',
+              image: 'images/confused_img.png',
+              content:
+                  "We will continue to enhance individual and collective well-being for a mentally healthy Philippines!",
+              customColor: moodConfused,
+              onTap: () {},
+            ),
+            MoodContext(
+              name: name,
+              title: 'ANGRY',
+              image: 'images/angry_img.png',
+              content:
+                  "We will continue to enhance individual and collective well-being for a mentally healthy Philippines!",
+              customColor: moodAngry,
+              onTap: () {},
+            ),
+            MoodContext(
+              name: name,
+              title: 'SCARED',
+              image: 'images/scared_img.png',
+              content:
+                  "We will continue to enhance individual and collective well-being for a mentally healthy Philippines!",
+              customColor: moodScared,
+              onTap: () {},
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+
+class MoodContext extends StatelessWidget {
+  MoodController moodController = Get.put(MoodController());
+  final String image;
+  final String name;
+  final String title;
+  final String content;
+  final VoidCallback onTap;
+  final Color customColor;
+
+  MoodContext({
+    super.key,
+    required this.name,
+    required this.title,
+    required this.image,
+    required this.content,
+    required this.onTap,
+    required this.customColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          print("Clicked $title");
+          int index = MoodId.HAPPY.index;
+          if (title == "SAD") {
+            index = MoodId.SAD.index;
+          } else if (title == "CONFUSED") {
+            index = MoodId.CONFUSED.index;
+          } else if (title == "ANGRY") {
+            index = MoodId.ANGRY.index;
+          } else if (title == "SCARED") {
+            index = MoodId.SCARED.index;
+          }
+          moodController.logMood(index, "");
+          //onTap();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: ((context) => DashboardPage()),
+            ),
+          );
+        },
+        child: Container(
+          color: customColor,
+          width: constraint.maxWidth,
+          height: constraint.maxHeight,
+          child: Column(
+            //color: Colors.pink,
+            // elevation: 0,
+            children: <Widget>[
+              Container(
+                width: constraint.maxWidth,
+                height: constraint.maxHeight / 4,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      width: constraint.maxWidth - 50,
+                      child: Text(
+                        "How do you feel today $name?",
+                        softWrap: true,
+                        maxLines: 3,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 40,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: constraint.maxWidth,
+                height: (constraint.maxHeight / 4) * 2,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.asset(image),
+                ),
+              ),
+              Container(
+                width: constraint.maxWidth,
+                height: constraint.maxHeight / 4,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: constraint.maxWidth - 50,
+                      child: TextButton(
+                        child: Text(
+                          'Skip',
+                          style: TextStyle(
+                              fontFamily: 'Open Sans',
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                              fontSize: 15,
+                              decoration: TextDecoration.underline),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => DashboardPage())));
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
   }
 }

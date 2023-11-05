@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/controllers/appointment_controller.dart';
+import 'package:flutter_intro/dashboard_messages.dart';
+import 'package:flutter_intro/dashboard_profile.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-import 'package:flutter_intro/model/appointment.dart';
+import 'package:flutter_intro/model/appointment.dart' as appModel;
 import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 import 'dashboard_views.dart';
@@ -15,6 +18,7 @@ import 'package:flutter_intro/model/user.dart';
 
 // Third-party import
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 
 // Const
 enum ConsulationServices { consultation, therapy, counseling, assessment }
@@ -219,66 +223,551 @@ class BookIconBox extends StatelessWidget {
 class BookAppointmentIntroPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: Column(
-          children: [
-            SizedBox(height: 60),
-            Image.asset(
-              'images/therapy_logo.png',
-              fit: BoxFit.fitWidth,
-              height: 400,
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'BOOK\nAPPOINTMENT',
-                  softWrap: true,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontSize: 40,
-                      fontWeight: FontWeight.w800,
-                      color: mainDarkBlue),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'We will continue to enhance\nindividual and collective well-being\nfor a mentally healthy Philippines!',
-                  softWrap: true,
-                  maxLines: 3,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontFamily: 'Open Sans',
-                      fontSize: 18,
-                      color: mainLightPurple),
-                ),
-              ],
-            ),
-            SizedBox(height: 50),
-            FilledButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: ((context) => BookAppointmentPage())));
-              },
-              style: ButtonStyle(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {},
+      child: Scaffold(
+        backgroundColor: bookMainBg,
+        resizeToAvoidBottomInset: false,
+        body: Container(
+          color: bookMainBg,
+          child: Column(
+            children: [
+              SizedBox(height: 120),
+              Image.asset(
+                'images/book_intro.png',
+                width: 300,
+                fit: BoxFit.fitWidth,
+                height: 400,
+              ),
+              SizedBox(height: 20),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.sizeOf(context).width - 60,
+                    child: Text(
+                      "We will continue to enhance individual and collective well-being for a mentally healthy Philippines!",
+                      softWrap: true,
+                      maxLines: 3,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontFamily: 'Open Sans',
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 70),
+              FilledButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => BookSelectionServicePage())));
+                },
+                style: ButtonStyle(
                   minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor: MaterialStateProperty.all<Color>(mainBlue)),
-              child: Text('GET STARTED'),
-            ),
-          ],
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(forumButton),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.0),
+                      side: BorderSide(width: 2.0, color: loginDarkTeal),
+                    ),
+                  ),
+                ),
+                child: Text(
+                  'GET STARTED',
+                  style: TextStyle(
+                      fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+}
+
+class BookSelectionServicePage extends StatefulWidget {
+  const BookSelectionServicePage({super.key});
+
+  @override
+  _BookSelectionServiceState createState() {
+    return _BookSelectionServiceState();
+  }
+}
+
+class _BookSelectionServiceState extends State<BookSelectionServicePage> {
+  // _onPagePop(context) {
+  //   Navigator.push(
+  //       context, MaterialPageRoute(builder: ((context) => DashboardPage())));
+  // }
+
+  @override
+  Widget build(BuildContext context) {
+    const tilePadding = 10.0;
+    const headerpadding = 10.0;
+    return LayoutBuilder(builder: (context, constraint) {
+      return PopScope(
+        // onPopInvoked: (value) {
+        //   _onPagePop(context);
+        // },
+        canPop: true,
+        child: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 80,
+            automaticallyImplyLeading: false,
+            //backgroundColor: lightBlueBg,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage('images/bg_teal_hd.png'),
+                      fit: BoxFit.fill),
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.elliptical(50, 20),
+                      bottomRight: Radius.elliptical(50, 20))),
+            ),
+            title: Text("BOOK APPOINTMENT",
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w900)),
+            centerTitle: true,
+            leading: SizedBox(
+              width: 20,
+              height: 20,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    size: 30,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+            ),
+          ),
+          body: Container(
+            width: constraint.maxWidth,
+            height: constraint.maxHeight,
+            child: ListView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: headerpadding),
+                  child: Container(
+                    width: constraint.maxWidth - 20,
+                    height: (constraint.maxHeight / 6) / 2,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 20.0, top: 10),
+                              child: SizedBox(
+                                child: Text(
+                                  'Available Services',
+                                  style: TextStyle(
+                                      color: Colors.lightGreen, fontSize: 28),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 20.0),
+                              child: SizedBox(
+                                child: Text(
+                                  'Please select from the following services:',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 15),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Divider(),
+                Padding(
+                  padding: const EdgeInsets.only(top: tilePadding),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: ((context) => GenericBookPage(
+                                  service: ConsulationServices.counseling,
+                                  serviceDesc:
+                                      "Learn about your condition and your moods, feelings, thoughts and behaviors.",
+                                  image:
+                                      "images/service_select_counseling.png"))));
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: constraint.maxWidth - 30,
+                          height: (constraint.maxHeight / 6) - tilePadding + 10,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.asset('images/select_counseling.png',
+                                fit: BoxFit.fill),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: tilePadding),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: ((context) => GenericBookPage(
+                                  service: ConsulationServices.consultation,
+                                  serviceDesc:
+                                      "A comprehensive evaluation of the psychological, biological, medical and social causes of emotional distress.",
+                                  image:
+                                      "images/service_select_consultation.png"))));
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: constraint.maxWidth - 30,
+                          height: (constraint.maxHeight / 6) - tilePadding + 10,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.asset('images/select_psych.png',
+                                fit: BoxFit.fill),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: tilePadding),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: ((context) => GenericBookPage(
+                                  service: ConsulationServices.therapy,
+                                  serviceDesc:
+                                      "Helps patients develop, recover, improve as well as maintain the skills needed for daily living and working.",
+                                  image:
+                                      "images/service_select_therapy.png"))));
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: constraint.maxWidth - 30,
+                          height: (constraint.maxHeight / 6) - tilePadding + 10,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.asset('images/select_occup.png',
+                                fit: BoxFit.fill),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: tilePadding),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: ((context) => GenericBookPage(
+                                  service: ConsulationServices.assessment,
+                                  serviceDesc:
+                                      "To understand a person's strengths and weaknesses, identify potential problem, with cognitions, emotional reactivity, and make recommendations.",
+                                  image:
+                                      "images/service_select_assesment.png"))));
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: constraint.maxWidth - 30,
+                          height: (constraint.maxHeight / 6) - tilePadding + 10,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.asset('images/select_assesment.png',
+                                fit: BoxFit.fill),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class GenericBookPage extends StatefulWidget {
+  final ConsulationServices service;
+  final String serviceDesc;
+  final String image;
+  const GenericBookPage(
+      {super.key,
+      required this.service,
+      required this.serviceDesc,
+      required this.image});
+
+  @override
+  _GenericBookState createState() {
+    return _GenericBookState(
+        service: service, serviceDesc: serviceDesc, image: image);
+  }
+}
+
+class _GenericBookState extends State<GenericBookPage> {
+  final ConsulationServices service;
+  final String serviceDesc;
+  final String image;
+  AppointmentController appointmentController =
+      Get.put(AppointmentController());
+  final _formKey = GlobalKey<FormState>();
+
+  _GenericBookState(
+      {required this.service, required this.serviceDesc, required this.image});
+
+  String getTitle() {
+    String title = "Counseling";
+    if (service == ConsulationServices.consultation) {
+      title = "Psychiatric Consultation";
+    } else if (service == ConsulationServices.therapy) {
+      title = "Occupational Therapy";
+    } else if (service == ConsulationServices.assessment) {
+      title = "Psychological Assesment";
+    }
+    return title;
+  }
+
+  @override
+  void dispose() {
+    appointmentController.concernController.clear();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const descPadding = 40.0;
+    const headerpadding = 10.0;
+    print("service selected: $service");
+    return LayoutBuilder(builder: (context, constraint) {
+      return PopScope(
+        canPop: true,
+        child: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 80,
+            automaticallyImplyLeading: false,
+            //backgroundColor: lightBlueBg,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage('images/bg_teal_hd.png'),
+                      fit: BoxFit.fill),
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.elliptical(50, 20),
+                      bottomRight: Radius.elliptical(50, 20))),
+            ),
+            leading: SizedBox(
+              width: 20,
+              height: 20,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    size: 30,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+            ),
+          ),
+          body: Form(
+            key: _formKey,
+            child: Container(
+              width: constraint.maxWidth,
+              height: constraint.maxHeight,
+              child: ListView(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: headerpadding),
+                    child: Container(
+                      width: constraint.maxWidth - 20,
+                      height: (constraint.maxHeight / 5),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 20.0, top: 10),
+                                child: SizedBox(
+                                  child: Text(
+                                    getTitle(),
+                                    style: TextStyle(
+                                        color: forumButton, fontSize: 28),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10.0),
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 20.0),
+                                  child: SizedBox(
+                                    width: constraint.maxWidth - descPadding,
+                                    child: Text(
+                                      serviceDesc,
+                                      softWrap: true,
+                                      maxLines: 4,
+                                      style: TextStyle(
+                                          color: primaryGrey, fontSize: 17),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: constraint.maxWidth - 20,
+                        height: (constraint.maxHeight / 5) * 2,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.asset(image, fit: BoxFit.fill),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    width: constraint.maxWidth,
+                    height: (constraint.maxHeight / 5) * 2,
+                    child: Column(children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 30.0, bottom: 5),
+                        child: SizedBox(
+                            width: constraint.maxWidth - 30,
+                            child: Text("Concerns",
+                                style: TextStyle(
+                                    color: Colors.teal, fontSize: 18))),
+                      ),
+                      SizedBox(
+                        width: constraint.maxWidth - 30,
+                        height: ((constraint.maxHeight / 5) * 2) / 3,
+                        child: TextFormField(
+                          validator: (value) {
+                            //String validPattern = '[^ a-zA-Z]';
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your concern first';
+                            }
+                            // if (value.contains(RegExp(validPattern))) {
+                            //   return 'Must not contain invalid characters';
+                            // }
+                            if (value.length > 128) {
+                              return 'Invalid length.';
+                            }
+                            return null;
+                          },
+                          controller: appointmentController.concernController,
+                          maxLines: 3,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: unselectedLightBlue,
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(25.0)),
+                            ),
+                            hintText: 'Please note your concerns here...',
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 15.0),
+                            child: TextButton(
+                              child: Text(
+                                'Next',
+                                style: TextStyle(
+                                    fontFamily: 'Open Sans',
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 18,
+                                    color: Colors.teal),
+                              ),
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: ((context) =>
+                                              BookSchedulePage(
+                                                  service: service))));
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ]),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    });
   }
 }
 
@@ -1070,12 +1559,13 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
   String targetDate = "";
   bool dateSelected = false;
   String selectedService = "OCCUPATIONAL_THERAPY";
-  late Future<List<AppointmentSlot>> futureBlockedSlots;
+  late Future<List<appModel.AppointmentSlot>> futureBlockedSlots;
 
   Future<List<DateTime>> getBlockedDatesAsync() async {
     List<DateTime> dateList = <DateTime>[];
-    List<AppointmentSlot> futureBlockedSlots = await appointmentController
-        .fetchBlockedSlots(DateTime.now().year, DateTime.now().month);
+    List<appModel.AppointmentSlot> futureBlockedSlots =
+        await appointmentController.fetchBlockedSlots(
+            DateTime.now().year, DateTime.now().month);
 
     futureBlockedSlots.forEach((element) {
       dateList.add(DateTime.parse(element.startTime));
@@ -1085,8 +1575,8 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
     return dateList;
   }
 
-  List<AppointmentSlot> blockedSlots = getSlots();
-  static List<AppointmentSlot> getSlots() {
+  List<appModel.AppointmentSlot> blockedSlots = getSlots();
+  static List<appModel.AppointmentSlot> getSlots() {
     const data = [
       {
         "start_time": "2023-10-25T09:00:00+00:00",
@@ -1113,7 +1603,9 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
         "end_time": "2023-10-23T10:00:00+00:00"
       }
     ];
-    return data.map<AppointmentSlot>(AppointmentSlot.fromJson).toList();
+    return data
+        .map<appModel.AppointmentSlot>(appModel.AppointmentSlot.fromJson)
+        .toList();
   }
 
   _BookSchedulePageState({required this.service});
@@ -1177,15 +1669,11 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
     getBlockedDatesAsync();
     return Scaffold(
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: <Color>[primaryLightBlue, primaryBlue]),
-          ),
-        ),
-        toolbarHeight: 60,
+        toolbarHeight: 80,
+        automaticallyImplyLeading: false,
+        title: Text("Schedule Appointment"),
+        centerTitle: true,
+        backgroundColor: Colors.teal,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -1203,21 +1691,9 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
             ),
           ),
         ),
-        title: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Text(
-            'SCHEDULE APPOINTMENT',
-            style: TextStyle(
-                fontFamily: 'Proza Libre',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white),
-          ),
-        ),
       ),
       body: Column(
         children: [
-          SizedBox(height: 60),
           SizedBox(
             width: MediaQuery.sizeOf(context).width,
             height: 380,
@@ -1234,6 +1710,7 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                       selectionShape: DateRangePickerSelectionShape.rectangle,
                       selectionColor: primaryLightBlue,
                       headerHeight: 80,
+                      showNavigationArrow: true,
                       monthViewSettings: DateRangePickerMonthViewSettings(
                         //blackoutDates: [DateTime(2023, 10, 20), DateTime(2023, 10, 21)],
                         blackoutDates: dates,
@@ -1247,9 +1724,8 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                             //     Border.all(color: const Color(0xFFF44436), width: 1),
                             shape: BoxShape.rectangle),
                         blackoutDatesDecoration: BoxDecoration(
-                            color: Colors.red,
-                            border: Border.all(
-                                color: const Color(0xFFF44436), width: 1),
+                            color: unselectedGray,
+                            border: Border.all(color: Colors.white, width: 1),
                             shape: BoxShape.rectangle),
                         disabledDatesDecoration: BoxDecoration(
                             color: unselectedGray,
@@ -1262,7 +1738,7 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                             shape: BoxShape.circle),
                       ),
                       headerStyle: DateRangePickerHeaderStyle(
-                          backgroundColor: calendarHeaderMainLightBlue,
+                          backgroundColor: Colors.teal,
                           textAlign: TextAlign.center,
                           textStyle: TextStyle(
                             fontStyle: FontStyle.normal,
@@ -1273,56 +1749,16 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                       onSelectionChanged: selectionChanged,
                     );
                   } else {
-                    return SfDateRangePicker(
-                      showTodayButton: false,
-                      enablePastDates: false,
-                      selectionShape: DateRangePickerSelectionShape.rectangle,
-                      selectionColor: primaryLightBlue,
-                      headerHeight: 80,
-                      monthViewSettings: DateRangePickerMonthViewSettings(
-                        blackoutDates: [
-                          DateTime(2023, 10, 20),
-                          DateTime(2023, 10, 21)
-                        ],
-                        //blackoutDates: [],
-                        viewHeaderStyle: DateRangePickerViewHeaderStyle(
-                            backgroundColor: calendarHeaderBgLightTeal),
+                    return Container(
+                      width: MediaQuery.sizeOf(context).width,
+                      child: CircularProgressIndicator(
+                        color: primaryGrey,
                       ),
-                      monthCellStyle: DateRangePickerMonthCellStyle(
-                        cellDecoration: BoxDecoration(
-                            color: calendarCellUnselectedBgWhite,
-                            // border:
-                            //     Border.all(color: const Color(0xFFF44436), width: 1),
-                            shape: BoxShape.rectangle),
-                        blackoutDatesDecoration: BoxDecoration(
-                            color: Colors.red,
-                            border: Border.all(
-                                color: const Color(0xFFF44436), width: 1),
-                            shape: BoxShape.rectangle),
-                        disabledDatesDecoration: BoxDecoration(
-                            color: unselectedGray,
-                            border: Border.all(color: unselectedGray, width: 1),
-                            shape: BoxShape.rectangle),
-                        specialDatesDecoration: BoxDecoration(
-                            color: Colors.green,
-                            border: Border.all(
-                                color: const Color(0xFF2B732F), width: 1),
-                            shape: BoxShape.circle),
-                      ),
-                      headerStyle: DateRangePickerHeaderStyle(
-                          backgroundColor: calendarHeaderMainLightBlue,
-                          textAlign: TextAlign.center,
-                          textStyle: TextStyle(
-                            fontStyle: FontStyle.normal,
-                            fontSize: 25,
-                            letterSpacing: 5,
-                            color: backgroundColor,
-                          )),
-                      onSelectionChanged: selectionChanged,
                     );
                   }
                 }),
           ),
+          SizedBox(height: 10),
           Container(
             height: 8,
             decoration: BoxDecoration(
@@ -1332,28 +1768,30 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                   colors: <Color>[mainLightBlue, primaryBlue]),
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 30),
           SizedBox(
             width: MediaQuery.sizeOf(context).width,
             child: Padding(
-              padding: const EdgeInsets.only(left: 30.0),
+              padding: const EdgeInsets.only(left: 25.0),
               child: Text(
-                'TIME',
+                'Select Available Time',
                 style: TextStyle(
                   fontFamily: 'Roboto',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: primaryBlue,
+                  color: Colors.black87,
                 ),
               ),
             ),
           ),
+          SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ChoiceChip(
                 label: Text('9:00-10:00'),
                 selected: scheduleValue == TimeSlot.slot1.index,
+                selectedColor: slotSelect,
                 onSelected: (bool selected) {
                   setState(() {
                     _timeSlot = "09:00";
@@ -1365,6 +1803,7 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
               ChoiceChip(
                 label: Text('10:00-11:00'),
                 selected: scheduleValue == TimeSlot.slot2.index,
+                selectedColor: slotSelect,
                 onSelected: (bool selected) {
                   setState(() {
                     _timeSlot = "10:00";
@@ -1376,6 +1815,7 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
               ChoiceChip(
                 label: Text('11:00-12:00'),
                 selected: scheduleValue == TimeSlot.slot3.index,
+                selectedColor: slotSelect,
                 onSelected: (bool selected) {
                   setState(() {
                     _timeSlot = "11:00";
@@ -1386,12 +1826,14 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
               ),
             ],
           ),
+          SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               ChoiceChip(
-                label: Text('1:00-2:00'),
+                label: Text('01:00-02:00'),
                 selected: scheduleValue == TimeSlot.slot4.index,
+                selectedColor: slotSelect,
                 onSelected: (bool selected) {
                   setState(() {
                     _timeSlot = "01:00";
@@ -1401,8 +1843,9 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                 },
               ),
               ChoiceChip(
-                label: Text('2:00-3:00'),
+                label: Text('02:00-03:00'),
                 selected: scheduleValue == TimeSlot.slot5.index,
+                selectedColor: slotSelect,
                 onSelected: (bool selected) {
                   setState(() {
                     _timeSlot = "02:00";
@@ -1412,8 +1855,9 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                 },
               ),
               ChoiceChip(
-                label: Text('3:00-4:00'),
+                label: Text('03:00-04:00'),
                 selected: scheduleValue == TimeSlot.slot6.index,
+                selectedColor: slotSelect,
                 onSelected: (bool selected) {
                   setState(() {
                     _timeSlot = "03:00";
@@ -1425,7 +1869,7 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 20.0),
+            padding: const EdgeInsets.only(top: 30.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1449,7 +1893,7 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                       minimumSize:
                           MaterialStateProperty.all<Size>(Size(200, 50)),
                       backgroundColor:
-                          MaterialStateProperty.all<Color>(primaryLightBlue)),
+                          MaterialStateProperty.all<Color>(forumButton)),
                   child: Text('BOOK'),
                 ),
               ],
@@ -1464,54 +1908,1034 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
 class BookScheduleSuccessPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: ((context) => DashboardPage())));
-        },
-        child: Container(
-          width: MediaQuery.sizeOf(context).width,
-          color: backgroundColor,
-          child: Column(
-            children: [
-              SizedBox(height: 100),
-              Image.asset(
-                'images/welcome_logo.png',
-                fit: BoxFit.fitHeight,
-                height: 300,
-              ),
-              SizedBox(height: 30),
-              SizedBox(height: 50),
-              SizedBox(
-                width: MediaQuery.sizeOf(context).width - 80,
-                child: HeaderContentText(
-                    title:
-                        'Your appointment request has been submitted. Please wait for our call(09362855204) between 2-3 business days for confirmation of booking appointment.',
-                    isOverflow: true,
-                    isHeavy: true,
-                    customColor: Colors.black87),
-              ),
-              SizedBox(height: 70),
-              FilledButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => DashboardPage())));
-                },
-                style: ButtonStyle(
-                    minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(primaryLightBlue)),
-                child: Text('CONFIRM'),
-              ),
-            ],
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 80,
+          title: Text("Pending Approval",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 35)),
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          //backgroundColor: lightBlueBg,
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage('images/bg_yellow_hd.png'),
+                    fit: BoxFit.fill),
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.elliptical(50, 20),
+                    bottomRight: Radius.elliptical(50, 20))),
+          ),
+        ),
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: ((context) => DashboardPage())));
+          },
+          child: Container(
+            width: MediaQuery.sizeOf(context).width,
+            color: backgroundColor,
+            child: Column(
+              children: [
+                SizedBox(height: 100),
+                Image.asset(
+                  'images/calendar_logo.png',
+                  fit: BoxFit.fitHeight,
+                  height: 200,
+                ),
+                SizedBox(height: 20),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 80,
+                  child: Text(
+                    "December 25, 2023",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w900),
+                  ),
+                ),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 80,
+                  child: Text(
+                    "01:00 - 02:00",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: primaryGrey,
+                        fontSize: 25,
+                        fontWeight: FontWeight.w900),
+                  ),
+                ),
+                SizedBox(height: 40),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 80,
+                  child: HeaderContentText(
+                      title:
+                          "Your appointment request has been submitted. We'll notify you by email or by SMS between 1-2 business days for confirmation of booking appointment",
+                      isOverflow: true,
+                      isHeavy: true,
+                      customColor: Colors.black54),
+                ),
+                SizedBox(height: 70),
+                FilledButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: ((context) => AppointmentTab())));
+                  },
+                  style: ButtonStyle(
+                      minimumSize:
+                          MaterialStateProperty.all<Size>(Size(200, 50)),
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(Colors.orange)),
+                  child: Text('CONTINUE'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+class ScheduleCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return Container(
+        width: constraint.maxWidth,
+        height: constraint.maxHeight,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: constraint.maxWidth - 30,
+              height: constraint.maxHeight - 10,
+              child: Row(
+                children: [
+                  Container(
+                    width: 20,
+                    height: constraint.maxHeight - 10,
+                    decoration: BoxDecoration(
+                      color: scLineGreen,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(50),
+                        bottomLeft: Radius.circular(50),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: constraint.maxWidth - 30 - 20,
+                    height: constraint.maxHeight - 10,
+                    decoration: BoxDecoration(
+                      color: scBgGreen,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(25),
+                        bottomRight: Radius.circular(25),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text(
+                                "Philippine Mental Health Association - Palawan Chapter",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: scTitleDarkGreen,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text("Service: Counseling",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: scTitleGreen,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text("Patient Name: John Doe",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: scContentGreen,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: Row(
+                            children: [
+                              Icon(Icons.today, size: 15, color: scTitleGreen),
+                              Text(" 2023-11-15  ",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: scContentGreen,
+                                  )),
+                              Icon(Icons.schedule,
+                                  size: 15, color: scTitleGreen),
+                              Text("01:00-02:00",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: scContentGreen,
+                                  )),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+
+class ReScheduleCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return Container(
+        width: constraint.maxWidth,
+        height: constraint.maxHeight,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: constraint.maxWidth - 30,
+              height: constraint.maxHeight - 10,
+              child: Row(
+                children: [
+                  Container(
+                    width: 20,
+                    height: constraint.maxHeight - 10,
+                    decoration: BoxDecoration(
+                      color: scLineGreen,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(50),
+                        bottomLeft: Radius.circular(50),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: constraint.maxWidth - 30 - 20,
+                    height: constraint.maxHeight - 10,
+                    decoration: BoxDecoration(
+                      color: scBgGreen,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(25),
+                        bottomRight: Radius.circular(25),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text(
+                                "Philippine Mental Health Association - Palawan Chapter",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: scTitleDarkGreen,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text("Service: Counseling",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: scTitleGreen,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text("Patient Name: John Doe",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: scContentGreen,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: Row(
+                            children: [
+                              Icon(Icons.today, size: 15, color: scTitleGreen),
+                              Text(" 2023-11-15  ",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: scContentGreen,
+                                  )),
+                              Icon(Icons.schedule,
+                                  size: 15, color: scTitleGreen),
+                              Text("01:00-02:00",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: scContentGreen,
+                                  )),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            FilledButton(
+                              onPressed: () {},
+                              style: ButtonStyle(
+                                  minimumSize: MaterialStateProperty.all<Size>(
+                                      Size(80, 30)),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.blue)),
+                              child: Row(children: [
+                                Icon(Icons.restore),
+                                Text("   Reschedule")
+                              ]),
+                            ),
+                            FilledButton(
+                              onPressed: () {},
+                              style: ButtonStyle(
+                                  minimumSize: MaterialStateProperty.all<Size>(
+                                      Size(80, 30)),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.red)),
+                              child: Row(children: [
+                                Icon(Icons.update_disabled),
+                                Text("   Cancel")
+                              ]),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+
+class PendingCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return Container(
+        width: constraint.maxWidth,
+        height: constraint.maxHeight,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: constraint.maxWidth - 30,
+              height: constraint.maxHeight - 10,
+              child: Row(
+                children: [
+                  Container(
+                    width: 20,
+                    height: constraint.maxHeight - 10,
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(50),
+                        bottomLeft: Radius.circular(50),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: constraint.maxWidth - 30 - 20,
+                    height: constraint.maxHeight - 10,
+                    decoration: BoxDecoration(
+                      color: Colors.yellow.shade100,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(25),
+                        bottomRight: Radius.circular(25),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text(
+                                "Philippine Mental Health Association - Palawan Chapter",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade700,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text("Service: Counseling",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text("Patient Name: John Doe",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.orange.shade300,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: Row(
+                            children: [
+                              Icon(Icons.today,
+                                  size: 15, color: Colors.orange.shade700),
+                              Text(" 2023-11-15  ",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.orange.shade700,
+                                  )),
+                              Icon(Icons.schedule,
+                                  size: 15, color: Colors.orange.shade700),
+                              Text("01:00-02:00",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.orange.shade700,
+                                  )),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            FilledButton(
+                              onPressed: () {},
+                              style: ButtonStyle(
+                                  minimumSize: MaterialStateProperty.all<Size>(
+                                      Size(80, 30)),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.blue)),
+                              child: Row(children: [
+                                Icon(Icons.restore),
+                                Text("   Reschedule")
+                              ]),
+                            ),
+                            FilledButton(
+                              onPressed: () {},
+                              style: ButtonStyle(
+                                  minimumSize: MaterialStateProperty.all<Size>(
+                                      Size(80, 30)),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.red)),
+                              child: Row(children: [
+                                Icon(Icons.update_disabled),
+                                Text("   Cancel")
+                              ]),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+
+class PreviousCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return Container(
+        width: constraint.maxWidth,
+        height: constraint.maxHeight,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: constraint.maxWidth - 30,
+              height: constraint.maxHeight - 10,
+              child: Row(
+                children: [
+                  Container(
+                    width: 20,
+                    height: constraint.maxHeight - 10,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade600,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(50),
+                        bottomLeft: Radius.circular(50),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: constraint.maxWidth - 30 - 20,
+                    height: constraint.maxHeight - 10,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(25),
+                        bottomRight: Radius.circular(25),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text(
+                                "Philippine Mental Health Association - Palawan Chapter",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade800,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text("Service: Counseling",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: primaryGrey,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text("Patient Name: John Doe",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey,
+                                )),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: Row(
+                            children: [
+                              Icon(Icons.today, size: 15, color: primaryGrey),
+                              Text(" 2023-11-15  ",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: primaryGrey,
+                                  )),
+                              Icon(Icons.schedule,
+                                  size: 15, color: primaryGrey),
+                              Text("01:00-02:00",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: primaryGrey,
+                                  )),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+
+class AppointmentTab extends StatefulWidget {
+  const AppointmentTab({super.key});
+
+  @override
+  _AppointmentTabState createState() {
+    return _AppointmentTabState();
+  }
+}
+
+class _AppointmentTabState extends State<AppointmentTab> {
+  int _selectedIndex = 2;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      if (index == 0) {
+        Navigator.push(context,
+            MaterialPageRoute(builder: ((context) => DashboardPage())));
+      } else if (index == 1) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: ((context) => MessagesTab())));
+      } else if (index == 3) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: ((context) => ProfileTab())));
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      double headPadding = 20;
+      double headerSize = 30;
+      double tileHeight = constraint.maxHeight / 5;
+      return PopScope(
+        canPop: false,
+        child: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 80,
+            automaticallyImplyLeading: false,
+            //backgroundColor: lightBlueBg,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage('images/bg_teal_hd.png'),
+                      fit: BoxFit.fill),
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.elliptical(50, 20),
+                      bottomRight: Radius.elliptical(50, 20))),
+            ),
+            title: Text("APPOINTMENT",
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w900)),
+            centerTitle: true,
+            // leading: SizedBox(
+            //   width: 20,
+            //   height: 20,
+            //   child: Padding(
+            //     padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            //     child: IconButton(
+            //       icon: const Icon(
+            //         Icons.arrow_back,
+            //         size: 30,
+            //         color: Colors.white,
+            //       ),
+            //       onPressed: () {
+            //         Navigator.pop(context);
+            //       },
+            //     ),
+            //   ),
+            // ),
+          ),
+          body: Container(
+            width: constraint.maxWidth,
+            height: constraint.maxHeight,
+            child: Column(
+              children: [
+                SizedBox(height: headPadding),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: SizedBox(
+                    width: constraint.maxWidth,
+                    height: headerSize,
+                    child: Text("Upcoming Schedule",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 25,
+                        )),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Container(
+                  width: constraint.maxWidth,
+                  height: tileHeight - 30,
+                  child: ScheduleCard(),
+                ),
+                Divider(),
+                SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: SizedBox(
+                    width: constraint.maxWidth,
+                    height: headerSize,
+                    child: Text("Manage Bookings",
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 20,
+                        )),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: ((context) =>
+                                  BookSelectionServicePage())));
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: constraint.maxWidth - 30,
+                          height: tileHeight + 20,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.asset(
+                                'images/book_appointment_tab.png',
+                                fit: BoxFit.fill),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: ((context) => ReschedulePage())));
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: constraint.maxWidth - 30,
+                          height: tileHeight + 20,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.asset('images/reschedule_tab.png',
+                                fit: BoxFit.fill),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          bottomNavigationBar: SizedBox(
+            width: MediaQuery.sizeOf(context).width,
+            height: 60,
+            child: BottomNavigationBar(
+              items: <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: 'Home',
+                  backgroundColor: HexColor("#67ddd8"),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.mail),
+                  label: 'Messages',
+                  backgroundColor: HexColor("#5ce1e6"),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.event),
+                  label: 'Appointment',
+                  backgroundColor: HexColor("#67ddd8"),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.account_circle),
+                  label: 'Profile',
+                  backgroundColor: HexColor("#5ce1e6"),
+                ),
+              ],
+              currentIndex: _selectedIndex,
+              selectedItemColor: Colors.teal,
+              onTap: _onItemTapped,
+            ),
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class ReschedulePage extends StatefulWidget {
+  const ReschedulePage({super.key});
+
+  @override
+  _ReschedulePageState createState() {
+    return _ReschedulePageState();
+  }
+}
+
+class _ReschedulePageState extends State<ReschedulePage> {
+  int _selectedIndex = 2;
+  List<appModel.Appointment> upcoming = getUpcoming();
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      if (index == 0) {
+        Navigator.push(context,
+            MaterialPageRoute(builder: ((context) => DashboardPage())));
+      }
+    });
+  }
+
+  static List<appModel.Appointment> getUpcoming() {
+    const data = [
+      {
+        "startTime": "2023-11-06T09:00:00+00:00",
+        "endTime": "2023-11-06T09:00:00+00:00",
+        "service": "Therapy",
+        "concerns": "sample",
+      },
+      {
+        "startTime": "2023-11-06T09:00:00+00:00",
+        "endTime": "2023-11-06T09:00:00+00:00",
+        "service": "Therapy",
+        "concerns": "sample",
+      },
+      {
+        "startTime": "2023-11-06T09:00:00+00:00",
+        "endTime": "2023-11-06T09:00:00+00:00",
+        "service": "Therapy",
+        "concerns": "sample",
+      },
+      {
+        "startTime": "2023-11-06T09:00:00+00:00",
+        "endTime": "2023-11-06T09:00:00+00:00",
+        "service": "Therapy",
+        "concerns": "sample",
+      },
+      {
+        "startTime": "2023-11-06T09:00:00+00:00",
+        "endTime": "2023-11-06T09:00:00+00:00",
+        "service": "Therapy",
+        "concerns": "sample",
+      },
+      {
+        "startTime": "2023-11-06T09:00:00+00:00",
+        "endTime": "2023-11-06T09:00:00+00:00",
+        "service": "Therapy",
+        "concerns": "sample",
+      }
+    ];
+    return data
+        .map<appModel.Appointment>(appModel.Appointment.fromJson)
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      child: LayoutBuilder(builder: (context, constraint) {
+        return Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 80,
+            automaticallyImplyLeading: false,
+            //backgroundColor: lightBlueBg,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage('images/bg_teal_hd.png'),
+                      fit: BoxFit.fill),
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.elliptical(50, 20),
+                      bottomRight: Radius.elliptical(50, 20))),
+            ),
+            title: Text("SCHEDULE/RESCHEDULE",
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w900)),
+            centerTitle: true,
+            leading: SizedBox(
+              width: 20,
+              height: 20,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    size: 30,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+            ),
+            bottom: TabBar(
+              dividerColor: Colors.transparent,
+              indicatorColor: Colors.yellow,
+              labelColor: Colors.white,
+              unselectedLabelColor: primaryGrey,
+              labelStyle: TextStyle(color: Colors.white),
+              tabs: [
+                Tab(text: "Upcoming", icon: Icon(Icons.schedule)),
+                Tab(text: "Pending", icon: Icon(Icons.pending_actions)),
+                Tab(text: "Previous", icon: Icon(Icons.history)),
+              ],
+            ),
+          ),
+          body: Container(
+            width: constraint.maxWidth,
+            height: constraint.maxHeight,
+            child: TabBarView(
+              children: <Widget>[
+                Container(
+                  width: constraint.maxWidth,
+                  height: constraint.maxHeight - 80,
+                  child: Column(
+                    children: [
+                      SizedBox(height: 20),
+                      Container(
+                          width: constraint.maxWidth,
+                          height: constraint.maxHeight - 200,
+                          child: buildUpcoming(upcoming)),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: constraint.maxWidth,
+                  height: constraint.maxHeight - 80,
+                  child: Column(
+                    children: [
+                      SizedBox(height: 20),
+                      Container(
+                          width: constraint.maxWidth,
+                          height: constraint.maxHeight - 200,
+                          child: buildPending(upcoming)),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: constraint.maxWidth,
+                  height: constraint.maxHeight - 80,
+                  child: Column(
+                    children: [
+                      SizedBox(height: 20),
+                      Container(
+                          width: constraint.maxWidth,
+                          height: constraint.maxHeight - 200,
+                          child: buildPrevious(upcoming)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget buildUpcoming(List<appModel.Appointment> upcoming) => ListView.builder(
+        itemCount: upcoming.length,
+        itemBuilder: (context, index) {
+          final thread = upcoming[index];
+          return LayoutBuilder(builder: (context, constraint) {
+            return Column(
+              children: [
+                Container(
+                    width: constraint.maxWidth,
+                    height: 200,
+                    child: ReScheduleCard()),
+                Divider(),
+              ],
+            );
+          });
+        },
+      );
+
+  Widget buildPending(List<appModel.Appointment> upcoming) => ListView.builder(
+        itemCount: upcoming.length,
+        itemBuilder: (context, index) {
+          final thread = upcoming[index];
+          return LayoutBuilder(builder: (context, constraint) {
+            return Column(
+              children: [
+                Container(
+                    width: constraint.maxWidth,
+                    height: 200,
+                    child: PendingCard()),
+                Divider(),
+              ],
+            );
+          });
+        },
+      );
+
+  Widget buildPrevious(List<appModel.Appointment> upcoming) => ListView.builder(
+        itemCount: upcoming.length,
+        itemBuilder: (context, index) {
+          final thread = upcoming[index];
+          return LayoutBuilder(builder: (context, constraint) {
+            return Column(
+              children: [
+                Container(
+                    width: constraint.maxWidth,
+                    height: 140,
+                    child: PreviousCard()),
+                Divider(),
+              ],
+            );
+          });
+        },
+      );
 }

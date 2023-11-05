@@ -52,3 +52,21 @@ final HexColor forumMainBg = HexColor("#38b6ff");
 final HexColor forumButton = HexColor("#17bbb0");
 final HexColor lightBlueBg = HexColor("#67ddd8");
 final HexColor greenBlueBg = HexColor("#17bbb0");
+
+// Moods
+final HexColor moodHappy = HexColor("#FFDE59");
+final HexColor moodSad = HexColor("#179B9E");
+final HexColor moodConfused = HexColor("#E6C2BF");
+final HexColor moodAngry = HexColor("#BC1824");
+final HexColor moodScared = HexColor("#A6A6A6");
+
+// Book
+final HexColor bookMainBg = HexColor("#FFDE59");
+final HexColor slotSelect = HexColor("#5ce1e6");
+
+// Schedule card
+final scLineGreen = HexColor("#5CDDA6");
+final scBgGreen = HexColor("#DCFCEF");
+final scTitleDarkGreen = HexColor("#044B23");
+final scTitleGreen = HexColor("#448C6D");
+final scContentGreen = HexColor("#8CC2AB");
