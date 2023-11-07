@@ -6,12 +6,17 @@ uses pydantic base model.
 date: 10/07/2023
 """
 from typing import List, Tuple, Dict
+from datetime import datetime
 from pydantic import BaseModel, Field
 from internal.database import (
+    UserModel,
     MembershipType,
     MembershipStatus,
     AppointmentStatus,
     AppointmentServices,
+    AppointmentModel,
+    ThreadModel,
+    ThreadUserLikeModel,
 )
 
 
@@ -45,14 +50,37 @@ class AppointmentInfoApi(BaseModel):
     id: int
     patient_id: int
     center: str
-    start_time: str
-    end_time: str
+    start_time: datetime
+    end_time: datetime
     status: AppointmentStatus
+
+    @classmethod
+    async def from_model(cls, model: AppointmentModel) -> "AppointmentInfoApi":
+        patient = await model.patient
+        return cls(
+            id=model.id,
+            patient_id=patient.id,
+            center="",
+            start_time=model.start_time,
+            end_time=model.end_time,
+            status=model.status,
+        )
 
 
 class AppointmentBlockedSlot(BaseModel):
-    start_time: str
-    end_time: str
+    start_time: datetime
+    end_time: datetime
+
+    @classmethod
+    async def from_model(cls, model: AppointmentModel) -> "AppointmentBlockedSlot":
+        return cls(
+            start_time=model.start_time,
+            end_time=model.end_time,
+        )
+
+
+class AppointmentUpdateStatusApi(BaseModel):
+    status: AppointmentStatus
 
 
 class AppointmentApi(BaseModel):
@@ -61,13 +89,13 @@ class AppointmentApi(BaseModel):
     Supported Method: POST
     """
 
-    start_time: str
-    end_time: str
+    start_time: datetime
+    end_time: datetime
     service: AppointmentServices
     concerns: str = ""
 
 
-class UserApi(BaseModel):
+class UserSignUpApi(BaseModel):
     """API model of a users.
 
     Supported Method: POST
@@ -153,9 +181,25 @@ class ThreadRequestApi(BaseModel):
     content: str
     thread_id: int = 0
     creator: str = ""
-    date_created: str = ""
+    date_created: datetime = datetime.today()
+    is_liked: bool = False
     num_likes: int = 0
+    num_comments: int = 0
     comments: List[ThreadCommentApi] = Field(default_factory=list)
+
+    @classmethod
+    async def from_model(cls, model: ThreadModel) -> "ThreadRequestApi":
+        user: UserModel = await model.user
+        return cls(
+            thread_id=model.id,
+            topic=model.topic,
+            content=model.content,
+            creator=user.email,
+            num_likes=model.num_likes,
+            num_comments=model.num_comments,
+            date_created=model.created,
+            is_liked=await ThreadUserLikeModel.exists(user__id=user.id, thread__id=model.id),
+        )
 
 
 class ThreadLikeApi(BaseModel):
@@ -164,3 +208,9 @@ class ThreadLikeApi(BaseModel):
     """
 
     like: bool
+
+
+class AdminStatsApi(BaseModel):
+    num_patients: int
+    num_appointments_req: int
+    num_todays_sessions: int
