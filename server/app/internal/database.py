@@ -19,6 +19,7 @@ from tortoise.fields import (
     ForeignKeyField,
     CharEnumField,
     ReverseRelation,
+    BooleanField,
 )
 
 
@@ -82,6 +83,7 @@ class UserModel(Model):
     age = IntField()
     occupation = CharField(128)
     birthday = CharField(128)
+    mobile_number = CharField(max_length=13, default="")
 
     @classmethod
     async def get_user(cls, email: str) -> Self:
@@ -102,6 +104,7 @@ class AppointmentStatus(str, Enum):
     PENDING = "PENDING"
     RESERVED = "RESERVED"
     CANCELLED = "CANCELLED"
+    RESCHEDULE = "RESCHEDULE"
 
 
 class AppointmentServices(str, Enum):
@@ -184,8 +187,10 @@ class ThreadModel(Model):
     user = ForeignKeyField("models.UserModel")
     created = DatetimeField(auto_now=True)
     topic = CharField(max_length=160)
-    content = CharField(max_length=1024)
+    content = CharField(max_length=256)
     comments = ReverseRelation["ThreadCommentModel"]
+    num_likes = IntField(default=0)
+    num_comments = IntField(default=0)
 
 
 class ThreadCommentModel(Model):
@@ -193,11 +198,26 @@ class ThreadCommentModel(Model):
     user = ForeignKeyField("models.UserModel")
     thread = ForeignKeyField("models.ThreadModel")
     created = DatetimeField(auto_now=True)
-    content = CharField(max_length=1024)
+    content = CharField(max_length=256)
 
     @classmethod
     async def get_thread_comments(cls, thread_id: int) -> List["ThreadCommentModel"]:
         return await cls.filter(thread__id=thread_id).order_by("-created")
+
+
+class ThreadUserLikeModel(Model):
+    id = IntField(pk=True)
+    thread = ForeignKeyField("models.ThreadModel")
+    user = ForeignKeyField("models.UserModel")
+    liked_at = DatetimeField(auto_now=True)
+
+    @classmethod
+    async def get_all_thread_like_by_user(cls, user_id: int) -> List["ThreadUserLikeModel"]:
+        return await cls.filter(user__id=user_id)
+
+    @classmethod
+    async def get_thread_like_by_user(cls, user_id: int, thread_id: int) -> "ThreadUserLikeModel":
+        return await cls.first(user__id=user_id, thread__id=thread_id)
 
 
 class Doctor(Model):
@@ -208,7 +228,7 @@ class Doctor(Model):
     # center = ForeignKeyField("models.HealthCenter")
 
 
-class Appointment(Model):
+class AppointmentModel(Model):
     """Model the describe an appointment.
 
     An appointment basically consists of a patient(user), doctor(user) and the
@@ -222,6 +242,7 @@ class Appointment(Model):
     start_time = DatetimeField()
     end_time = DatetimeField()
     status = CharEnumField(AppointmentStatus, max_length=64)
+    created = DatetimeField(auto_now=True)
 
     @classmethod
     async def get_by_month(cls, date: datetime) -> List[Self]:
