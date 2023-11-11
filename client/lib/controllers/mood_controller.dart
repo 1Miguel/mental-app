@@ -37,7 +37,7 @@ class MoodController extends GetxController {
 
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/user/mood/today'),
+        Uri.parse('$baseUrl/user/mood/2023/11/11/'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Authorization': '$token_type $token',
@@ -75,7 +75,7 @@ class MoodController extends GetxController {
 
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/user/mood/?month=2023-10-01'),
+        Uri.parse('$baseUrl/user/mood/2023/11/'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Authorization': '$token_type $token',
@@ -115,7 +115,7 @@ class MoodController extends GetxController {
 
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/user/mood/?month=2023-10-01'),
+        Uri.parse('$baseUrl/user/mood/2023/11/'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Authorization': '$token_type $token',
@@ -165,7 +165,7 @@ class MoodController extends GetxController {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/user/mood'),
+        Uri.parse('$baseUrl/user/mood/log/'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Authorization': '$token_type $token',

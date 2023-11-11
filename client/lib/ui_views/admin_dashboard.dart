@@ -13,6 +13,16 @@ class MainBody extends StatelessWidget {
     super.key,
   });
 
+  getDate() {
+    final datenow = DateTime.now();
+    int month = datenow.month;
+    int year = datenow.year;
+    int day = datenow.day;
+
+    String dateToday = "$year-$month-$day";
+    return dateToday;
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -22,14 +32,48 @@ class MainBody extends StatelessWidget {
         double summaryHeight = constraint.maxHeight / 2;
         return Column(
           children: [
-            //SizedBox(height: 50),
+            SizedBox(height: 50),
             Container(
               width: constraint.maxWidth,
-              height: searchHeight,
+              height: searchHeight - 50,
               child: Padding(
                 padding:
                     const EdgeInsets.only(left: 60.0, top: 20.0, bottom: 20.0),
-                child: SearchBarApp(),
+                child: SizedBox(
+                  width: 200,
+                  height: searchHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 3.0,
+                            ),
+                            child: Text("Today's Date"),
+                          ),
+                          Text(getDate()),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 15.0),
+                        child: SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: Container(
+                            color: unselectedGray,
+                            child: Icon(
+                              Icons.calendar_month,
+                              color: primaryGrey,
+                              size: 20.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
             Container(
@@ -37,21 +81,25 @@ class MainBody extends StatelessWidget {
               height: statusHeight,
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 65.0, bottom: 15.0, top: 20.0),
-                    child: SizedBox(
-                      width: MediaQuery.sizeOf(context).width,
-                      child: Text(
-                        'Status',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Roboto',
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 65.0, bottom: 15.0, top: 20.0),
+                        child: SizedBox(
+                          width: statusHeight,
+                          child: Text(
+                            'Status',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Roboto',
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 50.0),
@@ -121,29 +169,6 @@ class StatusBoxList extends StatelessWidget {
                     overflowLabel: true),
               ),
             ),
-            Container(
-              width: cardWidth,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                child: StatusCard(
-                    count: "0",
-                    label: "Membership\nRequests",
-                    icon: Icons.bookmark,
-                    overflowLabel: true),
-              ),
-            ),
-            Container(
-              width: cardWidth,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                child: StatusCard(
-                  count: "0",
-                  label: "Pending\nDonations",
-                  icon: Icons.loyalty,
-                  overflowLabel: true,
-                ),
-              ),
-            ),
           ],
         );
       },
@@ -180,33 +205,33 @@ class UpcomingEventsList extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 20),
               child: Container(
-                width: constraint.maxWidth / 3 - 40,
+                width: constraint.maxWidth / 3 + 100,
                 height: constraint.maxHeight,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 10.0, right: 10.0),
                   child: MembershipCard(
-                    title: "Membership Requests",
+                    title: "Service Summary",
                     label: "Doctors",
                     image: "images/admin_membership.png",
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: Container(
-                width: constraint.maxWidth / 3 - 40,
-                height: constraint.maxHeight,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                  child: Donationcard(
-                    title: "Donation",
-                    label: "Doctors",
-                    image: "images/admin_donation.png",
-                  ),
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(right: 20),
+            //   child: Container(
+            //     width: constraint.maxWidth / 3 - 40,
+            //     height: constraint.maxHeight,
+            //     child: Padding(
+            //       padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+            //       child: Donationcard(
+            //         title: "Donation",
+            //         label: "Doctors",
+            //         image: "images/admin_donation.png",
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         );
       },
@@ -370,16 +395,6 @@ class SearchBarApp extends StatefulWidget {
 class _SearchBarAppState extends State<SearchBarApp> {
   bool isDark = false;
 
-  getDate() {
-    final datenow = DateTime.now();
-    int month = datenow.month;
-    int year = datenow.year;
-    int day = datenow.day;
-
-    String dateToday = "$year-$month-$day";
-    return dateToday;
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -418,38 +433,6 @@ class _SearchBarAppState extends State<SearchBarApp> {
               ),
             ),
             SizedBox(width: 30),
-            SizedBox(
-              width: 150,
-              height: 50,
-              child: Row(
-                children: [
-                  Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 3.0),
-                        child: Text("Today's Date"),
-                      ),
-                      Text(getDate()),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15.0),
-                    child: SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: Container(
-                        color: unselectedGray,
-                        child: Icon(
-                          Icons.calendar_month,
-                          color: primaryGrey,
-                          size: 20.0,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         );
       },
@@ -813,10 +796,10 @@ class MembershipChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<ChartData> chartData = [
-      ChartData('David', 25),
-      ChartData('Steve', 38),
-      ChartData('Jack', 34),
-      ChartData('Others', 52)
+      ChartData('Counseling', 25),
+      ChartData('Psychiatric Consultation', 38),
+      ChartData('Occupational Therapy', 34),
+      ChartData('Psychological Assesment', 52)
     ];
     return Center(
       child: SfCircularChart(

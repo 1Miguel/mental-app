@@ -124,6 +124,51 @@ class ThreadController extends GetxController {
     }
   }
 
+  Future<List<Thread>> fetchPosts(int page) async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+            '$baseUrl/user/thread/{thread_id}/query/?filter=posted&limit=100'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> myMap = json.decode(response.body);
+        List<Thread> ThreadList = <Thread>[];
+
+        myMap.forEach((element) {
+          print(element);
+          ThreadList.add(Thread.fromJson(element));
+        });
+
+        return ThreadList;
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+      throw "Unknown Error Occurred";
+    }
+  }
+
   Future<void> createPost() async {
     String? token = await getToken();
     String? token_type = await getTokenType();

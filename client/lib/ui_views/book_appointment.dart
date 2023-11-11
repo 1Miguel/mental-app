@@ -4,6 +4,7 @@ import 'package:flutter_intro/ui_views/dashboard_messages.dart';
 import 'package:flutter_intro/ui_views/dashboard_profile.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:flutter_intro/model/appointment.dart' as appModel;
@@ -1548,6 +1549,44 @@ class BookSchedulePage extends StatefulWidget {
       _BookSchedulePageState(service: service);
 }
 
+class TimeSlotList {
+  bool timeSlot1 = true;
+  bool timeSlot2 = true;
+  bool timeSlot3 = true;
+  bool timeSlot4 = true;
+  bool timeSlot5 = true;
+  bool timeSlot6 = true;
+}
+
+class MonthTimeSlot {
+  String date = DateTime.now().toString();
+  bool available = true;
+  TimeSlotList timeSlots = TimeSlotList();
+}
+
+bool isDayFullyBooked(TimeSlotList timeSlots) {
+  bool isAvailable = false;
+  if (timeSlots.timeSlot1 == true) {
+    isAvailable = true;
+  }
+  if (timeSlots.timeSlot2 == true) {
+    isAvailable = true;
+  }
+  if (timeSlots.timeSlot3 == true) {
+    isAvailable = true;
+  }
+  if (timeSlots.timeSlot4 == true) {
+    isAvailable = true;
+  }
+  if (timeSlots.timeSlot5 == true) {
+    isAvailable = true;
+  }
+  if (timeSlots.timeSlot6 == true) {
+    isAvailable = true;
+  }
+  return isAvailable;
+}
+
 class _BookSchedulePageState extends State<BookSchedulePage> {
   final ConsulationServices service;
   int? scheduleValue = TimeSlot.slot0.index;
@@ -1560,6 +1599,13 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
   bool dateSelected = false;
   String selectedService = "OCCUPATIONAL_THERAPY";
   late Future<List<appModel.AppointmentSlot>> futureBlockedSlots;
+  List<MonthTimeSlot> monthSlots = [];
+  bool timeSlot1Enabled = true;
+  bool timeSlot2Enabled = true;
+  bool timeSlot3Enabled = true;
+  bool timeSlot4Enabled = true;
+  bool timeSlot5Enabled = true;
+  bool timeSlot6Enabled = true;
 
   Future<List<DateTime>> getBlockedDatesAsync() async {
     List<DateTime> dateList = <DateTime>[];
@@ -1568,10 +1614,74 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
             DateTime.now().year, DateTime.now().month);
 
     futureBlockedSlots.forEach((element) {
-      dateList.add(DateTime.parse(element.startTime));
+      MonthTimeSlot monthSlot = new MonthTimeSlot();
+
+      String slotDate =
+          DateFormat('yyyy-MM-dd').format(DateTime.parse(element.startTime));
+      String slotTime = DateFormat('HH:mm')
+          .format(DateTime.parse(element.startTime))
+          .toString();
+      bool scheduleFound = false;
+      bool scheduleFull = true;
+      //dateList.add(DateTime.parse(element.startTime));
+
+      monthSlots.forEach((slot) {
+        if (slot.date == slotDate) {
+          scheduleFound = true;
+          if (slotTime == "09:00") {
+            slot.timeSlots.timeSlot1 = false;
+          } else if (slotTime == "10:00") {
+            slot.timeSlots.timeSlot2 = false;
+          } else if (slotTime == "11:00") {
+            slot.timeSlots.timeSlot3 = false;
+          } else if (slotTime == "01:00") {
+            slot.timeSlots.timeSlot4 = false;
+          } else if (slotTime == "02:00") {
+            slot.timeSlots.timeSlot5 = false;
+          } else if (slotTime == "03:00") {
+            slot.timeSlots.timeSlot6 = false;
+          }
+          // Check if schedule is already booked
+          if (slot.timeSlots.timeSlot1 == true) {
+            scheduleFull = false;
+          } else if (slot.timeSlots.timeSlot2 == true) {
+            scheduleFull = false;
+          } else if (slot.timeSlots.timeSlot3 == true) {
+            scheduleFull = false;
+          } else if (slot.timeSlots.timeSlot4 == true) {
+            scheduleFull = false;
+          } else if (slot.timeSlots.timeSlot5 == true) {
+            scheduleFull = false;
+          } else if (slot.timeSlots.timeSlot6 == true) {
+            scheduleFull = false;
+          }
+
+          if (scheduleFull == true) {
+            slot.available = false;
+            dateList.add(DateTime.parse(element.startTime));
+          }
+        }
+      });
+      if (scheduleFound == false) {
+        monthSlot.date = slotDate;
+        if (slotTime == "09:00") {
+          monthSlot.timeSlots.timeSlot1 = false;
+        } else if (slotTime == "10:00") {
+          monthSlot.timeSlots.timeSlot2 = false;
+        } else if (slotTime == "11:00") {
+          monthSlot.timeSlots.timeSlot3 = false;
+        } else if (slotTime == "01:00") {
+          monthSlot.timeSlots.timeSlot4 = false;
+        } else if (slotTime == "02:00") {
+          monthSlot.timeSlots.timeSlot5 = false;
+        } else if (slotTime == "03:00") {
+          monthSlot.timeSlots.timeSlot6 = false;
+        }
+        monthSlots.add(monthSlot);
+      }
     });
 
-    print(dateList);
+    //print(dateList);
     return dateList;
   }
 
@@ -1644,8 +1754,22 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
       setState(() {
         dateSelected = true;
         _date = DateFormat('yyyy-MM-dd').format(args.value).toString();
-        print("date selection changed");
+        print("date selection changed $_date");
+
         updateSelectionDate();
+        print("Month Length: ${monthSlots.length}");
+        monthSlots.forEach((element) {
+          print(element.date);
+          if (element.date == _date) {
+            print('Date selected is $_date');
+            timeSlot1Enabled = element.timeSlots.timeSlot1;
+            timeSlot2Enabled = element.timeSlots.timeSlot2;
+            timeSlot3Enabled = element.timeSlots.timeSlot3;
+            timeSlot4Enabled = element.timeSlots.timeSlot4;
+            timeSlot5Enabled = element.timeSlots.timeSlot5;
+            timeSlot6Enabled = element.timeSlots.timeSlot6;
+          }
+        });
       });
     });
   }
@@ -1703,7 +1827,7 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                   if (snapshot.hasData) {
                     final dates = snapshot.data!;
                     print("dates");
-                    print(dates);
+                    //print(dates);
                     return SfDateRangePicker(
                       showTodayButton: false,
                       enablePastDates: false,
@@ -1785,88 +1909,124 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
             ),
           ),
           SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ChoiceChip(
-                label: Text('9:00-10:00'),
-                selected: scheduleValue == TimeSlot.slot1.index,
-                selectedColor: slotSelect,
-                onSelected: (bool selected) {
-                  setState(() {
-                    _timeSlot = "09:00";
-                    updateSelectionDate();
-                    scheduleValue = selected ? TimeSlot.slot1.index : null;
-                  });
-                },
-              ),
-              ChoiceChip(
-                label: Text('10:00-11:00'),
-                selected: scheduleValue == TimeSlot.slot2.index,
-                selectedColor: slotSelect,
-                onSelected: (bool selected) {
-                  setState(() {
-                    _timeSlot = "10:00";
-                    updateSelectionDate();
-                    scheduleValue = selected ? TimeSlot.slot2.index : null;
-                  });
-                },
-              ),
-              ChoiceChip(
-                label: Text('11:00-12:00'),
-                selected: scheduleValue == TimeSlot.slot3.index,
-                selectedColor: slotSelect,
-                onSelected: (bool selected) {
-                  setState(() {
-                    _timeSlot = "11:00";
-                    updateSelectionDate();
-                    scheduleValue = selected ? TimeSlot.slot3.index : null;
-                  });
-                },
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (timeSlot1Enabled == true)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5.0, right: 5),
+                    child: ChoiceChip(
+                      label: Text('09:00-10:00'),
+                      selected: scheduleValue == TimeSlot.slot1.index,
+                      selectedColor: slotSelect,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          _timeSlot = "09:00";
+                          updateSelectionDate();
+                          scheduleValue =
+                              selected ? TimeSlot.slot1.index : null;
+                        });
+                      },
+                    ),
+                  ),
+                if (timeSlot2Enabled == true)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5.0, right: 5),
+                    child: ChoiceChip(
+                      label: Text('10:00-11:00'),
+                      selected: scheduleValue == TimeSlot.slot2.index,
+                      selectedColor: slotSelect,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          _timeSlot = "10:00";
+                          updateSelectionDate();
+                          scheduleValue =
+                              selected ? TimeSlot.slot2.index : null;
+                        });
+                      },
+                    ),
+                  ),
+                if (timeSlot3Enabled == true)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5.0, right: 5),
+                    child: ChoiceChip(
+                      label: Text('11:00-12:00'),
+                      selected: scheduleValue == TimeSlot.slot3.index,
+                      selectedColor: slotSelect,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          _timeSlot = "11:00";
+                          updateSelectionDate();
+                          scheduleValue =
+                              selected ? TimeSlot.slot3.index : null;
+                        });
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
           SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ChoiceChip(
-                label: Text('01:00-02:00'),
-                selected: scheduleValue == TimeSlot.slot4.index,
-                selectedColor: slotSelect,
-                onSelected: (bool selected) {
-                  setState(() {
-                    _timeSlot = "01:00";
-                    updateSelectionDate();
-                    scheduleValue = selected ? TimeSlot.slot4.index : null;
-                  });
-                },
-              ),
-              ChoiceChip(
-                label: Text('02:00-03:00'),
-                selected: scheduleValue == TimeSlot.slot5.index,
-                selectedColor: slotSelect,
-                onSelected: (bool selected) {
-                  setState(() {
-                    _timeSlot = "02:00";
-                    updateSelectionDate();
-                    scheduleValue = selected ? TimeSlot.slot5.index : null;
-                  });
-                },
-              ),
-              ChoiceChip(
-                label: Text('03:00-04:00'),
-                selected: scheduleValue == TimeSlot.slot6.index,
-                selectedColor: slotSelect,
-                onSelected: (bool selected) {
-                  setState(() {
-                    _timeSlot = "03:00";
-                    updateSelectionDate();
-                    scheduleValue = selected ? TimeSlot.slot6.index : null;
-                  });
-                },
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (timeSlot4Enabled == true)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5.0, right: 5),
+                    child: ChoiceChip(
+                      label: Text('01:00-02:00'),
+                      selected: scheduleValue == TimeSlot.slot4.index,
+                      selectedColor: slotSelect,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          _timeSlot = "01:00";
+                          updateSelectionDate();
+                          scheduleValue =
+                              selected ? TimeSlot.slot4.index : null;
+                        });
+                      },
+                    ),
+                  ),
+                if (timeSlot5Enabled == true)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5.0, right: 5),
+                    child: ChoiceChip(
+                      label: Text('02:00-03:00'),
+                      selected: scheduleValue == TimeSlot.slot5.index,
+                      selectedColor: slotSelect,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          _timeSlot = "02:00";
+                          updateSelectionDate();
+                          scheduleValue =
+                              selected ? TimeSlot.slot5.index : null;
+                        });
+                      },
+                    ),
+                  ),
+                if (timeSlot6Enabled == true)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5.0, right: 5),
+                    child: ChoiceChip(
+                      label: Text('03:00-04:00'),
+                      selected: scheduleValue == TimeSlot.slot6.index,
+                      selectedColor: slotSelect,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          _timeSlot = "03:00";
+                          updateSelectionDate();
+                          scheduleValue =
+                              selected ? TimeSlot.slot6.index : null;
+                        });
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 30.0),
@@ -1906,6 +2066,17 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
 }
 
 class BookScheduleSuccessPage extends StatelessWidget {
+  final String date;
+  final String startTime;
+  final String endTime;
+
+  BookScheduleSuccessPage({
+    super.key,
+    required this.date,
+    required this.startTime,
+    required this.endTime,
+  });
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -1953,7 +2124,7 @@ class BookScheduleSuccessPage extends StatelessWidget {
                 SizedBox(
                   width: MediaQuery.sizeOf(context).width - 80,
                   child: Text(
-                    "December 25, 2023",
+                    date,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         color: Colors.black,
@@ -1964,7 +2135,7 @@ class BookScheduleSuccessPage extends StatelessWidget {
                 SizedBox(
                   width: MediaQuery.sizeOf(context).width - 80,
                   child: Text(
-                    "01:00 - 02:00",
+                    "$startTime - $endTime",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         color: primaryGrey,
@@ -2116,6 +2287,19 @@ class ScheduleCard extends StatelessWidget {
 }
 
 class ReScheduleCard extends StatelessWidget {
+  final int id;
+  final String date;
+  final String startTime;
+  final String endTime;
+
+  const ReScheduleCard({
+    super.key,
+    required this.id,
+    required this.date,
+    required this.startTime,
+    required this.endTime,
+  });
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraint) {
@@ -2195,14 +2379,14 @@ class ReScheduleCard extends StatelessWidget {
                           child: Row(
                             children: [
                               Icon(Icons.today, size: 15, color: scTitleGreen),
-                              Text(" 2023-11-15  ",
+                              Text(" $date ",
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: scContentGreen,
                                   )),
                               Icon(Icons.schedule,
                                   size: 15, color: scTitleGreen),
-                              Text("01:00-02:00",
+                              Text("$startTime-$endTime",
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: scContentGreen,
@@ -2256,6 +2440,53 @@ class ReScheduleCard extends StatelessWidget {
 }
 
 class PendingCard extends StatelessWidget {
+  final int id;
+  final String date;
+  final String startTime;
+  final String endTime;
+  AppointmentController appointmentController =
+      Get.put(AppointmentController());
+  final VoidCallback onPressed;
+
+  PendingCard({
+    super.key,
+    required this.id,
+    required this.date,
+    required this.startTime,
+    required this.endTime,
+    required this.onPressed,
+  });
+
+  _onAlertCancelAppointment(context) {
+    Alert(
+        context: context,
+        type: AlertType.warning,
+        title: "Cancel Appointment",
+        desc: "Are you sure you want to cancel this appointment?",
+        buttons: [
+          DialogButton(
+            onPressed: () {
+              onPressed();
+              appointmentController.cancelAppointment(id);
+              Navigator.of(context, rootNavigator: true).pop();
+            },
+            child: Text(
+              "Confirm",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ),
+          DialogButton(
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pop();
+            },
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          )
+        ]).show();
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraint) {
@@ -2336,14 +2567,14 @@ class PendingCard extends StatelessWidget {
                             children: [
                               Icon(Icons.today,
                                   size: 15, color: Colors.orange.shade700),
-                              Text(" 2023-11-15  ",
+                              Text(" $date ",
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: Colors.orange.shade700,
                                   )),
                               Icon(Icons.schedule,
                                   size: 15, color: Colors.orange.shade700),
-                              Text("01:00-02:00",
+                              Text("$startTime-$endTime",
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: Colors.orange.shade700,
@@ -2369,7 +2600,11 @@ class PendingCard extends StatelessWidget {
                               ]),
                             ),
                             FilledButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                _onAlertCancelAppointment(context);
+                                // onPressed();
+                                // appointmentController.cancelAppointment(id);
+                              },
                               style: ButtonStyle(
                                   minimumSize: MaterialStateProperty.all<Size>(
                                       Size(80, 30)),
@@ -2397,6 +2632,19 @@ class PendingCard extends StatelessWidget {
 }
 
 class PreviousCard extends StatelessWidget {
+  final int id;
+  final String date;
+  final String startTime;
+  final String endTime;
+
+  const PreviousCard({
+    super.key,
+    required this.id,
+    required this.date,
+    required this.startTime,
+    required this.endTime,
+  });
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraint) {
@@ -2476,19 +2724,84 @@ class PreviousCard extends StatelessWidget {
                           child: Row(
                             children: [
                               Icon(Icons.today, size: 15, color: primaryGrey),
-                              Text(" 2023-11-15  ",
+                              Text(" $date  ",
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: primaryGrey,
                                   )),
                               Icon(Icons.schedule,
                                   size: 15, color: primaryGrey),
-                              Text("01:00-02:00",
+                              Text("$startTime-$endTime",
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: primaryGrey,
                                   )),
                             ],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+}
+
+class EmptyCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return Container(
+        width: constraint.maxWidth,
+        height: constraint.maxHeight,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: constraint.maxWidth - 30,
+              height: constraint.maxHeight - 10,
+              child: Row(
+                children: [
+                  Container(
+                    width: 20,
+                    height: constraint.maxHeight - 10,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade600,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(50),
+                        bottomLeft: Radius.circular(50),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: constraint.maxWidth - 30 - 20,
+                    height: constraint.maxHeight - 10,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(25),
+                        bottomRight: Radius.circular(25),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: SizedBox(
+                            width: constraint.maxWidth - 30 - 20 - 10,
+                            child: Text("No Available Data",
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade800,
+                                )),
                           ),
                         ),
                         SizedBox(height: 10),
@@ -2516,6 +2829,15 @@ class AppointmentTab extends StatefulWidget {
 
 class _AppointmentTabState extends State<AppointmentTab> {
   int _selectedIndex = 2;
+  late Future<List<appModel.AppointmentInfo>> futureUpcomingLists;
+  AppointmentController appointmentController =
+      Get.put(AppointmentController());
+
+  Future<List<appModel.AppointmentInfo>> fetchLatestUpcoming() async {
+    futureUpcomingLists = appointmentController.fetchLatestUpcoming();
+    print(futureUpcomingLists);
+    return futureUpcomingLists;
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -2601,7 +2923,28 @@ class _AppointmentTabState extends State<AppointmentTab> {
                 Container(
                   width: constraint.maxWidth,
                   height: tileHeight - 30,
-                  child: ScheduleCard(),
+                  child: FutureBuilder<List<appModel.AppointmentInfo>>(
+                      future: fetchLatestUpcoming(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final upcList = snapshot.data!;
+                          if (upcList.length > 0) {
+                            return ScheduleCard();
+                          } else {
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                    width: constraint.maxWidth,
+                                    height: tileHeight - 30,
+                                    child: EmptyCard()),
+                              ],
+                            );
+                          }
+                        } else {
+                          return CircularProgressIndicator();
+                        }
+                      }),
                 ),
                 Divider(),
                 SizedBox(height: 10),
@@ -2724,6 +3067,29 @@ class ReschedulePage extends StatefulWidget {
 class _ReschedulePageState extends State<ReschedulePage> {
   int _selectedIndex = 2;
   List<appModel.Appointment> upcoming = getUpcoming();
+  late Future<List<appModel.AppointmentInfo>> futurePendingLists;
+  late Future<List<appModel.AppointmentInfo>> futureUpcomingLists;
+  late Future<List<appModel.AppointmentInfo>> futurePreviousLists;
+  AppointmentController appointmentController =
+      Get.put(AppointmentController());
+
+  Future<List<appModel.AppointmentInfo>> fetchPendingList() async {
+    futurePendingLists = appointmentController.fetchPendingList();
+    print(futurePendingLists);
+    return futurePendingLists;
+  }
+
+  Future<List<appModel.AppointmentInfo>> fetchUpcomingList() async {
+    futureUpcomingLists = appointmentController.fetchUpcomingList();
+    print(futureUpcomingLists);
+    return futureUpcomingLists;
+  }
+
+  Future<List<appModel.AppointmentInfo>> fetchPreviousList() async {
+    futurePreviousLists = appointmentController.fetchPreviousList();
+    print(futurePreviousLists);
+    return futurePreviousLists;
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -2845,9 +3211,32 @@ class _ReschedulePageState extends State<ReschedulePage> {
                     children: [
                       SizedBox(height: 20),
                       Container(
-                          width: constraint.maxWidth,
-                          height: constraint.maxHeight - 200,
-                          child: buildUpcoming(upcoming)),
+                        width: constraint.maxWidth,
+                        height: constraint.maxHeight - 200,
+                        child: FutureBuilder<List<appModel.AppointmentInfo>>(
+                            future: fetchUpcomingList(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                final upcList = snapshot.data!;
+                                if (upcList.length > 0) {
+                                  return buildUpcoming(upcList);
+                                } else {
+                                  return Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                          width: constraint.maxWidth,
+                                          height: 100,
+                                          child: EmptyCard()),
+                                    ],
+                                  );
+                                }
+                              } else {
+                                return CircularProgressIndicator();
+                              }
+                            }),
+                      ),
                     ],
                   ),
                 ),
@@ -2858,9 +3247,39 @@ class _ReschedulePageState extends State<ReschedulePage> {
                     children: [
                       SizedBox(height: 20),
                       Container(
-                          width: constraint.maxWidth,
-                          height: constraint.maxHeight - 200,
-                          child: buildPending(upcoming)),
+                        width: constraint.maxWidth,
+                        height: constraint.maxHeight - 200,
+                        child: FutureBuilder<List<appModel.AppointmentInfo>>(
+                            future: fetchPendingList(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                final pendList = snapshot.data!;
+                                if (pendList.length > 0) {
+                                  return buildPending(
+                                    pendList,
+                                    () {
+                                      setState(() {
+                                        print("parent set state");
+                                      });
+                                    },
+                                  );
+                                } else {
+                                  return Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                          width: constraint.maxWidth,
+                                          height: 100,
+                                          child: EmptyCard()),
+                                    ],
+                                  );
+                                }
+                              } else {
+                                return CircularProgressIndicator();
+                              }
+                            }),
+                      ),
                     ],
                   ),
                 ),
@@ -2868,12 +3287,38 @@ class _ReschedulePageState extends State<ReschedulePage> {
                   width: constraint.maxWidth,
                   height: constraint.maxHeight - 80,
                   child: Column(
+                    //crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 20),
                       Container(
-                          width: constraint.maxWidth,
-                          height: constraint.maxHeight - 200,
-                          child: buildPrevious(upcoming)),
+                        width: constraint.maxWidth,
+                        height: constraint.maxHeight - 200,
+                        child: FutureBuilder<List<appModel.AppointmentInfo>>(
+                            future: fetchPreviousList(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                final prevList = snapshot.data!;
+                                print("Previous List");
+                                print(prevList);
+                                if (prevList.length > 0) {
+                                  return buildPrevious(prevList);
+                                } else {
+                                  return Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                          width: constraint.maxWidth,
+                                          height: 100,
+                                          child: EmptyCard()),
+                                    ],
+                                  );
+                                }
+                              } else {
+                                return CircularProgressIndicator();
+                              }
+                            }),
+                      ),
                     ],
                   ),
                 ),
@@ -2885,7 +3330,8 @@ class _ReschedulePageState extends State<ReschedulePage> {
     );
   }
 
-  Widget buildUpcoming(List<appModel.Appointment> upcoming) => ListView.builder(
+  Widget buildUpcoming(List<appModel.AppointmentInfo> upcoming) =>
+      ListView.builder(
         itemCount: upcoming.length,
         itemBuilder: (context, index) {
           final thread = upcoming[index];
@@ -2895,7 +3341,12 @@ class _ReschedulePageState extends State<ReschedulePage> {
                 Container(
                     width: constraint.maxWidth,
                     height: 200,
-                    child: ReScheduleCard()),
+                    child: ReScheduleCard(
+                      id: thread.id,
+                      date: thread.date,
+                      startTime: thread.startTime,
+                      endTime: thread.endTime,
+                    )),
                 Divider(),
               ],
             );
@@ -2903,7 +3354,9 @@ class _ReschedulePageState extends State<ReschedulePage> {
         },
       );
 
-  Widget buildPending(List<appModel.Appointment> upcoming) => ListView.builder(
+  Widget buildPending(
+          List<appModel.AppointmentInfo> upcoming, VoidCallback onPressed) =>
+      ListView.builder(
         itemCount: upcoming.length,
         itemBuilder: (context, index) {
           final thread = upcoming[index];
@@ -2913,7 +3366,13 @@ class _ReschedulePageState extends State<ReschedulePage> {
                 Container(
                     width: constraint.maxWidth,
                     height: 200,
-                    child: PendingCard()),
+                    child: PendingCard(
+                      id: thread.id,
+                      date: thread.date,
+                      startTime: thread.startTime,
+                      endTime: thread.endTime,
+                      onPressed: onPressed,
+                    )),
                 Divider(),
               ],
             );
@@ -2921,7 +3380,8 @@ class _ReschedulePageState extends State<ReschedulePage> {
         },
       );
 
-  Widget buildPrevious(List<appModel.Appointment> upcoming) => ListView.builder(
+  Widget buildPrevious(List<appModel.AppointmentInfo> upcoming) =>
+      ListView.builder(
         itemCount: upcoming.length,
         itemBuilder: (context, index) {
           final thread = upcoming[index];
@@ -2931,7 +3391,12 @@ class _ReschedulePageState extends State<ReschedulePage> {
                 Container(
                     width: constraint.maxWidth,
                     height: 140,
-                    child: PreviousCard()),
+                    child: PreviousCard(
+                      id: thread.id,
+                      date: thread.date,
+                      startTime: thread.startTime,
+                      endTime: thread.endTime,
+                    )),
                 Divider(),
               ],
             );

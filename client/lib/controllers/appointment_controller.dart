@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/model/appointment.dart';
+import 'package:intl/intl.dart';
 
 // Local import
 import 'package:flutter_intro/ui_views/book_appointment.dart';
@@ -51,7 +52,7 @@ class AppointmentController extends GetxController {
         List<AppointmentInfo> AppointmentList = <AppointmentInfo>[];
 
         myMap.forEach((element) {
-          print(element);
+          //print(element);
           AppointmentList.add(AppointmentInfo.fromJson(element));
         });
 
@@ -79,10 +80,13 @@ class AppointmentController extends GetxController {
   Future<List<AppointmentSlot>> fetchBlockedSlots(int year, int month) async {
     String? token = await getToken();
     String? token_type = await getTokenType();
+    List<AppointmentSlot> AppointmentList = <AppointmentSlot>[];
+    int advMonth = month + 1;
 
+    // get 2 months
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/user/appointment/$year/$month'),
+        Uri.parse('$baseUrl/user/appointment/schedule/$year/$month'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Authorization': '$token_type $token',
@@ -92,14 +96,47 @@ class AppointmentController extends GetxController {
 
       if (response.statusCode == 200) {
         List<dynamic> myMap = json.decode(response.body);
-        List<AppointmentSlot> AppointmentList = <AppointmentSlot>[];
-
         myMap.forEach((element) {
-          print(element);
+          //print(element);
           AppointmentList.add(AppointmentSlot.fromJson(element));
         });
 
-        return AppointmentList;
+        try {
+          final response2 = await http.get(
+            Uri.parse('$baseUrl/user/appointment/schedule/$year/$advMonth'),
+            headers: <String, String>{
+              'Accept': 'application/json',
+              'Authorization': '$token_type $token',
+              'Content-Type': 'application/json',
+            },
+          );
+
+          if (response2.statusCode == 200) {
+            List<dynamic> myMap = json.decode(response.body);
+            myMap.forEach((element) {
+              //print(element);
+              AppointmentList.add(AppointmentSlot.fromJson(element));
+            });
+            return AppointmentList;
+          } else {
+            print(response.body);
+            print(response.statusCode);
+            throw jsonDecode(response.body)['Message'] ??
+                "Unknown Error Occurred";
+          }
+        } catch (e) {
+          Get.back();
+          showDialog(
+              context: Get.context!,
+              builder: (context) {
+                return SimpleDialog(
+                  title: Text('Error!'),
+                  contentPadding: EdgeInsets.all(20),
+                  children: [Text(e.toString())],
+                );
+              });
+          throw "Unknown Error Occurred";
+        }
       } else {
         print(response.body);
         print(response.statusCode);
@@ -127,7 +164,7 @@ class AppointmentController extends GetxController {
 
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/user/appointment/set'),
+        Uri.parse('$baseUrl/user/appointment/new/'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Authorization': '$token_type $token',
@@ -147,7 +184,18 @@ class AppointmentController extends GetxController {
         final SharedPreferences? prefs = await _prefs;
         //go to home
         concernController.clear();
-        Get.to(() => BookScheduleSuccessPage());
+        String pendDate =
+            DateFormat('MMMM dd, yyyy').format(DateTime.parse(startTime));
+        String startSlot =
+            DateFormat('HH:mm').format(DateTime.parse(startTime)).toString();
+        String endSlot =
+            DateFormat('HH:mm').format(DateTime.parse(endTime)).toString();
+
+        Get.to(() => BookScheduleSuccessPage(
+              date: pendDate,
+              startTime: startSlot,
+              endTime: endSlot,
+            ));
       } else {
         print(response.body);
         print(response.statusCode);
@@ -164,6 +212,221 @@ class AppointmentController extends GetxController {
               children: [Text(e.toString())],
             );
           });
+    }
+  }
+
+  Future<void> cancelAppointment(int id) async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/appointment/myschedule/$id/cancel/'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        print(json);
+        final SharedPreferences? prefs = await _prefs;
+        //go to home
+        //Get.to(() => BookScheduleSuccessPage());
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+    }
+  }
+
+  Future<List<AppointmentInfo>> fetchPendingList() async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/appointment/myschedule/pending/?limit=20'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> myMap = json.decode(response.body);
+        List<AppointmentInfo> AppointmentList = <AppointmentInfo>[];
+
+        myMap.forEach((element) {
+          //print(element);
+          AppointmentList.add(AppointmentInfo.fromJson(element));
+        });
+
+        return AppointmentList;
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+      throw "Unknown Error Occurred";
+    }
+  }
+
+  Future<List<AppointmentInfo>> fetchUpcomingList() async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/appointment/myschedule/upcoming/?limit=20'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> myMap = json.decode(response.body);
+        List<AppointmentInfo> AppointmentList = <AppointmentInfo>[];
+
+        myMap.forEach((element) {
+          //print(element);
+          AppointmentList.add(AppointmentInfo.fromJson(element));
+        });
+
+        return AppointmentList;
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+      throw "Unknown Error Occurred";
+    }
+  }
+
+  Future<List<AppointmentInfo>> fetchPreviousList() async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/appointment/myschedule/previous/?limit=20'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> myMap = json.decode(response.body);
+        List<AppointmentInfo> AppointmentList = <AppointmentInfo>[];
+
+        myMap.forEach((element) {
+          //print(element);
+          AppointmentList.add(AppointmentInfo.fromJson(element));
+        });
+
+        return AppointmentList;
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+      throw "Unknown Error Occurred";
+    }
+  }
+
+  Future<List<AppointmentInfo>> fetchLatestUpcoming() async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/appointment/myschedule/upcoming/?limit=1'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> myMap = json.decode(response.body);
+        List<AppointmentInfo> AppointmentList = <AppointmentInfo>[];
+
+        myMap.forEach((element) {
+          //print(element);
+          AppointmentList.add(AppointmentInfo.fromJson(element));
+        });
+
+        return AppointmentList;
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+      throw "Unknown Error Occurred";
     }
   }
 }

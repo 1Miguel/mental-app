@@ -93,6 +93,23 @@ class ContactUs extends StatelessWidget {
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
           centerTitle: true,
+          leading: SizedBox(
+            width: 20,
+            height: 20,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
+                  size: 30,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ),
         ),
         body: Container(
           width: constraint.maxWidth,

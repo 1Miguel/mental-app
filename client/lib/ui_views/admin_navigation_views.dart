@@ -159,12 +159,8 @@ class AdminSidebarX extends StatelessWidget {
           label: 'Appointment',
         ),
         const SidebarXItem(
-          icon: Icons.group,
-          label: 'Membership',
-        ),
-        const SidebarXItem(
-          icon: Icons.volunteer_activism,
-          label: 'Donation',
+          icon: Icons.logout,
+          label: 'Logout',
         ),
       ],
     );
@@ -193,10 +189,6 @@ class _ScreensExample extends StatelessWidget {
             return ScheduleCalendarView();
           case 2:
             return AppointmentRequestsMainView();
-          case 3:
-            return MembershipRequestsMainView();
-          case 4:
-            return DonationRequestsMainView();
           default:
             return Text(
               pageTitle,
@@ -216,12 +208,6 @@ String _getTitleByIndex(int index) {
       return 'Schedule';
     case 2:
       return 'Appointment';
-    case 3:
-      return 'Membership';
-    case 4:
-      return 'Profile';
-    case 5:
-      return 'Settings';
     default:
       return 'Not found page';
   }

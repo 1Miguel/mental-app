@@ -1,4 +1,5 @@
 // Standard import
+import 'package:email_otp/email_otp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
@@ -443,7 +444,12 @@ class LoginMainPage extends StatelessWidget {
                 // TODO: check one day interval for moods
                 // expirationDay = lastDailyCheck.add(oneDayDuration);
                 // isOneDayAfter = DateTime.now().isAfter(expirationDay);
-                return DashboardPage();
+
+                if (kIsWeb) {
+                  return AdminApp();
+                } else {
+                  return DashboardPage();
+                }
               }
             }
           }
@@ -1810,47 +1816,9 @@ class SignupState extends State<SignupPage> {
                                         getDecor(Icons.remove_red_eye, ""),
                                     autovalidateMode:
                                         AutovalidateMode.onUserInteraction,
-                                    // onTap: () {
-                                    //   setState(() {
-                                    //     if (pwEditActive == true) {
-                                    //       pwEditActive = false;
-                                    //     } else {
-                                    //       pwEditActive = true;
-                                    //     }
-                                    //   });
-                                    // },
                                   ),
                                 ),
                               ),
-                              // pwEditActive == true
-                              //     ? Padding(
-                              //         padding:
-                              //             const EdgeInsets.only(bottom: 10.0),
-                              //         child: SizedBox(
-                              //           width: constraint.maxWidth - 100,
-                              //           child: FlutterPwValidator(
-                              //             key: validatorKey,
-                              //             controller: signupController
-                              //                 .passwordController,
-                              //             minLength: 8,
-                              //             uppercaseCharCount: 1,
-                              //             lowercaseCharCount: 1,
-                              //             width: 400,
-                              //             height: 100,
-                              //             onSuccess: () {
-                              //               print("MATCHED");
-                              //               ScaffoldMessenger.of(context)
-                              //                   .showSnackBar(new SnackBar(
-                              //                       content: new Text(
-                              //                           "Password is matched")));
-                              //             },
-                              //             onFail: () {
-                              //               print("NOT MATCHED");
-                              //             },
-                              //           ),
-                              //         ),
-                              //       )
-                              //     : SizedBox(height: 0),
                               Padding(
                                 padding:
                                     EdgeInsets.only(bottom: 3.0, left: 40.0),
@@ -1933,13 +1901,26 @@ class SignupState extends State<SignupPage> {
                               FilledButton(
                                 onPressed: () {
                                   if (_formKey.currentState!.validate()) {
-                                    signupController.registerWithEmail();
-
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: ((context) =>
-                                                SignupValidatePage())));
+                                          builder: ((context) =>
+                                              SignupValidatePage(
+                                                email: signupController
+                                                    .emailController.text,
+                                                onPressed: () {
+                                                  signupController
+                                                      .registerWithEmail();
+                                                  // Navigator.push(
+                                                  //     context,
+                                                  //     MaterialPageRoute(
+                                                  //         builder: ((context) =>
+                                                  //             SignupSuccessPage())));
+                                                },
+                                              )),
+                                        ));
+
+                                    //
                                   }
                                 },
                                 style: ButtonStyle(
@@ -1977,15 +1958,55 @@ class SignupState extends State<SignupPage> {
 }
 
 class SignupValidatePage extends StatefulWidget {
-  const SignupValidatePage({super.key});
+  final String email;
+  final VoidCallback onPressed;
+
+  const SignupValidatePage({
+    super.key,
+    required this.email,
+    required this.onPressed,
+  });
 
   @override
   _SignupValidateState createState() {
-    return _SignupValidateState();
+    return _SignupValidateState(email: email, onPressed: onPressed);
   }
 }
 
 class _SignupValidateState extends State<SignupValidatePage> {
+  final _formKey = GlobalKey<FormState>();
+  EmailOTP myauth = EmailOTP();
+  TextEditingController otp = TextEditingController();
+  final String email;
+  final VoidCallback onPressed;
+
+  _SignupValidateState({required this.email, required this.onPressed});
+
+  @override
+  void initState() {
+    super.initState();
+    sendOtp();
+  }
+
+  void sendOtp() async {
+    myauth.setConfig(
+        appEmail: "pmhi.test.01@gmail.com",
+        appName: "Email OTP",
+        userEmail: "pmhi.test.01@gmail.com",
+        otpLength: 6,
+        otpType: OTPType.digitsOnly);
+
+    if (await myauth.sendOTP() == true) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("OTP has been sent"),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Oops, OTP send failed"),
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraint) {
@@ -2006,80 +2027,95 @@ class _SignupValidateState extends State<SignupValidatePage> {
           ),
           centerTitle: true,
         ),
-        body: Container(
-          color: backgroundColor,
-          child: ListView(
-            children: [
-              Container(
-                color: backgroundColor,
-                width: constraint.maxWidth,
-                height: (constraint.maxHeight / 8) * 7,
-                child: Column(
-                  children: [
-                    SizedBox(height: 200),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10, right: 10),
-                      child: SizedBox(
-                        height: 150,
-                        child: Text(
-                          "Please enter the verification\ncode was sent to\n{email}",
-                          softWrap: true,
-                          maxLines: 4,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: primaryGrey,
-                            fontSize: 25,
-                            fontFamily: 'Asap',
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 100,
-                      height: 60,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          //labelText: 'Password',
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 50.0),
-                      child: FilledButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: ((context) => SignupSuccessPage())));
-                        },
-                        style: ButtonStyle(
-                          minimumSize:
-                              MaterialStateProperty.all<Size>(Size(200, 50)),
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(Colors.teal),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                              side:
-                                  BorderSide(width: 2.0, color: loginDarkTeal),
+        body: Form(
+          key: _formKey,
+          child: Container(
+            color: backgroundColor,
+            child: ListView(
+              children: [
+                Container(
+                  color: backgroundColor,
+                  width: constraint.maxWidth,
+                  height: (constraint.maxHeight / 8) * 7,
+                  child: Column(
+                    children: [
+                      SizedBox(height: 200),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: SizedBox(
+                          height: 150,
+                          child: Text(
+                            "Please enter the verification\ncode was sent to\n$email",
+                            softWrap: true,
+                            maxLines: 4,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: primaryGrey,
+                              fontSize: 25,
+                              fontFamily: 'Asap',
+                              decoration: TextDecoration.none,
                             ),
                           ),
                         ),
-                        child: Text(
-                          'Verify',
-                          style: TextStyle(
-                              fontFamily: 'Open Sans',
-                              fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        width: 200,
+                        height: 60,
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter the OTP';
+                            }
+                            return null;
+                          },
+                          controller: otp,
+                          decoration: getDecor(Icons.key, "OTP"),
                         ),
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.only(top: 50.0),
+                        child: FilledButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              if (await myauth.verifyOTP(otp: otp.text) ==
+                                  true) {
+                                onPressed();
+                              } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text("Invalid OTP"),
+                                ));
+                              }
+                            }
+                            ;
+                          },
+                          style: ButtonStyle(
+                            minimumSize:
+                                MaterialStateProperty.all<Size>(Size(200, 50)),
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(Colors.teal),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(
+                                    width: 2.0, color: loginDarkTeal),
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'Verify',
+                            style: TextStyle(
+                                fontFamily: 'Open Sans',
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );

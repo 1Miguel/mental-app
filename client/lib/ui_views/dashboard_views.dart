@@ -543,7 +543,12 @@ class DashboardDiscoverCarousel extends StatelessWidget {
               image: 'images/media_dashboard.png',
               content:
                   "Discover articles, videos, and infographics about mental health and mental wellbeing",
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: ((context) => UnderstandingSelfPage())));
+              },
             ),
             DashboardFeatureContext(
               title: 'MOOD',

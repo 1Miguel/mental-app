@@ -225,14 +225,23 @@ class _EditProfileFormState extends State<EditProfileForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: 150,
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.lightBlue.shade600,
-                    child: Icon(
-                      Icons.person,
-                      size: 80,
-                      color: Colors.white,
+                  width: 100,
+                  // child: CircleAvatar(
+                  //   radius: 50,
+                  //   backgroundColor: Colors.lightBlue.shade600,
+                  //   child: Icon(
+                  //     Icons.person,
+                  //     size: 80,
+                  //     color: Colors.white,
+                  //   ),
+                  // ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20.0), //or 15.0
+                    child: Container(
+                      height: 100.0,
+                      width: 100.0,
+                      color: bgTeal,
+                      child: Icon(Icons.person, color: conTeal, size: 80.0),
                     ),
                   ),
                 ),

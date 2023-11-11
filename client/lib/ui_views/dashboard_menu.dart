@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/ui_views/dashboard_menu_aboutus.dart';
 import 'package:flutter_intro/ui_views/dashboard_menu_contactus.dart';
+import 'package:flutter_intro/ui_views/dashboard_menu_settings.dart';
 import 'package:flutter_intro/ui_views/login_views.dart';
 import 'dart:convert';
 import 'package:flutter_intro/utils/colors_scheme.dart';
@@ -231,6 +233,23 @@ class AccountsPage extends StatelessWidget {
         title: Text("MENU",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
         centerTitle: true,
+        leading: SizedBox(
+          width: 20,
+          height: 20,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                size: 30,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder(
           future: getUserData(),
@@ -295,7 +314,12 @@ class AccountsPage extends StatelessWidget {
                     AccountMenuTile(
                       menu: 'Settings',
                       menuIcon: Icons.settings,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => Settings())));
+                      },
                       bgColor: bgGreen,
                       conColor: conGreen,
                     ),
@@ -314,7 +338,12 @@ class AccountsPage extends StatelessWidget {
                     AccountMenuTile(
                       menu: 'About Us',
                       menuIcon: Icons.info,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => AboutUs())));
+                      },
                       bgColor: bgPurple,
                       conColor: conPurple,
                     ),

@@ -1,5 +1,7 @@
 // standard imports
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/controllers/admin_appointment_controller.dart';
+import 'package:flutter_intro/controllers/admin_membership_controller.dart';
 
 // local imports
 import 'package:flutter_intro/utils/colors_scheme.dart';
@@ -97,7 +99,14 @@ class _AppointmentRequestsState extends State<AppointmentRequestsView> {
   @override
   void initState() {
     super.initState();
-    appointmentDataSource = AppointmentDataSource(appointmentData: []);
+    appointmentDataSource = AppointmentDataSource(
+      appointmentData: [],
+      onPressed: () {
+        setState(() {
+          print("set state in parent");
+        });
+      },
+    );
   }
 
   Future<List<AppointmentInfo>> fethAppointmentRequests() async {
@@ -120,8 +129,13 @@ class _AppointmentRequestsState extends State<AppointmentRequestsView> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final requestList = snapshot.data!;
-                appointmentDataSource =
-                    AppointmentDataSource(appointmentData: requestList);
+                appointmentDataSource = AppointmentDataSource(
+                    appointmentData: requestList,
+                    onPressed: () {
+                      setState(() {
+                        print("set state in main");
+                      });
+                    });
                 return Column(
                   children: [
                     Container(
@@ -222,8 +236,14 @@ class _AppointmentRequestsState extends State<AppointmentRequestsView> {
 }
 
 class AppointmentDataSource extends DataGridSource {
+  final VoidCallback onPressed;
+  AdminAppointmentController adminAppointmentController =
+      Get.put(AdminAppointmentController());
+
   /// Creates the employee data source class with required details.
-  AppointmentDataSource({required List<AppointmentInfo> appointmentData}) {
+  AppointmentDataSource(
+      {required List<AppointmentInfo> appointmentData,
+      required this.onPressed}) {
     _appointmentDataGridRows = appointmentData
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
@@ -310,27 +330,6 @@ class AppointmentDataSource extends DataGridSource {
                                         _onApproveButtonPressed(
                                             context, row.getCells()[0].value),
                                       },
-                              // onPressed: () {
-                              //   showDialog(
-                              //       context: context,
-                              //       builder: (context) =>
-                              //       AlertDialog(
-                              //           content: SizedBox(
-                              //               height: 100,
-                              //               child: Column(
-                              //                 mainAxisAlignment:
-                              //                     MainAxisAlignment
-                              //                         .spaceBetween,
-                              //                 children: [
-                              //                   Text(
-                              //                       'Appointment ID: ${row.getCells()[0].value.toString()}'),
-                              //                   Text(
-                              //                       'Appointment Name: ${row.getCells()[1].value.toString()}'),
-                              //                   Text(
-                              //                       'Employee Designation: ${row.getCells()[2].value.toString()}'),
-                              //                 ],
-                              //               ))));
-                              // },
                               style: ButtonStyle(
                                   minimumSize: MaterialStateProperty.all<Size>(
                                       Size(40, 40)),
@@ -358,26 +357,6 @@ class AppointmentDataSource extends DataGridSource {
                                         _onRejectButtonPressed(
                                             context, row.getCells()[0].value),
                                       },
-                              // onPressed: () {
-                              //   showDialog(
-                              //       context: context,
-                              //       builder: (context) => AlertDialog(
-                              //           content: SizedBox(
-                              //               height: 100,
-                              //               child: Column(
-                              //                 mainAxisAlignment:
-                              //                     MainAxisAlignment
-                              //                         .spaceBetween,
-                              //                 children: [
-                              //                   Text(
-                              //                       'Appointment ID: ${row.getCells()[0].value.toString()}'),
-                              //                   Text(
-                              //                       'Appointment Name: ${row.getCells()[1].value.toString()}'),
-                              //                   Text(
-                              //                       'Employee Designation: ${row.getCells()[2].value.toString()}'),
-                              //                 ],
-                              //               ))));
-                              // },
                               style: ButtonStyle(
                                   minimumSize: MaterialStateProperty.all<Size>(
                                       Size(40, 40)),
@@ -417,8 +396,11 @@ class AppointmentDataSource extends DataGridSource {
             style: TextStyle(color: Colors.white, fontSize: 18),
           ),
           onPressed: () {
-            //adminMembershipController.approveMembership(id);
+            adminAppointmentController.approveAppointment(id);
             Navigator.of(context, rootNavigator: true).pop();
+            onPressed();
+            buildDataGridRow();
+            notifyListeners();
           },
           color: Color.fromRGBO(0, 179, 134, 1.0),
         ),
@@ -449,8 +431,11 @@ class AppointmentDataSource extends DataGridSource {
             style: TextStyle(color: Colors.white, fontSize: 18),
           ),
           onPressed: () {
-            //adminMembershipController.approveMembership(id);
+            adminAppointmentController.cancelAppointment(id);
             Navigator.of(context, rootNavigator: true).pop();
+            onPressed();
+            buildDataGridRow();
+            notifyListeners();
           },
           color: Color.fromRGBO(0, 179, 134, 1.0),
         ),
