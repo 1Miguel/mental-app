@@ -941,17 +941,17 @@ class LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.all(16.0),
           child: Center(
             child: SizedBox(
-              width: 300.0,
+              width: MediaQuery.sizeOf(context).width - 100,
               child: Form(
                 key: _captchaFormKey,
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  //mainAxisSize: MainAxisSize.min,
                   children: [
                     LocalCaptcha(
                       key: ValueKey(_configFormData.toString()),
                       controller: _localCaptchaController,
                       height: 150,
-                      width: 300,
+                      width: MediaQuery.sizeOf(context).width - 100,
                       backgroundColor: Colors.grey[100]!,
                       chars: _configFormData.chars,
                       length: _configFormData.length,

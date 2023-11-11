@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/controllers/appointment_controller.dart';
-import 'package:flutter_intro/dashboard_messages.dart';
-import 'package:flutter_intro/dashboard_profile.dart';
+import 'package:flutter_intro/ui_views/dashboard_messages.dart';
+import 'package:flutter_intro/ui_views/dashboard_profile.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';

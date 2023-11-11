@@ -12,17 +12,29 @@ class TopicThread extends StatefulWidget {
   final int topicId;
   final String topicName;
   final String content;
+  final bool isLiked;
+  final int numLikes;
+  final int numComments;
 
   const TopicThread({
     super.key,
     required this.topicId,
     required this.topicName,
     required this.content,
+    required this.isLiked,
+    required this.numLikes,
+    required this.numComments,
   });
 
   @override
   _TopicThreadState createState() => _TopicThreadState(
-      topicId: topicId, topicName: topicName, content: content);
+        topicId: topicId,
+        topicName: topicName,
+        content: content,
+        isLiked: isLiked,
+        numLikes: numLikes,
+        numComments: numComments,
+      );
 }
 
 class _TopicThreadState extends State<TopicThread> {
@@ -31,14 +43,22 @@ class _TopicThreadState extends State<TopicThread> {
   final int topicId;
   final String topicName;
   final String content;
+  final bool isLiked;
+  final int numLikes;
+  final int numComments;
   final TextEditingController commentController = TextEditingController();
   late Future<List<ThreadComment>> futureThreadComments;
+  bool likeState = false;
+  int likeNumState = 0;
+  int commentState = 0;
 
-  _TopicThreadState({
-    required this.topicId,
-    required this.topicName,
-    required this.content,
-  });
+  _TopicThreadState(
+      {required this.topicId,
+      required this.topicName,
+      required this.content,
+      required this.isLiked,
+      required this.numLikes,
+      required this.numComments});
 
   Future<List<ThreadComment>> getThreadComments() async {
     futureThreadComments = threadController.fetchThreadComments(topicId);
@@ -46,6 +66,14 @@ class _TopicThreadState extends State<TopicThread> {
     print(topicId);
     print(futureThreadComments);
     return futureThreadComments;
+  }
+
+  @override
+  void initState() {
+    likeState = isLiked;
+    likeNumState = numLikes;
+    commentState = numComments;
+    super.initState();
   }
 
   Widget buildComments(List<ThreadComment> comments) => ListView.builder(
@@ -94,6 +122,13 @@ class _TopicThreadState extends State<TopicThread> {
     return updStartTime;
   }
 
+  Color getLikeColor() {
+    if (likeState) {
+      return Colors.red;
+    }
+    return primaryGrey;
+  }
+
   @override
   Widget build(BuildContext context) {
     Image img = Image.asset('images/generic_user.png');
@@ -118,7 +153,7 @@ class _TopicThreadState extends State<TopicThread> {
                 color: Colors.white,
               ),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(context, [likeState, commentState]);
               },
             ),
           ),
@@ -146,6 +181,9 @@ class _TopicThreadState extends State<TopicThread> {
                 threadController.createComment(topicId);
                 //threadController.commentController.clear();
                 FocusScope.of(context).unfocus();
+                setState(() {
+                  commentState += 1;
+                });
               } else {
                 print("Not validated");
               }
@@ -236,7 +274,7 @@ class _TopicThreadState extends State<TopicThread> {
                     Padding(
                       padding: const EdgeInsets.only(left: 25.0, bottom: 10),
                       child: Text(
-                        "125",
+                        commentState.toString(),
                         style: TextStyle(
                           color: primaryGrey,
                           fontWeight: FontWeight.bold,
@@ -261,7 +299,7 @@ class _TopicThreadState extends State<TopicThread> {
                     Padding(
                       padding: const EdgeInsets.only(left: 25.0, bottom: 10),
                       child: Text(
-                        "125",
+                        likeNumState.toString(),
                         style: TextStyle(
                           color: primaryGrey,
                           fontWeight: FontWeight.bold,
@@ -274,9 +312,19 @@ class _TopicThreadState extends State<TopicThread> {
                       icon: Icon(
                         Icons.favorite,
                         size: 15.0,
-                        color: primaryGrey,
+                        color: getLikeColor(),
                       ),
                       onPressed: () {
+                        threadController.likeThread(topicId, !likeState);
+                        setState(() {
+                          if (likeState == false) {
+                            likeNumState += 1;
+                            likeState = true;
+                          } else {
+                            likeNumState -= 1;
+                            likeState = false;
+                          }
+                        });
                         // Navigator.push(
                         //     context,
                         //     MaterialPageRoute(

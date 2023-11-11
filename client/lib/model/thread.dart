@@ -34,6 +34,9 @@ class Thread {
   final String content;
   final String creator;
   final String date;
+  final bool isLiked;
+  final int numLikes;
+  final int numComments;
   //final List<ThreadComment> comments;
 
   const Thread({
@@ -42,6 +45,9 @@ class Thread {
     required this.content,
     required this.creator,
     required this.date,
+    required this.isLiked,
+    required this.numLikes,
+    required this.numComments,
     //required this.comments,
   });
 
@@ -51,6 +57,9 @@ class Thread {
     String def_content;
     String def_creator;
     String def_date;
+    bool def_isLiked;
+    int def_numLikes;
+    int def_numComments;
     //List<ThreadComment> def_comments;
 
     def_threadId = json['thread_id'] ?? 0;
@@ -58,6 +67,9 @@ class Thread {
     def_content = json['content'] ?? '';
     def_creator = json['creator'] ?? '';
     def_date = json['date_created'] ?? '';
+    def_isLiked = json['is_liked'] ?? false;
+    def_numLikes = json['num_likes'] ?? 0;
+    def_numComments = json['num_comments'] ?? 0;
     //def_comments = json['comments'] ?? [];
 
     return Thread(
@@ -66,6 +78,9 @@ class Thread {
       content: def_content as String,
       creator: def_creator as String,
       date: def_date as String,
+      isLiked: def_isLiked as bool,
+      numLikes: def_numLikes as int,
+      numComments: def_numComments as int,
       //comments: def_comments as List<ThreadComment>,
     );
   }

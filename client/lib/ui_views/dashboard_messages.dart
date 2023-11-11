@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_intro/dashboard_profile.dart';
 import 'package:flutter_intro/ui_views/book_appointment.dart';
+import 'package:flutter_intro/ui_views/dashboard_profile.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:hexcolor/hexcolor.dart';

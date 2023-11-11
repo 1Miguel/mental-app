@@ -70,3 +70,17 @@ final scBgGreen = HexColor("#DCFCEF");
 final scTitleDarkGreen = HexColor("#044B23");
 final scTitleGreen = HexColor("#448C6D");
 final scContentGreen = HexColor("#8CC2AB");
+
+// DashboardMenu
+final bgYellow = HexColor("#FEEFC3");
+final conYellow = HexColor("#FBCE43");
+final bgGreen = HexColor("#C3F5E2");
+final conGreen = HexColor("#3CCC99");
+final bgPeachRed = HexColor("#FEDFE2");
+final conPeachRed = HexColor("#FEA1A7");
+final bgPurple = HexColor('#E0D9FE');
+final conPurple = HexColor("#9C88FC");
+final bgRed = HexColor("#FDD2D3");
+final conRed = HexColor("#EF6A6F");
+final bgTeal = HexColor("#C9FBF7");
+final conTeal = HexColor("#6ECAC1");

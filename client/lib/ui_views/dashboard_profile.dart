@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'package:flutter_intro/dashboard_messages.dart';
+import 'package:flutter_intro/ui_views/dashboard_messages.dart';
 import 'package:flutter_intro/ui_views/book_appointment.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
 import 'package:hexcolor/hexcolor.dart';

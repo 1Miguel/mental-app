@@ -86,7 +86,7 @@ class ThreadController extends GetxController {
 
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/user/thread/$page/?limit=5'),
+        Uri.parse('$baseUrl/user/thread/page/$page/?limit=100'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Authorization': '$token_type $token',
@@ -189,6 +189,51 @@ class ThreadController extends GetxController {
         },
         body: jsonEncode({
           "content": commentController.text,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        print(json);
+        final SharedPreferences? prefs = await _prefs;
+        commentController.clear();
+        //go to home
+        //Get.off(() => CommunityMainpage());
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+    }
+  }
+
+  Future<void> likeThread(int threadId, bool value) async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    print("Value string ${value.toString()}");
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/thread/$threadId/like/'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "like": value.toString(),
         }),
       );
 
