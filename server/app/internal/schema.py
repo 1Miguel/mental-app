@@ -49,21 +49,25 @@ class AppointmentInfoApi(BaseModel):
 
     id: int
     patient_id: int
+    patient_name: str
     center: str
     start_time: datetime
     end_time: datetime
     status: AppointmentStatus
+    service: AppointmentServices
 
     @classmethod
     async def from_model(cls, model: AppointmentModel) -> "AppointmentInfoApi":
-        patient = await model.patient
+        patient: UserModel = await model.patient
         return cls(
             id=model.id,
             patient_id=patient.id,
+            patient_name=patient.fullname,
             center="",
             start_time=model.start_time,
             end_time=model.end_time,
             status=model.status,
+            service=model.service
         )
 
 
@@ -117,6 +121,7 @@ class UserProfileApi(BaseModel):
     email: str = ""
     firstname: str = ""
     lastname: str = ""
+    username: str = ""
     birthday: str = ""
     address: str = ""
     age: int = 0

@@ -79,6 +79,7 @@ class UserModel(Model):
     password_hash = CharField(128)
     firstname = CharField(128)
     lastname = CharField(128)
+    username = CharField(128)
     address = CharField(256)
     age = IntField()
     occupation = CharField(128)
@@ -92,6 +93,9 @@ class UserModel(Model):
     def verify_password(self, password) -> bool:
         return bcrypt.verify(password, self.password_hash)
 
+    @property
+    def fullname(self) -> str:
+        return f"{self.firstname} {self.lastname}"
 
 class AdminModel(Model):
     id = IntField(pk=True)

@@ -221,4 +221,8 @@ class AccountManager:
             user_model.lastname = profile.lastname
         if profile.occupation:
             user_model.occupation = profile.occupation
+        if profile.address:
+            user_model.address = profile.address
+        if profile.username:
+            user_model.username = profile.username
         await user_model.save()
