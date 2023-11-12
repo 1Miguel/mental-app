@@ -71,6 +71,17 @@ class MembershipType(IntEnum):
     STUDENT = auto()
 
 
+class JwtBlacklist(Model):
+    id = IntField(pk=True)
+    token = CharField(1024)
+
+
+class UserPasswordHistoryModel(Model):
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    password_hash = CharField(128, default="")
+
+
 class UserModel(Model):
     """DataBase model of a users."""
 

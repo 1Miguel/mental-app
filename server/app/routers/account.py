@@ -13,8 +13,9 @@ from typing import Any, Optional
 # third-party imports
 import jwt
 from passlib.hash import bcrypt
-from fastapi import HTTPException, Response, status, Depends, APIRouter
+from fastapi import HTTPException, Response, status, Depends, APIRouter, Header
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.responses import RedirectResponse
 from tortoise.exceptions import DoesNotExist, IntegrityError
 from tortoise.contrib.pydantic import pydantic_model_creator
 
@@ -53,6 +54,11 @@ async def _get_authenticated_user(token: str, *, check_admin: bool = False) -> U
     Raises:
         HTTPException: HTTP_401_UNAUTHORIZED for invalid access.
     """
+    if await JwtBlacklist.exists(token=token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
     try:
         # ---- check if this email has valid auth
         user: UserModel = await UserModel.get(email=jwt.decode(token, _JWT_SECRET, algorithms="HS256").get("email"))
@@ -103,6 +109,7 @@ class AccountManager:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         #: ---- Set all routes
+        self._routing.add_api_route("/", self.index, methods=["GET", "POST"])
         self._routing.add_api_route("/login", self.login, methods=["GET"], response_model=UserProfileApi)
         self._routing.add_api_route(
             "/signup",
@@ -113,6 +120,7 @@ class AccountManager:
         self._routing.add_api_route("/user/updatesettings", self.update_settings, methods=["POST"])
         self._routing.add_api_route("/user/updateprofile", self.update_profile, methods=["POST"])
         self._routing.add_api_route("/users", self.get_all_users, methods=["GET"], response_model=List[str])
+        self._routing.add_api_route("/user/changepassword", self.change_password, methods=["POST"])
 
     @property
     def router(self) -> APIRouter:
@@ -122,6 +130,9 @@ class AccountManager:
             APIRouter: This class api router.
         """
         return self._routing
+
+    async def index(self) -> None:
+        pass
 
     async def _get_authenticated_user(self, email: str, password: str) -> UserModel:
         """Returns the authenticated user database model if the given
@@ -223,3 +234,36 @@ class AccountManager:
 
     async def get_all_users(self, user: UserProfileApi = Depends(get_current_user)) -> List[str]:
         return [user.username for user in await UserModel.all() if user.username]
+
+    async def change_password(
+        self, new_password: PasswordChangeReqApi, user: UserProfileApi = Depends(get_current_user)
+    ) -> None:
+        """Updates the user's password request.
+
+        Args:
+            new_password (PasswordChangeReqApi): New Password Request dataclass.
+            user (UserProfileApi): User Profile dataclass.
+        """
+        user: UserModel = await UserModel.get(id=user.id)
+        old_token = jwt.encode((await UserSchema.from_tortoise_orm(user)).model_dump(), _JWT_SECRET)
+        old_password_hash = user.password_hash
+
+        # ---- validate if this password is old
+        for old_pw in await UserPasswordHistoryModel.filter(user=user):
+            is_old = bcrypt.verify(new_password.new_password, old_pw.password_hash)
+            self._log.critical("validating password %s...", is_old)
+            if is_old:
+                raise HTTPException(status.HTTP_400_BAD_REQUEST, "Dont use old password.")
+        # ---- 1. update the password hash and save new model
+        self._log.critical("Saving new password...")
+        user.password_hash = bcrypt.hash(new_password.new_password)
+        await user.save()
+        # ---- 2. remember old hash
+        self._log.critical("Blacklisting password...")
+        await UserPasswordHistoryModel(user=user, password_hash=old_password_hash).save()
+        # ---- 3. Blacklist the token
+        self._log.critical("Blacklisting token...")
+        await JwtBlacklist(token=old_token).save()
+
+    def user_logout(Authorization: str = Header(None)):
+        pass

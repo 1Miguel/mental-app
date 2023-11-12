@@ -239,3 +239,7 @@ class AdminStatsApi(BaseModel):
     num_appointments_req: int
     num_todays_sessions: int
     services_percentages: Dict[AppointmentServices, float]
+
+
+class PasswordChangeReqApi(BaseModel):
+    new_password: str = Field(..., min_length=8)
