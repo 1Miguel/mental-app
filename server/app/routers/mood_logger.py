@@ -22,9 +22,7 @@ class MoodLogger:
     """Mood Logger Class that contains all routes that is
     related to Mood logging services."""
 
-    def __init__(
-        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
-    ) -> None:
+    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         # ---- Set all routes
@@ -55,9 +53,7 @@ class MoodLogger:
         """
         return self._routing
 
-    async def set_mood(
-        self, mood: MoodLog, user: UserProfileApi = Depends(get_current_user)
-    ) -> None:
+    async def set_mood(self, mood: MoodLog, user: UserProfileApi = Depends(get_current_user)) -> None:
         """Daily Mood Logging. if mood score has been log for today, dont lot anymore
         and return an HTTP_409_CONFLICT error."""
         user = await UserModel.get(email=user.email)
@@ -89,9 +85,7 @@ class MoodLogger:
         if day is not None:
             date_time_q += f"-{day:02}"
         self._log.info("Filter all moods at %s", date_time_q)
-        mood_db_list: List[MoodModel] = await MoodModel.filter(
-            user__id=user.id, date__startswith=date_time_q
-        ).all()
+        mood_db_list: List[MoodModel] = await MoodModel.filter(user__id=user.id, date__startswith=date_time_q).all()
 
         # ---- 2. Iterate thru all the moods and build a response
         response = MoodListResponse(percentages=[0] * (MoodId.NUM_MOODS - 1), mood_list=[])
@@ -107,8 +101,7 @@ class MoodLogger:
 
         # ---- 3. Calculate percentage base on moods
         response.percentages = [
-            0 if not response.mood_list else int(100 * p / len(response.mood_list))
-            for p in response.percentages
+            0 if not response.mood_list else int(100 * p / len(response.mood_list)) for p in response.percentages
         ]
 
         return response

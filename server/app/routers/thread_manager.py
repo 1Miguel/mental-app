@@ -22,9 +22,7 @@ log = logging.getLogger(__name__)
 
 
 class ThreadManager:
-    def __init__(
-        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
-    ) -> None:
+    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
 
@@ -58,7 +56,7 @@ class ThreadManager:
             response_model=ThreadRequestApi,
         )
         self._routing.add_api_route(
-            "/user/thread/{thread_id}/query/",
+            "/user/thread/query/",
             self.get_all_thread_with_filter,
             methods=["GET"],
         )
@@ -84,19 +82,16 @@ class ThreadManager:
         """User create and submits a new thread."""
         await ThreadModel(
             user=await UserModel.get(email=user.email),
+            creator=thread_request.creator,
             topic=thread_request.topic,
             content=thread_request.content,
         ).save()
 
-    async def thread_delete(
-        self, thread_id: int, user: UserProfileApi = Depends(get_current_user)
-    ) -> Any:
+    async def thread_delete(self, thread_id: int, user: UserProfileApi = Depends(get_current_user)) -> Any:
         try:
             thread_db = await ThreadModel.get(id=thread_id)
         except DoesNotExist as exc:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
-            ) from exc
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist") from exc
         thread_creator: UserModel = await thread_db.user
         if thread_creator.id != user.id:
             raise HTTPException(
@@ -115,15 +110,11 @@ class ThreadManager:
         try:
             thread: ThreadModel = await ThreadModel.get(id=thread_id)
             commenter = await UserModel.get(email=user.email)
-            await ThreadCommentModel(
-                user=commenter, thread=thread, content=thread_comment.content
-            ).save()
+            await ThreadCommentModel(user=commenter, thread=thread, content=thread_comment.content).save()
             thread.num_comments += 1
             await thread.save()
         except DoesNotExist as exc:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
-            ) from exc
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist") from exc
 
     async def thread_like(
         self,
@@ -135,13 +126,9 @@ class ThreadManager:
         try:
             thread_db = await ThreadModel.get(id=thread_id)
         except DoesNotExist as exc:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
-            ) from exc
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist") from exc
         else:
-            thread_like_db = await ThreadUserLikeModel.filter(
-                user__id=user_db.id, thread__id=thread_id
-            )
+            thread_like_db = await ThreadUserLikeModel.filter(user__id=user_db.id, thread__id=thread_id)
 
             if thread_like_db and not thread_like_api.like:
                 # if the like is in the database, this means user already like the thread
@@ -161,16 +148,12 @@ class ThreadManager:
                 # then save
                 await thread_db.save()
 
-    async def get_thread(
-        self, thread_id: int, user: UserProfileApi = Depends(get_current_user)
-    ) -> ThreadRequestApi:
+    async def get_thread(self, thread_id: int, user: UserProfileApi = Depends(get_current_user)) -> ThreadRequestApi:
         """A User comment to a thread"""
         try:
             thread: ThreadModel = await ThreadModel.get(id=thread_id)
         except DoesNotExist as exc:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist"
-            ) from exc
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist") from exc
         # create the response model
         response: ThreadRequestApi = await ThreadRequestApi.from_model(thread)
         # build the list of responses
@@ -208,9 +191,7 @@ class ThreadManager:
         elif filter == "posted":
             thread = [
                 await ThreadRequestApi.from_model(thread)
-                for thread in await ThreadModel.filter(user__id=user.id)
-                .order_by("-created")
-                .limit(limit)
+                for thread in await ThreadModel.filter(user__id=user.id).order_by("-created").limit(limit)
             ]
         else:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=f"invalid filter {filter}")

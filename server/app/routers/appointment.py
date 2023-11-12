@@ -47,9 +47,7 @@ class Appointment:
                             specific appointment
     """
 
-    def __init__(
-        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
-    ) -> None:
+    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         # ---- POST methods
@@ -174,6 +172,7 @@ class Appointment:
             start_time=appointment_api.start_time,
             end_time=appointment_api.end_time,
             status=AppointmentStatus.PENDING,
+            concerns=appointment_api.concerns,
         )
         # ----- 3. Save this to database
         await new_appointment.save()
@@ -226,9 +225,7 @@ class Appointment:
     ) -> List[AppointmentInfoApi]:
         appointments = [
             await AppointmentInfoApi.from_model(appointment)
-            for appointment in await AppointmentModel.filter(
-                status=AppointmentStatus.PENDING, patient__id=user.id
-            )
+            for appointment in await AppointmentModel.filter(status=AppointmentStatus.PENDING, patient__id=user.id)
             .order_by("-created")
             .limit(limit)
         ]
@@ -244,9 +241,7 @@ class Appointment:
                 await AppointmentModel.get(id=appointment_id, patient__id=user.id)
             )
         except DoesNotExist as exc:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, "Appointment slot already blocked."
-            ) from exc
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Appointment slot already blocked.") from exc
 
     async def reschedule_user_appointment(
         self,

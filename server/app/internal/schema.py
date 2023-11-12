@@ -67,7 +67,7 @@ class AppointmentInfoApi(BaseModel):
             start_time=model.start_time,
             end_time=model.end_time,
             status=model.status,
-            service=model.service
+            service=model.service,
         )
 
 
@@ -130,6 +130,10 @@ class UserProfileApi(BaseModel):
     membership_type: MembershipType = MembershipType.NONE
     membership_status: MembershipStatus = MembershipStatus.NULL
     is_admin: bool = False
+
+
+class UserSettingsApi(BaseModel):
+    local_notif: bool = False
 
 
 class MembershipRegisterApi(BaseModel):
@@ -199,7 +203,7 @@ class ThreadRequestApi(BaseModel):
             thread_id=model.id,
             topic=model.topic,
             content=model.content,
-            creator=user.email,
+            creator=model.creator,
             num_likes=model.num_likes,
             num_comments=model.num_comments,
             date_created=model.created,
