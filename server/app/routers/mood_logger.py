@@ -56,20 +56,26 @@ class MoodLogger:
     async def set_mood(self, mood: MoodLog, user: UserProfileApi = Depends(get_current_user)) -> None:
         """Daily Mood Logging. if mood score has been log for today, dont lot anymore
         and return an HTTP_409_CONFLICT error."""
+        # validate mood id
+        try:
+            mood_id = MoodId(mood.mood)
+            if mood_id == MoodId.UNDEFINED:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Data.") 
+        except ValueError:
+            self._log.error("Invalid mood id %s.", mood.mood)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Data.")
+
         user = await UserModel.get(email=user.email)
         today = date.today() if not mood.date else mood.date
-        mood_id = MoodId(mood.mood)
         try:
             mood_db = await MoodModel.get(date=today)
             self._log.info("Re-logging mood.")
             mood_db.mood = mood_id
             mood_db.note = mood.note
         except DoesNotExist:  # no data log today, create a new data to save
-            self._log.info("Logging new mood.")
+            self._log.info("Sucess logging new mood.")
             mood_db = MoodModel(user=user, mood=mood_id, date=today, note=mood.note)
-        except ValueError:
-            self._log.error("Invalid mood id %s.", mood.mood)
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Data.")
+        
         await mood_db.save()
 
     async def get_mood_list(
@@ -85,7 +91,9 @@ class MoodLogger:
         if day is not None:
             date_time_q += f"-{day:02}"
         self._log.info("Filter all moods at %s", date_time_q)
-        mood_db_list: List[MoodModel] = await MoodModel.filter(user__id=user.id, date__startswith=date_time_q).all()
+        mood_db_list: List[MoodModel] = (
+            await MoodModel.filter(user__id=user.id, date__startswith=date_time_q).all().order_by("-date")
+        )
 
         # ---- 2. Iterate thru all the moods and build a response
         response = MoodListResponse(percentages=[0] * (MoodId.NUM_MOODS - 1), mood_list=[])
@@ -101,7 +109,7 @@ class MoodLogger:
 
         # ---- 3. Calculate percentage base on moods
         response.percentages = [
-            0 if not response.mood_list else int(100 * p / len(response.mood_list)) for p in response.percentages
+            int(100 * p / len(response.mood_list)) for p in response.percentages
         ]
 
         return response
