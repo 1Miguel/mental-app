@@ -223,3 +223,4 @@ class AdminStatsApi(BaseModel):
     num_patients: int
     num_appointments_req: int
     num_todays_sessions: int
+    services_percentages: Dict[AppointmentServices, float]

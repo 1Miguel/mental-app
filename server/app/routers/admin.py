@@ -101,8 +101,12 @@ class AdminManager:
         return await AppointmentInfoApi.from_model(ap)
 
     async def admin_get_stats(self, admin: UserProfileApi = Depends(get_admin_user)) -> AdminStatsApi:
+        appointment_stats = {stats.service: stats.count for stats in await AppointmentServiceModelStats.all()}
+        total_stats = sum([stats for stats in appointment_stats.values()])
+        services_percentages = {k: int(100 * v / total_stats) for k, v in appointment_stats.items()}
         return AdminStatsApi(
             num_patients=await UserModel.all().count() - await AdminModel.all().count(),
             num_appointments_req=await AppointmentModel.filter(status=AppointmentStatus.PENDING).count(),
             num_todays_sessions=await AppointmentModel.filter(start_time__startswith=date.today().isoformat()).count(),
+            services_percentages=services_percentages,
         )
