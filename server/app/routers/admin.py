@@ -76,14 +76,11 @@ class AdminManager:
         self._log.info("Get All Appointments")
         return [await AppointmentInfoApi.from_model(ap) for ap in await AppointmentModel.all().order_by("-start_time")]
 
-    async def admin_get_appointment_today(
-        self, admin: UserProfileApi = Depends(get_admin_user)
-    ) -> List[AppointmentInfoApi]:
+    async def admin_get_appointment_today(self, admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
         self._log.info("Get Today's Appointments")
         today = date.today().isoformat()
         return [
-            await AppointmentInfoApi.from_model(ap)
-            for ap in await AppointmentModel.filter(start_time__startswith=today)
+            await AppointmentInfoApi.from_model(ap) for ap in await AppointmentModel.filter(start_time__startswith=today)
         ]
 
     async def admin_update_appointment(

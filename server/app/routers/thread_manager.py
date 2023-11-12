@@ -76,9 +76,7 @@ class ThreadManager:
         """
         return self._routing
 
-    async def thread_submit(
-        self, thread_request: ThreadRequestApi, user: UserProfileApi = Depends(get_current_user)
-    ) -> Any:
+    async def thread_submit(self, thread_request: ThreadRequestApi, user: UserProfileApi = Depends(get_current_user)) -> Any:
         """User create and submits a new thread."""
         await ThreadModel(
             user=await UserModel.get(email=user.email),
@@ -184,9 +182,7 @@ class ThreadManager:
         if filter == "liked":
             thread = [
                 await ThreadRequestApi.from_model(await liked_thread.thread)
-                for liked_thread in await ThreadUserLikeModel.filter(user__id=user.id)
-                .order_by("-liked_at")
-                .limit(limit)
+                for liked_thread in await ThreadUserLikeModel.filter(user__id=user.id).order_by("-liked_at").limit(limit)
             ]
         elif filter == "posted":
             thread = [

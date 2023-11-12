@@ -5,7 +5,7 @@ date: 10/07/2023
 """
 from enum import IntEnum, Enum, auto
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 from typing_extensions import Self
 from passlib.hash import bcrypt
 from tortoise.expressions import Q
@@ -234,6 +234,20 @@ class Doctor(Model):
     id = IntField(pk=True)
     user_id = ForeignKeyField("models.UserModel")
     # center = ForeignKeyField("models.HealthCenter")
+
+
+class AppointmentServiceModelStats(Model):
+    id = IntField(pk=True)
+    service = CharEnumField(AppointmentServices, max_length=64, unique=True)
+    count = IntField(default=0)
+
+    @classmethod
+    async def init_defaults(self) -> None:
+        [
+            await AppointmentServiceModelStats(service=service).save()
+            for service in AppointmentServices
+            if not await AppointmentServiceModelStats.exists(service=service)
+        ]
 
 
 class AppointmentModel(Model):

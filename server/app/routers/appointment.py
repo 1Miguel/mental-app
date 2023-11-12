@@ -155,9 +155,7 @@ class Appointment:
         ]
         return response
 
-    async def _schedule_new_appointment(
-        self, appointment_api: AppointmentApi, user: UserProfileApi
-    ) -> AppointmentInfoApi:
+    async def _schedule_new_appointment(self, appointment_api: AppointmentApi, user: UserProfileApi) -> AppointmentInfoApi:
         # ----- 1. check if this slot is already taken
         if await AppointmentModel.exists(start_time__startswith=appointment_api.start_time):
             # appointment is already blocked
@@ -177,7 +175,13 @@ class Appointment:
         # ----- 3. Save this to database
         await new_appointment.save()
 
-        # ----- 4. Return a response
+        # ----- 4. count
+        self._log.info("New appointment with service %s", appointment_api.service)
+        stats = await AppointmentServiceModelStats.get(service=appointment_api.service)
+        stats.count += 1
+        await stats.save()
+
+        # ----- 5. Return a response
         return await AppointmentInfoApi.from_model(new_appointment)
 
     async def new_appointment(
@@ -237,9 +241,7 @@ class Appointment:
     ) -> AppointmentInfoApi:
         """Returns the info of a schedule slot the belong to a user by ID."""
         try:
-            return await AppointmentInfoApi.from_model(
-                await AppointmentModel.get(id=appointment_id, patient__id=user.id)
-            )
+            return await AppointmentInfoApi.from_model(await AppointmentModel.get(id=appointment_id, patient__id=user.id))
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Appointment slot already blocked.") from exc
 
@@ -265,9 +267,7 @@ class Appointment:
 
         return response
 
-    async def cancel_user_appointment(
-        self, appointment_id: int, user: UserProfileApi = Depends(get_current_user)
-    ) -> None:
+    async def cancel_user_appointment(self, appointment_id: int, user: UserProfileApi = Depends(get_current_user)) -> None:
         """Cancel user appointment."""
         self._log.critical("Cancelling appointment %s.", appointment_id)
         # ----- 1. Check if this is a valid appointment

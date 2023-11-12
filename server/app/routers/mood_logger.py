@@ -60,7 +60,7 @@ class MoodLogger:
         try:
             mood_id = MoodId(mood.mood)
             if mood_id == MoodId.UNDEFINED:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Data.") 
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Data.")
         except ValueError:
             self._log.error("Invalid mood id %s.", mood.mood)
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Data.")
@@ -75,7 +75,7 @@ class MoodLogger:
         except DoesNotExist:  # no data log today, create a new data to save
             self._log.info("Sucess logging new mood.")
             mood_db = MoodModel(user=user, mood=mood_id, date=today, note=mood.note)
-        
+
         await mood_db.save()
 
     async def get_mood_list(
@@ -108,8 +108,6 @@ class MoodLogger:
             ]
 
         # ---- 3. Calculate percentage base on moods
-        response.percentages = [
-            int(100 * p / len(response.mood_list)) for p in response.percentages
-        ]
+        response.percentages = [int(100 * p / len(response.mood_list)) for p in response.percentages]
 
         return response
