@@ -55,9 +55,7 @@ async def _get_authenticated_user(token: str, *, check_admin: bool = False) -> U
     """
     try:
         # ---- check if this email has valid auth
-        user: UserModel = await UserModel.get(
-            email=jwt.decode(token, _JWT_SECRET, algorithms="HS256").get("email")
-        )
+        user: UserModel = await UserModel.get(email=jwt.decode(token, _JWT_SECRET, algorithms="HS256").get("email"))
     except:
         # ---- account invalid or user does not exist
         raise HTTPException(
@@ -109,24 +107,20 @@ class AccountManager:
     # temporary file where all files will be stored
     _temp_file_storage: TemporaryDirectory = "./files"
 
-    def __init__(
-        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
-    ) -> None:
+    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         #: ---- Set all routes
-        self._routing.add_api_route(
-            "/login", self.login, methods=["GET"], response_model=UserProfileApi
-        )
+        self._routing.add_api_route("/login", self.login, methods=["GET"], response_model=UserProfileApi)
         self._routing.add_api_route(
             "/signup",
             self.signup,
             methods=["POST"],
         )
-        self._routing.add_api_route(
-            "/token", self._generate_token, methods=["POST"], response_model=Any
-        )
+        self._routing.add_api_route("/token", self._generate_token, methods=["POST"], response_model=Any)
+        self._routing.add_api_route("/user/updatesettings", self.update_settings, methods=["POST"])
         self._routing.add_api_route("/user/updateprofile", self.update_profile, methods=["POST"])
+        self._routing.add_api_route("/users", self.get_all_users, methods=["GET"], response_model=List[str])
 
     @property
     def router(self) -> APIRouter:
@@ -187,6 +181,7 @@ class AccountManager:
                 password_hash=bcrypt.hash(user.password),
                 firstname=user.firstname,
                 lastname=user.lastname,
+                username="",
                 address="",
                 age=0,
                 occupation="",
@@ -196,16 +191,17 @@ class AccountManager:
             # create a folder space for the user, this will serve as
             # file storage path where all files user uploads will be stored.
             # Path(self._temp_file_storage.name).joinpath(str(user.id)).mkdir(exist_ok=True)
+            # create a default user settings
+            await UserSettingModel(user=user).save()
 
         except IntegrityError as err:
             log.critical("Attempt to create user that already exist.")
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="email is already used."
-            ) from err
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="email is already used.") from err
 
     async def update_profile(
+        self,
         profile: UserProfileApi,
-        user: UserSchema = Depends(get_current_user),
+        user: UserProfileApi = Depends(get_current_user),
     ) -> Any:
         """Update user profile route."""
         user_model = await UserModel.get(email=user.email)
@@ -221,4 +217,16 @@ class AccountManager:
             user_model.lastname = profile.lastname
         if profile.occupation:
             user_model.occupation = profile.occupation
+        if profile.address:
+            user_model.address = profile.address
+        if profile.username:
+            user_model.username = profile.username
         await user_model.save()
+
+    async def update_settings(self, user_settings: UserSettingsApi, user: UserProfileApi = Depends(get_current_user)):
+        settings = UserSettingModel.get(user=await UserSettingModel.get(id=user.id))
+        settings.local_notif = user_settings.local_notif
+        settings.save()
+
+    async def get_all_users(self, user: UserProfileApi = Depends(get_current_user)) -> List[str]:
+        return [user.username for user in await UserModel.all() if user.username]

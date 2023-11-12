@@ -5,7 +5,7 @@ date: 10/07/2023
 """
 from enum import IntEnum, Enum, auto
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 from typing_extensions import Self
 from passlib.hash import bcrypt
 from tortoise.expressions import Q
@@ -76,13 +76,14 @@ class UserModel(Model):
 
     id = IntField(pk=True)
     email = CharField(128, unique=True)
-    password_hash = CharField(128)
-    firstname = CharField(128)
-    lastname = CharField(128)
-    address = CharField(256)
-    age = IntField()
-    occupation = CharField(128)
-    birthday = CharField(128)
+    password_hash = CharField(128, default="")
+    firstname = CharField(128, default="")
+    lastname = CharField(128, default="")
+    username = CharField(128, default="")
+    address = CharField(256, default="")
+    age = IntField(default=0)
+    occupation = CharField(128, default="")
+    birthday = CharField(128, default="")
     mobile_number = CharField(max_length=13, default="")
 
     @classmethod
@@ -91,6 +92,16 @@ class UserModel(Model):
 
     def verify_password(self, password) -> bool:
         return bcrypt.verify(password, self.password_hash)
+
+    @property
+    def fullname(self) -> str:
+        return f"{self.firstname} {self.lastname}"
+
+
+class UserSettingModel(Model):
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    local_notif = BooleanField(default=False)
 
 
 class AdminModel(Model):
@@ -135,9 +146,7 @@ class MoodModel(Model):
         """
         # the month is in datetime isoformat YYYY-MM-DD to get only the
         # year and month, we need to cut the string
-        return await cls.filter(
-            user__email=user_email, date__startswith=month.date().isoformat()[:7]
-        ).all()
+        return await cls.filter(user__email=user_email, date__startswith=month.date().isoformat()[:7]).all()
 
     @classmethod
     async def get_today(cls, user_email: str) -> Optional[Self]:
@@ -151,9 +160,7 @@ class MoodModel(Model):
         """
         # the month is in datetime isoformat YYYY-MM-DD to get only the
         # year and month, we need to cut the string
-        q = await cls.filter(
-            user__email=user_email, date__startswith=datetime.today().date().isoformat()
-        ).all()
+        q = await cls.filter(user__email=user_email, date__startswith=datetime.today().date().isoformat()).all()
         return q[0] if q else None
 
 
@@ -185,6 +192,7 @@ class MembershipModel(Model):
 class ThreadModel(Model):
     id = IntField(pk=True)
     user = ForeignKeyField("models.UserModel")
+    creator = CharField(max_length=64)
     created = DatetimeField(auto_now=True)
     topic = CharField(max_length=160)
     content = CharField(max_length=256)
@@ -228,6 +236,20 @@ class Doctor(Model):
     # center = ForeignKeyField("models.HealthCenter")
 
 
+class AppointmentServiceModelStats(Model):
+    id = IntField(pk=True)
+    service = CharEnumField(AppointmentServices, max_length=64, unique=True)
+    count = IntField(default=0)
+
+    @classmethod
+    async def init_defaults(self) -> None:
+        [
+            await AppointmentServiceModelStats(service=service).save()
+            for service in AppointmentServices
+            if not await AppointmentServiceModelStats.exists(service=service)
+        ]
+
+
 class AppointmentModel(Model):
     """Model the describe an appointment.
 
@@ -243,6 +265,7 @@ class AppointmentModel(Model):
     end_time = DatetimeField()
     status = CharEnumField(AppointmentStatus, max_length=64)
     created = DatetimeField(auto_now=True)
+    concerns = CharField(max_length=160)
 
     @classmethod
     async def get_by_month(cls, date: datetime) -> List[Self]:
@@ -253,8 +276,7 @@ class AppointmentModel(Model):
     async def get_by_datetime(cls, start_time: datetime, end_time: datetime) -> List[Self]:
         """Get appointment by datetime."""
         return await cls.filter(
-            Q(start_time__startswith=start_time.isoformat())
-            | Q(end_time__startswith=end_time.isoformat())
+            Q(start_time__startswith=start_time.isoformat()) | Q(end_time__startswith=end_time.isoformat())
         ).all()
 
     @classmethod
