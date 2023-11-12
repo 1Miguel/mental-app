@@ -90,10 +90,10 @@ class MoodLogger:
         date_time_q = f"{year:04}-{month:02}"
         if day is not None:
             date_time_q += f"-{day:02}"
-        self._log.info("Filter all moods at %s", date_time_q)
         mood_db_list: List[MoodModel] = (
             await MoodModel.filter(user__id=user.id, date__startswith=date_time_q).all().order_by("-date")
         )
+        self._log.info("Filter all moods at %s | num moods: %s", date_time_q, len(mood_db_list))
 
         # ---- 2. Iterate thru all the moods and build a response
         response = MoodListResponse(percentages=[0] * (MoodId.NUM_MOODS - 1), mood_list=[])
