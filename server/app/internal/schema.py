@@ -131,6 +131,21 @@ class UserProfileApi(BaseModel):
     membership_status: MembershipStatus = MembershipStatus.NULL
     is_admin: bool = False
 
+    @classmethod
+    def from_model(cls, model: UserModel) -> "UserProfileApi":
+        return cls(
+            id=model.id,
+            email=model.email,
+            firstname=model.firstname,
+            lastname=model.lastname,
+            username=model.username,
+            birthday=model.birthday,
+            address=model.address,
+            age=model.age,
+            occupation=model.occupation,
+            mobile_number=model.mobile_number,
+        )
+
 
 class UserSettingsApi(BaseModel):
     local_notif: bool = False

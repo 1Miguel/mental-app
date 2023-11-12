@@ -72,17 +72,9 @@ async def _get_authenticated_user(token: str, *, check_admin: bool = False) -> U
 
     # ---- return account json profile
     # TODO: should I just return the actual database item?
-    return UserProfileApi(
-        id=user.id,
-        email=user.email,
-        firstname=user.firstname,
-        lastname=user.lastname,
-        address=user.address,
-        age=user.age,
-        occupation=user.occupation,
-        birthday=user.birthday,
-        is_admin=is_admin,
-    )
+    profile = UserProfileApi.from_model(user)
+    profile.is_admin = is_admin
+    return profile
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserProfileApi:
@@ -222,6 +214,7 @@ class AccountManager:
         if profile.username:
             user_model.username = profile.username
         await user_model.save()
+        return UserProfileApi.from_model(user_model)
 
     async def update_settings(self, user_settings: UserSettingsApi, user: UserProfileApi = Depends(get_current_user)):
         settings = UserSettingModel.get(user=await UserSettingModel.get(id=user.id))
