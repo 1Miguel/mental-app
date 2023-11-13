@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
 
 # ---- internal modules
+from internal.database import AppointmentServiceModelStats
 from routers.account import AccountManager
 from routers.appointment import Appointment
 from routers.mood_logger import MoodLogger
@@ -85,6 +86,7 @@ async def startup() -> None:
     """Routine at application startup."""
     log.info("App start up routine...")
     await admin_manager.setup_default_admin()
+    await AppointmentServiceModelStats.init_defaults()
 
 
 @app.on_event("shutdown")

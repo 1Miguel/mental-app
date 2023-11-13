@@ -13,8 +13,9 @@ from typing import Any, Optional
 # third-party imports
 import jwt
 from passlib.hash import bcrypt
-from fastapi import HTTPException, Response, status, Depends, APIRouter
+from fastapi import HTTPException, Response, status, Depends, APIRouter, Header
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.responses import RedirectResponse
 from tortoise.exceptions import DoesNotExist, IntegrityError
 from tortoise.contrib.pydantic import pydantic_model_creator
 
@@ -53,11 +54,14 @@ async def _get_authenticated_user(token: str, *, check_admin: bool = False) -> U
     Raises:
         HTTPException: HTTP_401_UNAUTHORIZED for invalid access.
     """
+    if await JwtBlacklist.exists(token=token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
     try:
         # ---- check if this email has valid auth
-        user: UserModel = await UserModel.get(
-            email=jwt.decode(token, _JWT_SECRET, algorithms="HS256").get("email")
-        )
+        user: UserModel = await UserModel.get(email=jwt.decode(token, _JWT_SECRET, algorithms="HS256").get("email"))
     except:
         # ---- account invalid or user does not exist
         raise HTTPException(
@@ -74,17 +78,9 @@ async def _get_authenticated_user(token: str, *, check_admin: bool = False) -> U
 
     # ---- return account json profile
     # TODO: should I just return the actual database item?
-    return UserProfileApi(
-        id=user.id,
-        email=user.email,
-        firstname=user.firstname,
-        lastname=user.lastname,
-        address=user.address,
-        age=user.age,
-        occupation=user.occupation,
-        birthday=user.birthday,
-        is_admin=is_admin,
-    )
+    profile = UserProfileApi.from_model(user)
+    profile.is_admin = is_admin
+    return profile
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserProfileApi:
@@ -109,24 +105,22 @@ class AccountManager:
     # temporary file where all files will be stored
     _temp_file_storage: TemporaryDirectory = "./files"
 
-    def __init__(
-        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
-    ) -> None:
+    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         #: ---- Set all routes
-        self._routing.add_api_route(
-            "/login", self.login, methods=["GET"], response_model=UserProfileApi
-        )
+        self._routing.add_api_route("/", self.index, methods=["GET", "POST"])
+        self._routing.add_api_route("/login", self.login, methods=["GET"], response_model=UserProfileApi)
         self._routing.add_api_route(
             "/signup",
             self.signup,
             methods=["POST"],
         )
-        self._routing.add_api_route(
-            "/token", self._generate_token, methods=["POST"], response_model=Any
-        )
+        self._routing.add_api_route("/token", self._generate_token, methods=["POST"], response_model=Any)
+        self._routing.add_api_route("/user/updatesettings", self.update_settings, methods=["POST"])
         self._routing.add_api_route("/user/updateprofile", self.update_profile, methods=["POST"])
+        self._routing.add_api_route("/users", self.get_all_users, methods=["GET"], response_model=List[str])
+        self._routing.add_api_route("/user/changepassword", self.change_password, methods=["POST"])
 
     @property
     def router(self) -> APIRouter:
@@ -136,6 +130,9 @@ class AccountManager:
             APIRouter: This class api router.
         """
         return self._routing
+
+    async def index(self) -> None:
+        pass
 
     async def _get_authenticated_user(self, email: str, password: str) -> UserModel:
         """Returns the authenticated user database model if the given
@@ -187,6 +184,7 @@ class AccountManager:
                 password_hash=bcrypt.hash(user.password),
                 firstname=user.firstname,
                 lastname=user.lastname,
+                username="",
                 address="",
                 age=0,
                 occupation="",
@@ -196,16 +194,17 @@ class AccountManager:
             # create a folder space for the user, this will serve as
             # file storage path where all files user uploads will be stored.
             # Path(self._temp_file_storage.name).joinpath(str(user.id)).mkdir(exist_ok=True)
+            # create a default user settings
+            await UserSettingModel(user=user).save()
 
         except IntegrityError as err:
             log.critical("Attempt to create user that already exist.")
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="email is already used."
-            ) from err
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="email is already used.") from err
 
     async def update_profile(
+        self,
         profile: UserProfileApi,
-        user: UserSchema = Depends(get_current_user),
+        user: UserProfileApi = Depends(get_current_user),
     ) -> Any:
         """Update user profile route."""
         user_model = await UserModel.get(email=user.email)
@@ -221,4 +220,50 @@ class AccountManager:
             user_model.lastname = profile.lastname
         if profile.occupation:
             user_model.occupation = profile.occupation
+        if profile.address:
+            user_model.address = profile.address
+        if profile.username:
+            user_model.username = profile.username
         await user_model.save()
+        return UserProfileApi.from_model(user_model)
+
+    async def update_settings(self, user_settings: UserSettingsApi, user: UserProfileApi = Depends(get_current_user)):
+        settings = UserSettingModel.get(user=await UserSettingModel.get(id=user.id))
+        settings.local_notif = user_settings.local_notif
+        settings.save()
+
+    async def get_all_users(self, user: UserProfileApi = Depends(get_current_user)) -> List[str]:
+        return [user.username for user in await UserModel.all() if user.username]
+
+    async def change_password(
+        self, new_password: PasswordChangeReqApi, user: UserProfileApi = Depends(get_current_user)
+    ) -> None:
+        """Updates the user's password request.
+
+        Args:
+            new_password (PasswordChangeReqApi): New Password Request dataclass.
+            user (UserProfileApi): User Profile dataclass.
+        """
+        user: UserModel = await UserModel.get(id=user.id)
+        old_token = jwt.encode((await UserSchema.from_tortoise_orm(user)).model_dump(), _JWT_SECRET)
+        old_password_hash = user.password_hash
+
+        # ---- validate if this password is old
+        for old_pw in await UserPasswordHistoryModel.filter(user=user):
+            is_old = bcrypt.verify(new_password.new_password, old_pw.password_hash)
+            self._log.critical("validating password %s...", is_old)
+            if is_old:
+                raise HTTPException(status.HTTP_400_BAD_REQUEST, "Dont use old password.")
+        # ---- 1. update the password hash and save new model
+        self._log.critical("Saving new password...")
+        user.password_hash = bcrypt.hash(new_password.new_password)
+        await user.save()
+        # ---- 2. remember old hash
+        self._log.critical("Blacklisting password...")
+        await UserPasswordHistoryModel(user=user, password_hash=old_password_hash).save()
+        # ---- 3. Blacklist the token
+        self._log.critical("Blacklisting token...")
+        await JwtBlacklist(token=old_token).save()
+
+    def user_logout(Authorization: str = Header(None)):
+        pass

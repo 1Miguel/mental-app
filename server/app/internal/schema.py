@@ -49,21 +49,25 @@ class AppointmentInfoApi(BaseModel):
 
     id: int
     patient_id: int
+    patient_name: str
     center: str
     start_time: datetime
     end_time: datetime
     status: AppointmentStatus
+    service: AppointmentServices
 
     @classmethod
     async def from_model(cls, model: AppointmentModel) -> "AppointmentInfoApi":
-        patient = await model.patient
+        patient: UserModel = await model.patient
         return cls(
             id=model.id,
             patient_id=patient.id,
+            patient_name=patient.fullname,
             center="",
             start_time=model.start_time,
             end_time=model.end_time,
             status=model.status,
+            service=model.service,
         )
 
 
@@ -117,6 +121,7 @@ class UserProfileApi(BaseModel):
     email: str = ""
     firstname: str = ""
     lastname: str = ""
+    username: str = ""
     birthday: str = ""
     address: str = ""
     age: int = 0
@@ -125,6 +130,25 @@ class UserProfileApi(BaseModel):
     membership_type: MembershipType = MembershipType.NONE
     membership_status: MembershipStatus = MembershipStatus.NULL
     is_admin: bool = False
+
+    @classmethod
+    def from_model(cls, model: UserModel) -> "UserProfileApi":
+        return cls(
+            id=model.id,
+            email=model.email,
+            firstname=model.firstname,
+            lastname=model.lastname,
+            username=model.username,
+            birthday=model.birthday,
+            address=model.address,
+            age=model.age,
+            occupation=model.occupation,
+            mobile_number=model.mobile_number,
+        )
+
+
+class UserSettingsApi(BaseModel):
+    local_notif: bool = False
 
 
 class MembershipRegisterApi(BaseModel):
@@ -194,7 +218,7 @@ class ThreadRequestApi(BaseModel):
             thread_id=model.id,
             topic=model.topic,
             content=model.content,
-            creator=user.email,
+            creator=model.creator,
             num_likes=model.num_likes,
             num_comments=model.num_comments,
             date_created=model.created,
@@ -214,3 +238,8 @@ class AdminStatsApi(BaseModel):
     num_patients: int
     num_appointments_req: int
     num_todays_sessions: int
+    services_percentages: Dict[AppointmentServices, float]
+
+
+class PasswordChangeReqApi(BaseModel):
+    new_password: str = Field(..., min_length=8)
