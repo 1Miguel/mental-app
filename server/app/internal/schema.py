@@ -55,6 +55,7 @@ class AppointmentInfoApi(BaseModel):
     end_time: datetime
     status: AppointmentStatus
     service: AppointmentServices
+    concerns: str
 
     @classmethod
     async def from_model(cls, model: AppointmentModel) -> "AppointmentInfoApi":
@@ -68,6 +69,7 @@ class AppointmentInfoApi(BaseModel):
             end_time=model.end_time,
             status=model.status,
             service=model.service,
+            concerns=model.concerns,
         )
 
 

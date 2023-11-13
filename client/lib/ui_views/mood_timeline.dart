@@ -11,8 +11,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 
 class MoodTimeline extends StatelessWidget {
+  int dominantMood = 0;
+  int percentage = 0;
   MoodController moodController = Get.put(MoodController());
   late Future<List<Mood>> futureMoodHistory;
+
+  MoodTimeline({
+    super.key,
+    required this.dominantMood,
+    required this.percentage,
+  });
 
   Future<List<Mood>> getMoodHistory() async {
     futureMoodHistory = moodController.fetchMoodHistory(DateTime.now());
@@ -52,7 +60,8 @@ class MoodTimeline extends StatelessWidget {
                 ),
                 beforeLineStyle:
                     LineStyle(color: Colors.white.withOpacity(0.7)),
-                endChild: _ContainerHeader(),
+                endChild: _ContainerHeader(
+                    dominantMood: dominantMood, percentage: percentage),
               ),
               Expanded(
                 child: SizedBox(
@@ -87,16 +96,16 @@ class MoodTimeline extends StatelessWidget {
           final thread = moods[index];
           IconData moodIcon = Icons.sentiment_satisfied;
           String moodName = "HAPPY";
-          if (moods[index].mood == 1) {
+          if (moods[index].mood == 2) {
             moodIcon = Icons.sentiment_dissatisfied;
             moodName = "SAD";
-          } else if (moods[index].mood == 2) {
+          } else if (moods[index].mood == 3) {
             moodIcon = Icons.sentiment_neutral;
             moodName = "CONFUSED";
-          } else if (moods[index].mood == 3) {
+          } else if (moods[index].mood == 4) {
             moodIcon = Icons.sentiment_very_dissatisfied;
             moodName = "SCARED";
-          } else if (moods[index].mood == 4) {
+          } else if (moods[index].mood == 5) {
             moodIcon = Icons.sentiment_very_dissatisfied;
             moodName = "ANGRY";
           }
@@ -231,6 +240,32 @@ class _IconIndicator extends StatelessWidget {
 }
 
 class _ContainerHeader extends StatelessWidget {
+  int dominantMood = 0;
+  int percentage = 0;
+
+  _ContainerHeader({
+    super.key,
+    required this.dominantMood,
+    required this.percentage,
+  });
+
+  String getMoodString() {
+    if (percentage == 0) {
+      return "Unknown";
+    } else if (dominantMood == 0) {
+      return "HAPPY";
+    } else if (dominantMood == 1) {
+      return "SAD";
+    } else if (dominantMood == 2) {
+      return "CONFUSED";
+    } else if (dominantMood == 3) {
+      return "SCARED";
+    } else if (dominantMood == 4) {
+      return "ANGRY";
+    }
+    return "Unknown";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -249,7 +284,7 @@ class _ContainerHeader extends StatelessWidget {
               ),
             ),
             Text(
-              'Sad',
+              getMoodString(),
               style: TextStyle(
                 fontSize: 30,
                 color: Colors.white.withOpacity(0.8),
@@ -261,7 +296,7 @@ class _ContainerHeader extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    '40% mood',
+                    '${percentage.toString()}% mood',
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.right,
                     style: TextStyle(

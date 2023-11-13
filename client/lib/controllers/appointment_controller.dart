@@ -158,13 +158,71 @@ class AppointmentController extends GetxController {
   }
 
   Future<void> setAppointment(
-      String startTime, String endTime, String service) async {
+      String startTime, String endTime, String service, String concern) async {
     String? token = await getToken();
     String? token_type = await getTokenType();
 
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/user/appointment/new/'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "start_time": startTime,
+          "end_time": endTime,
+          "service": service,
+          "concerns": concern,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        print(json);
+        final SharedPreferences? prefs = await _prefs;
+        //go to home
+        concernController.clear();
+        String pendDate =
+            DateFormat('MMMM dd, yyyy').format(DateTime.parse(startTime));
+        String startSlot =
+            DateFormat('HH:mm').format(DateTime.parse(startTime)).toString();
+        String endSlot =
+            DateFormat('HH:mm').format(DateTime.parse(endTime)).toString();
+
+        Get.to(() => BookScheduleSuccessPage(
+              date: pendDate,
+              startTime: startSlot,
+              endTime: endSlot,
+            ));
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+    }
+  }
+
+  Future<void> rescheduleAppointment(
+      int id, String startTime, String endTime, String service) async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/appointment/myschedule/$id/reschedule/'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Authorization': '$token_type $token',

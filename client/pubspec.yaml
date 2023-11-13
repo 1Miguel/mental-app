@@ -48,6 +48,7 @@ dependencies:
   local_captcha: ^1.0.1
   email_otp: ^2.1.1
   custom_sliding_segmented_control: ^1.8.1
+  flutter_widget_from_html: ^0.14.6
 
 dev_dependencies:
   flutter_test:

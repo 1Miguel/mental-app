@@ -35,9 +35,14 @@ class MoodController extends GetxController {
     String? token = await getToken();
     String? token_type = await getTokenType();
 
+    int day = dateTime.day;
+    int month = dateTime.month;
+    int year = dateTime.year;
+
     try {
+      print("DEBUG $baseUrl/user/mood/$year/$month/$day/");
       final response = await http.get(
-        Uri.parse('$baseUrl/user/mood/2023/11/11/'),
+        Uri.parse('$baseUrl/user/mood/$year/$month/$day/'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Authorization': '$token_type $token',
@@ -47,8 +52,12 @@ class MoodController extends GetxController {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> myMap = json.decode(response.body);
-        print(myMap);
-        return Mood.fromJson(myMap);
+        List<dynamic> mood_list = myMap["mood_list"];
+        if (mood_list.isNotEmpty) {
+          return Mood.fromJson(mood_list[0]);
+        } else {
+          return Mood(date: DateTime.now().toString(), mood: 0, note: "");
+        }
       } else {
         print(response.body);
         print(response.statusCode);
@@ -73,9 +82,14 @@ class MoodController extends GetxController {
     String? token = await getToken();
     String? token_type = await getTokenType();
 
+    int day = dateTime.day;
+    int month = dateTime.month;
+    int year = dateTime.year;
+
     try {
+      print("Debug $baseUrl/user/mood/$year/$month/");
       final response = await http.get(
-        Uri.parse('$baseUrl/user/mood/2023/11/'),
+        Uri.parse('$baseUrl/user/mood/$year/$month/'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Authorization': '$token_type $token',

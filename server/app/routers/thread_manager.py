@@ -169,10 +169,12 @@ class ThreadManager:
         self, page: int = 0, limit: int = 5, user: UserProfileApi = Depends(get_current_user)
     ) -> List[ThreadRequestApi]:
         """Get thread list base on page."""
+        user_db = await UserModel.get(email=user.email)
         thread_list = await ThreadModel.all().order_by("-created").offset(page * 5).limit(limit)
         thread_req = []
         for thread in thread_list:
             _th = await ThreadRequestApi.from_model(thread)
+            _th.is_liked = await ThreadUserLikeModel.exists(user__id=user.id, thread__id=thread.id)
             thread_req.append(_th)
         return thread_req
 

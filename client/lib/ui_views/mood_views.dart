@@ -665,8 +665,10 @@ class MoodHistoryPage extends StatelessWidget {
   late Future<List<Mood>?> futureMoodHistory;
 
   Future<List<Mood>?> getMoodHistory() async {
-    futureMoodHistory = moodController.fetchMoodHistory(DateTime.now());
+    futureMoodHistory = moodController
+        .fetchMoodHistory(DateTime.now().add(const Duration(hours: 8)));
     print('futureMoodHistory');
+    print(DateTime.now().add(const Duration(hours: 8)));
     print(futureMoodHistory);
     return futureMoodHistory;
   }
@@ -798,13 +800,14 @@ class MonthlyMoodSummary extends StatelessWidget {
   });
 
   Future<List> getMoodSummary() async {
-    futureMoodSummary = moodController.fetchMoodAverage(DateTime.now());
-    print(futureMoodSummary);
+    futureMoodSummary = moodController
+        .fetchMoodAverage(DateTime.now().add(const Duration(hours: 8)));
+    print("Mood Summary: $futureMoodSummary");
     return futureMoodSummary;
   }
 
   getMonth() {
-    final datenow = DateTime.now();
+    final datenow = DateTime.now().add(const Duration(hours: 8));
     String currentMonthName = DateFormat('MMMM').format(datenow);
 
     return currentMonthName;
@@ -837,22 +840,45 @@ class MonthlyMoodSummary extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 25.0),
-                  child: TextButton(
-                    child: Text(
-                      'More Info',
-                      style: TextStyle(
-                          color: solidPurple,
-                          decoration: TextDecoration.underline),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: ((context) => MoodTimeline()),
-                        ),
-                      );
-                    },
-                  ),
+                  child: FutureBuilder<List>(
+                      future: getMoodSummary(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final moodAve = snapshot.data!;
+                          print("Mood Ave Data: ${moodAve}");
+
+                          int dominant = 0;
+                          int percentage = moodAve[0];
+                          for (int i = 1; i < moodAve.length; i++) {
+                            if (moodAve[i] > dominant) {
+                              dominant = i;
+                              percentage = moodAve[i];
+                            }
+                          }
+
+                          return TextButton(
+                            child: Text(
+                              'More Info',
+                              style: TextStyle(
+                                  color: solidPurple,
+                                  decoration: TextDecoration.underline),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: ((context) => MoodTimeline(
+                                        dominantMood: dominant,
+                                        percentage: percentage,
+                                      )),
+                                ),
+                              );
+                            },
+                          );
+                        } else {
+                          return const Text("More Info");
+                        }
+                      }),
                 ),
               ],
             ),
@@ -990,13 +1016,14 @@ class TodayMoodInfo extends StatelessWidget {
   });
 
   Future<Mood> getMoodToday() async {
-    futureMood = moodController.fetchMoodToday(DateTime.now());
-    print(futureMood);
+    futureMood = moodController
+        .fetchMoodToday(DateTime.now().add(const Duration(hours: 8)));
     return futureMood;
   }
 
   @override
   Widget build(BuildContext context) {
+    moodController.noteController.clear();
     return Form(
       key: _formKey,
       child: Container(
@@ -1015,19 +1042,23 @@ class TodayMoodInfo extends StatelessWidget {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final todayMood = snapshot.data!;
-                String moodLogo = 'images/happy_emoji.png';
-                String moodName = "HAPPY";
+                String moodLogo = 'images/mood_skipped.png';
+                String moodName = "SKIPPED";
+                print("TodayMood: ${todayMood.mood}, ${todayMood.date}");
 
                 if (todayMood.mood == 1) {
+                  moodLogo = 'images/happy_emoji.png';
+                  moodName = "HAPPY";
+                } else if (todayMood.mood == 2) {
                   moodLogo = 'images/sad_emoji.png';
                   moodName = "SAD";
-                } else if (todayMood.mood == 2) {
+                } else if (todayMood.mood == 3) {
                   moodLogo = 'images/confused_emoji.png';
                   moodName = "CONFUSED";
-                } else if (todayMood.mood == 3) {
+                } else if (todayMood.mood == 4) {
                   moodLogo = 'images/scared_emoji.png';
                   moodName = "SCARED";
-                } else if (todayMood.mood == 4) {
+                } else if (todayMood.mood == 5) {
                   moodLogo = 'images/angry_emoji.png';
                   moodName = "ANGRY";
                 }
@@ -1097,6 +1128,10 @@ class TodayMoodInfo extends StatelessWidget {
                       onPressed: () {
                         moodController.logMood(
                             todayMood.mood, moodController.noteController.text);
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text("Note was successfully saved."),
+                        ));
                       },
                       style: ButtonStyle(
                           minimumSize:
@@ -1292,7 +1327,7 @@ class MoodContext extends StatelessWidget {
           } else if (title == "SCARED") {
             index = MoodId.SCARED.index;
           }
-          moodController.logMood(index, "");
+          moodController.logMood(index + 1, "");
           //onTap();
           Navigator.push(
             context,

@@ -71,38 +71,46 @@ class Appointment {
 class AppointmentInfo {
   final int id;
   final int patientId;
+  final String patientName;
   final String center;
   final String date;
   final String startTime;
   final String endTime;
   final String status;
+  final String service;
 
   const AppointmentInfo({
     required this.id,
     required this.patientId,
+    required this.patientName,
     required this.center,
     required this.date,
     required this.startTime,
     required this.endTime,
     required this.status,
+    required this.service,
   });
 
   factory AppointmentInfo.fromJson(Map<String, dynamic> json) {
     int def_id;
     int def_patientId;
+    String def_patientName;
     String def_center;
     String def_date;
     String def_startTime;
     String def_endTime;
     String def_status;
+    String def_service;
 
     def_id = json['id'] ?? 0;
     def_patientId = json['patient_id'] ?? 0;
+    def_patientName = json['patient_name'] ?? '';
     def_center = json['center'] ?? '';
     def_date = json['start_time'] ?? DateTime.now.toString();
     def_startTime = json['start_time'] ?? DateTime.now.toString();
     def_endTime = json['end_time'] ?? DateTime.now.toString();
     def_status = json['status'] ?? '';
+    def_service = json['service'] ?? '';
 
     String updDate =
         DateFormat('yyyy-MM-dd').format(DateTime.parse(def_date)).toString();
@@ -116,11 +124,13 @@ class AppointmentInfo {
     return AppointmentInfo(
       id: def_id as int,
       patientId: def_patientId as int,
+      patientName: def_patientName as String,
       center: def_center as String,
       date: updDate as String,
       startTime: updStartTime as String,
       endTime: updEndTime as String,
       status: def_status as String,
+      service: def_service as String,
     );
   }
 }

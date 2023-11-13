@@ -753,7 +753,11 @@ class _GenericBookState extends State<GenericBookPage> {
                                       MaterialPageRoute(
                                           builder: ((context) =>
                                               BookSchedulePage(
-                                                  service: service))));
+                                                  service: service,
+                                                  concern: appointmentController
+                                                      .concernController.text,
+                                                  reschedule: false,
+                                                  id: 0))));
                                 }
                               },
                             ),
@@ -1518,8 +1522,11 @@ class GenericConsultationPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: ((context) =>
-                                BookSchedulePage(service: service))));
+                            builder: ((context) => BookSchedulePage(
+                                service: service,
+                                concern: "",
+                                reschedule: false,
+                                id: 0))));
                   },
                   style: ButtonStyle(
                       minimumSize:
@@ -1538,16 +1545,6 @@ class GenericConsultationPage extends StatelessWidget {
 }
 
 enum TimeSlot { slot0, slot1, slot2, slot3, slot4, slot5, slot6 }
-
-class BookSchedulePage extends StatefulWidget {
-  final ConsulationServices service;
-
-  const BookSchedulePage({super.key, required this.service});
-
-  @override
-  State<BookSchedulePage> createState() =>
-      _BookSchedulePageState(service: service);
-}
 
 class TimeSlotList {
   bool timeSlot1 = true;
@@ -1587,8 +1584,30 @@ bool isDayFullyBooked(TimeSlotList timeSlots) {
   return isAvailable;
 }
 
+class BookSchedulePage extends StatefulWidget {
+  final ConsulationServices service;
+  String concern;
+  bool reschedule;
+  int id;
+
+  BookSchedulePage({
+    super.key,
+    required this.service,
+    required this.concern,
+    required this.reschedule,
+    required this.id,
+  });
+
+  @override
+  State<BookSchedulePage> createState() => _BookSchedulePageState(
+      service: service, concern: concern, reschedule: reschedule, id: id);
+}
+
 class _BookSchedulePageState extends State<BookSchedulePage> {
   final ConsulationServices service;
+  int id;
+  String concern;
+  bool reschedule;
   int? scheduleValue = TimeSlot.slot0.index;
   String _date = "0000-00-00";
   String _timeSlot = "00:00";
@@ -1606,6 +1625,12 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
   bool timeSlot4Enabled = true;
   bool timeSlot5Enabled = true;
   bool timeSlot6Enabled = true;
+
+  _BookSchedulePageState(
+      {required this.service,
+      required this.concern,
+      required this.reschedule,
+      required this.id});
 
   Future<List<DateTime>> getBlockedDatesAsync() async {
     List<DateTime> dateList = <DateTime>[];
@@ -1717,8 +1742,6 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
         .map<appModel.AppointmentSlot>(appModel.AppointmentSlot.fromJson)
         .toList();
   }
-
-  _BookSchedulePageState({required this.service});
 
   AppointmentController appointmentController =
       Get.put(AppointmentController());
@@ -2042,8 +2065,13 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                     } else {
                       print("No valid schedule selected");
                     }
-                    appointmentController.setAppointment(
-                        startDate, endDate, selectedService);
+                    if (reschedule == true) {
+                      appointmentController.rescheduleAppointment(
+                          id, startDate, endDate, selectedService);
+                    } else {
+                      appointmentController.setAppointment(
+                          startDate, endDate, selectedService, concern);
+                    }
                     // Navigator.push(
                     //     context,
                     //     MaterialPageRoute(
@@ -2288,17 +2316,114 @@ class ScheduleCard extends StatelessWidget {
 
 class ReScheduleCard extends StatelessWidget {
   final int id;
+  final String name;
   final String date;
   final String startTime;
   final String endTime;
+  final String serviceType;
+  final VoidCallback onPressed;
+  AppointmentController appointmentController =
+      Get.put(AppointmentController());
 
-  const ReScheduleCard({
+  ReScheduleCard({
     super.key,
+    required this.name,
     required this.id,
     required this.date,
     required this.startTime,
     required this.endTime,
+    required this.serviceType,
+    required this.onPressed,
   });
+
+  String getServiceTypeString() {
+    if (serviceType == "PSYCHIATRIC_CONSULTATION") {
+      return "Psychiatric Consultation";
+    } else if (serviceType == "OCCUPATIONAL_THERAPY") {
+      return "Occupational Therapy";
+    } else if (serviceType == "PSYCHOLOGICAL_ASSESMENT") {
+      return "Psychological Assesment";
+    }
+    return "Counseling";
+  }
+
+  ConsulationServices getServiceTypeEnum() {
+    if (serviceType == "PSYCHIATRIC_CONSULTATION") {
+      return ConsulationServices.consultation;
+    } else if (serviceType == "OCCUPATIONAL_THERAPY") {
+      return ConsulationServices.therapy;
+    } else if (serviceType == "PSYCHOLOGICAL_ASSESMENT") {
+      return ConsulationServices.assessment;
+    }
+    return ConsulationServices.counseling;
+  }
+
+  _onAlertCancelAppointment(context) {
+    Alert(
+        context: context,
+        type: AlertType.warning,
+        title: "Cancel Appointment",
+        desc: "Are you sure you want to cancel this appointment?",
+        buttons: [
+          DialogButton(
+            onPressed: () {
+              onPressed();
+              appointmentController.cancelAppointment(id);
+              Navigator.of(context, rootNavigator: true).pop();
+            },
+            child: Text(
+              "Confirm",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ),
+          DialogButton(
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pop();
+            },
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          )
+        ]).show();
+  }
+
+  _onAlertRescheduleAppointment(context) {
+    Alert(
+        context: context,
+        type: AlertType.warning,
+        title: "Reschedule Appointment",
+        desc: "Are you sure you want to reschedule this appointment?",
+        buttons: [
+          DialogButton(
+            onPressed: () {
+              onPressed();
+
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: ((context) => BookSchedulePage(
+                          service: getServiceTypeEnum(),
+                          concern: "",
+                          reschedule: true,
+                          id: id))));
+            },
+            child: Text(
+              "Confirm",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ),
+          DialogButton(
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pop();
+            },
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          )
+        ]).show();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2355,7 +2480,7 @@ class ReScheduleCard extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 10.0),
                           child: SizedBox(
                             width: constraint.maxWidth - 30 - 20 - 10,
-                            child: Text("Service: Counseling",
+                            child: Text("Service: ${getServiceTypeString()}",
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
@@ -2367,7 +2492,7 @@ class ReScheduleCard extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 10.0),
                           child: SizedBox(
                             width: constraint.maxWidth - 30 - 20 - 10,
-                            child: Text("Patient Name: John Doe",
+                            child: Text("Patient Name: $name",
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: scContentGreen,
@@ -2399,7 +2524,9 @@ class ReScheduleCard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             FilledButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                _onAlertRescheduleAppointment(context);
+                              },
                               style: ButtonStyle(
                                   minimumSize: MaterialStateProperty.all<Size>(
                                       Size(80, 30)),
@@ -2412,7 +2539,9 @@ class ReScheduleCard extends StatelessWidget {
                               ]),
                             ),
                             FilledButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                _onAlertCancelAppointment(context);
+                              },
                               style: ButtonStyle(
                                   minimumSize: MaterialStateProperty.all<Size>(
                                       Size(80, 30)),
@@ -2441,21 +2570,47 @@ class ReScheduleCard extends StatelessWidget {
 
 class PendingCard extends StatelessWidget {
   final int id;
+  final String name;
   final String date;
   final String startTime;
   final String endTime;
+  final String serviceType;
+  final VoidCallback onPressed;
   AppointmentController appointmentController =
       Get.put(AppointmentController());
-  final VoidCallback onPressed;
 
   PendingCard({
     super.key,
     required this.id,
+    required this.name,
     required this.date,
     required this.startTime,
     required this.endTime,
+    required this.serviceType,
     required this.onPressed,
   });
+
+  String getServiceTypeString() {
+    if (serviceType == "PSYCHIATRIC_CONSULTATION") {
+      return "Psychiatric Consultation";
+    } else if (serviceType == "OCCUPATIONAL_THERAPY") {
+      return "Occupational Therapy";
+    } else if (serviceType == "PSYCHOLOGICAL_ASSESMENT") {
+      return "Psychological Assesment";
+    }
+    return "Counseling";
+  }
+
+  ConsulationServices getServiceTypeEnum() {
+    if (serviceType == "PSYCHIATRIC_CONSULTATION") {
+      return ConsulationServices.consultation;
+    } else if (serviceType == "OCCUPATIONAL_THERAPY") {
+      return ConsulationServices.therapy;
+    } else if (serviceType == "PSYCHOLOGICAL_ASSESMENT") {
+      return ConsulationServices.assessment;
+    }
+    return ConsulationServices.counseling;
+  }
 
   _onAlertCancelAppointment(context) {
     Alert(
@@ -2469,6 +2624,43 @@ class PendingCard extends StatelessWidget {
               onPressed();
               appointmentController.cancelAppointment(id);
               Navigator.of(context, rootNavigator: true).pop();
+            },
+            child: Text(
+              "Confirm",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ),
+          DialogButton(
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pop();
+            },
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          )
+        ]).show();
+  }
+
+  _onAlertRescheduleAppointment(context) {
+    Alert(
+        context: context,
+        type: AlertType.warning,
+        title: "Reschedule Appointment",
+        desc: "Are you sure you want to reschedule this appointment?",
+        buttons: [
+          DialogButton(
+            onPressed: () {
+              onPressed();
+
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: ((context) => BookSchedulePage(
+                          service: getServiceTypeEnum(),
+                          concern: "",
+                          reschedule: true,
+                          id: id))));
             },
             child: Text(
               "Confirm",
@@ -2542,7 +2734,7 @@ class PendingCard extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 10.0),
                           child: SizedBox(
                             width: constraint.maxWidth - 30 - 20 - 10,
-                            child: Text("Service: Counseling",
+                            child: Text("Service: ${getServiceTypeString()}",
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
@@ -2554,7 +2746,7 @@ class PendingCard extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 10.0),
                           child: SizedBox(
                             width: constraint.maxWidth - 30 - 20 - 10,
-                            child: Text("Patient Name: John Doe",
+                            child: Text("Patient Name: $name",
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.orange.shade300,
@@ -2587,7 +2779,9 @@ class PendingCard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             FilledButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                _onAlertRescheduleAppointment(context);
+                              },
                               style: ButtonStyle(
                                   minimumSize: MaterialStateProperty.all<Size>(
                                       Size(80, 30)),
@@ -2633,17 +2827,32 @@ class PendingCard extends StatelessWidget {
 
 class PreviousCard extends StatelessWidget {
   final int id;
+  final String name;
   final String date;
   final String startTime;
   final String endTime;
+  final String service;
 
   const PreviousCard({
     super.key,
     required this.id,
+    required this.name,
     required this.date,
     required this.startTime,
     required this.endTime,
+    required this.service,
   });
+
+  String getServiceTypeString() {
+    if (service == "PSYCHIATRIC_CONSULTATION") {
+      return "Psychiatric Consultation";
+    } else if (service == "OCCUPATIONAL_THERAPY") {
+      return "Occupational Therapy";
+    } else if (service == "PSYCHOLOGICAL_ASSESMENT") {
+      return "Psychological Assesment";
+    }
+    return "Counseling";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2700,7 +2909,7 @@ class PreviousCard extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 10.0),
                           child: SizedBox(
                             width: constraint.maxWidth - 30 - 20 - 10,
-                            child: Text("Service: Counseling",
+                            child: Text("Service: ${getServiceTypeString()}",
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
@@ -2712,7 +2921,7 @@ class PreviousCard extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 10.0),
                           child: SizedBox(
                             width: constraint.maxWidth - 30 - 20 - 10,
-                            child: Text("Patient Name: John Doe",
+                            child: Text("Patient Name: $name",
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.grey,
@@ -3219,7 +3428,14 @@ class _ReschedulePageState extends State<ReschedulePage> {
                               if (snapshot.hasData) {
                                 final upcList = snapshot.data!;
                                 if (upcList.length > 0) {
-                                  return buildUpcoming(upcList);
+                                  return buildUpcoming(
+                                    upcList,
+                                    () {
+                                      setState(() {
+                                        print("parent set state");
+                                      });
+                                    },
+                                  );
                                 } else {
                                   return Row(
                                     crossAxisAlignment:
@@ -3330,7 +3546,8 @@ class _ReschedulePageState extends State<ReschedulePage> {
     );
   }
 
-  Widget buildUpcoming(List<appModel.AppointmentInfo> upcoming) =>
+  Widget buildUpcoming(
+          List<appModel.AppointmentInfo> upcoming, VoidCallback onPressed) =>
       ListView.builder(
         itemCount: upcoming.length,
         itemBuilder: (context, index) {
@@ -3343,9 +3560,12 @@ class _ReschedulePageState extends State<ReschedulePage> {
                     height: 200,
                     child: ReScheduleCard(
                       id: thread.id,
+                      name: thread.patientName,
                       date: thread.date,
                       startTime: thread.startTime,
                       endTime: thread.endTime,
+                      serviceType: thread.service,
+                      onPressed: onPressed,
                     )),
                 Divider(),
               ],
@@ -3368,9 +3588,11 @@ class _ReschedulePageState extends State<ReschedulePage> {
                     height: 200,
                     child: PendingCard(
                       id: thread.id,
+                      name: thread.patientName,
                       date: thread.date,
                       startTime: thread.startTime,
                       endTime: thread.endTime,
+                      serviceType: thread.service,
                       onPressed: onPressed,
                     )),
                 Divider(),
@@ -3393,9 +3615,11 @@ class _ReschedulePageState extends State<ReschedulePage> {
                     height: 140,
                     child: PreviousCard(
                       id: thread.id,
+                      name: thread.patientName,
                       date: thread.date,
                       startTime: thread.startTime,
                       endTime: thread.endTime,
+                      service: thread.service,
                     )),
                 Divider(),
               ],
