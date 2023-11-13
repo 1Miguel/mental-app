@@ -14,6 +14,7 @@ import 'package:flutter_intro/utils/colors_scheme.dart';
 // Third-party import
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class MoodModalPage extends StatelessWidget {
   MoodController moodController = Get.put(MoodController());
@@ -674,16 +675,20 @@ class MoodHistoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
-        toolbarHeight: 60,
-        backgroundColor: Colors.transparent,
-        title: Text(
-          'Mood History',
-          style: TextStyle(
-            color: primaryGrey,
-            fontWeight: FontWeight.bold,
-          ),
+        toolbarHeight: 80,
+        automaticallyImplyLeading: false,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage('images/bg_teal_hd.png'), fit: BoxFit.fill),
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.elliptical(50, 20),
+                  bottomRight: Radius.elliptical(50, 20))),
         ),
+        title: Text("MENU",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+        centerTitle: true,
         leading: SizedBox(
           width: 20,
           height: 20,
@@ -693,7 +698,7 @@ class MoodHistoryPage extends StatelessWidget {
               icon: Icon(
                 Icons.arrow_back,
                 size: 30,
-                color: primaryGrey,
+                color: Colors.white,
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -736,33 +741,34 @@ class MoodHistoryPage extends StatelessWidget {
                       Column(
                         children: [
                           SizedBox(height: 20),
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(left: 20.0, bottom: 10.0),
-                            child: SizedBox(
-                              width: MediaQuery.sizeOf(context).width - 20.0,
-                              child: Text('October',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 25)),
-                            ),
-                          ),
+                          // Padding(
+                          //   padding:
+                          //       const EdgeInsets.only(left: 20.0, bottom: 10.0),
+                          //   child: SizedBox(
+                          //     width: MediaQuery.sizeOf(context).width - 20.0,
+                          //     child: Text(getMonth(),
+                          //         style: TextStyle(
+                          //             fontWeight: FontWeight.bold,
+                          //             fontSize: 25,
+                          //             color: Colors.grey.shade800)),
+                          //   ),
+                          // ),
                           SizedBox(
                             width: MediaQuery.sizeOf(context).width - 20.0,
                             child: MonthlyMoodSummary(),
                           ),
                           SizedBox(height: 30),
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(left: 20.0, bottom: 10.0),
-                            child: SizedBox(
-                              width: MediaQuery.sizeOf(context).width - 20.0,
-                              child: Text('Today',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 25)),
-                            ),
-                          ),
+                          // Padding(
+                          //   padding:
+                          //       const EdgeInsets.only(left: 20.0, bottom: 10.0),
+                          //   child: SizedBox(
+                          //     width: MediaQuery.sizeOf(context).width - 20.0,
+                          //     child: Text('Today',
+                          //         style: TextStyle(
+                          //             fontWeight: FontWeight.bold,
+                          //             fontSize: 25)),
+                          //   ),
+                          // ),
                           SizedBox(
                             width: MediaQuery.sizeOf(context).width - 20.0,
                             child: TodayMoodInfo(),
@@ -797,8 +803,16 @@ class MonthlyMoodSummary extends StatelessWidget {
     return futureMoodSummary;
   }
 
+  getMonth() {
+    final datenow = DateTime.now();
+    String currentMonthName = DateFormat('MMMM').format(datenow);
+
+    return currentMonthName;
+  }
+
   @override
   Widget build(BuildContext context) {
+    String currentMonth = getMonth();
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
@@ -817,7 +831,7 @@ class MonthlyMoodSummary extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 25.0),
                   child: SizedBox(
-                      child: Text("This Month's Overview",
+                      child: Text("$currentMonth Overview",
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 18))),
                 ),
@@ -990,7 +1004,10 @@ class TodayMoodInfo extends StatelessWidget {
           gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomLeft,
-              colors: <Color>[primaryLightBlue, primaryBlue]),
+              colors: <Color>[
+                Colors.lightBlue.shade300,
+                Colors.lightBlue.shade300
+              ]),
           borderRadius: BorderRadius.circular(30),
         ),
         child: FutureBuilder<Mood>(
@@ -1026,8 +1043,10 @@ class TodayMoodInfo extends StatelessWidget {
                             child: SizedBox(
                                 child: Text("My Mood Today",
                                     style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18))),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: contentColor,
+                                    ))),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: 25.0),
@@ -1064,7 +1083,7 @@ class TodayMoodInfo extends StatelessWidget {
                           maxLines: 3,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: unselectedLightBlue,
+                            fillColor: bgLightColor,
                             border: OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(25.0)),

@@ -1,5 +1,7 @@
 // standard import
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/ui_views/login_views.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // local import
 import 'admin_dashboard.dart';
@@ -158,10 +160,6 @@ class AdminSidebarX extends StatelessWidget {
           icon: Icons.today,
           label: 'Appointment',
         ),
-        const SidebarXItem(
-          icon: Icons.logout,
-          label: 'Logout',
-        ),
       ],
     );
   }
@@ -179,24 +177,24 @@ class _ScreensExample extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) {
-        final pageTitle = _getTitleByIndex(controller.selectedIndex);
-        switch (controller.selectedIndex) {
-          case 0:
-            return MainBody();
-          case 1:
-            return ScheduleCalendarView();
-          case 2:
-            return AppointmentRequestsMainView();
-          default:
-            return Text(
-              pageTitle,
-              style: theme.textTheme.headlineSmall,
-            );
-        }
-      },
-    );
+        animation: controller,
+        builder: (context, child) {
+          final pageTitle = _getTitleByIndex(controller.selectedIndex);
+          switch (controller.selectedIndex) {
+            case 0:
+              return MainBody();
+            case 1:
+              return ScheduleCalendarView();
+            case 2:
+              return AppointmentRequestsMainView();
+
+            default:
+              return Text(
+                pageTitle,
+                style: theme.textTheme.headlineSmall,
+              );
+          }
+        });
   }
 }
 

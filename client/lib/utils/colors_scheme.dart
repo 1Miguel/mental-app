@@ -84,3 +84,8 @@ final bgRed = HexColor("#FDD2D3");
 final conRed = HexColor("#EF6A6F");
 final bgTeal = HexColor("#C9FBF7");
 final conTeal = HexColor("#6ECAC1");
+
+// Mood Today
+final contentColor = HexColor('#0F184A');
+final bgDarkColor = HexColor('#66A5E0');
+final bgLightColor = HexColor('##DCF0FC');

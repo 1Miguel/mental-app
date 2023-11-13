@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/controllers/admin_controller.dart';
+import 'package:flutter_intro/model/admin.dart';
+import 'package:flutter_intro/ui_views/login_views.dart';
 
 // Local import
 import 'package:flutter_intro/utils/colors_scheme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Third-party imports
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:get/get.dart';
 
 GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
@@ -21,6 +26,14 @@ class MainBody extends StatelessWidget {
 
     String dateToday = "$year-$month-$day";
     return dateToday;
+  }
+
+  Future<String?> getLogOutState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? name = prefs.getString('first_name')!.toUpperCase();
+    prefs.clear();
+    return name;
   }
 
   @override
@@ -69,6 +82,28 @@ class MainBody extends StatelessWidget {
                               size: 20.0,
                             ),
                           ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 20, right: 15.0, top: 10),
+                        child: TextButton(
+                          child: Text(
+                            'Logout',
+                            style: TextStyle(
+                                fontFamily: 'Open Sans',
+                                fontWeight: FontWeight.w900,
+                                fontSize: 18,
+                                color: Colors.black87,
+                                decoration: TextDecoration.underline),
+                          ),
+                          onPressed: () {
+                            getLogOutState();
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) => LoginMainPage())));
+                          },
                         ),
                       ),
                     ],
@@ -124,9 +159,18 @@ class MainBody extends StatelessWidget {
 }
 
 class StatusBoxList extends StatelessWidget {
-  const StatusBoxList({
+  AdminController adminController = Get.put(AdminController());
+  late Future<DashboardStats> stats;
+
+  StatusBoxList({
     super.key,
   });
+
+  Future<DashboardStats> fetchStats() async {
+    stats = adminController.fetchAdminStats();
+    print(stats);
+    return stats;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,34 +183,82 @@ class StatusBoxList extends StatelessWidget {
               width: cardWidth,
               child: Padding(
                 padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                child: StatusCard(
-                    count: "125",
-                    label: "Patients",
-                    icon: Icons.wheelchair_pickup,
-                    overflowLabel: false),
+                child: FutureBuilder<DashboardStats>(
+                    future: fetchStats(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final statData = snapshot.data!;
+                        return StatusCard(
+                            count: statData.numPatients.toString(),
+                            label: "Patients",
+                            icon: Icons.wheelchair_pickup,
+                            overflowLabel: false);
+                      } else {
+                        return Container(
+                            height: 100,
+                            width: cardWidth,
+                            child: Center(
+                                child: SizedBox(
+                                    width: 100,
+                                    height: 100,
+                                    child: CircularProgressIndicator())));
+                      }
+                    }),
               ),
             ),
             Container(
               width: cardWidth,
               child: Padding(
                 padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                child: StatusCard(
-                  count: "5",
-                  label: "Today's Sessions",
-                  icon: Icons.schedule,
-                  overflowLabel: true,
-                ),
+                child: FutureBuilder<DashboardStats>(
+                    future: fetchStats(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final statData = snapshot.data!;
+                        return StatusCard(
+                          count: statData.numSessions.toString(),
+                          label: "Today's Sessions",
+                          icon: Icons.schedule,
+                          overflowLabel: true,
+                        );
+                      } else {
+                        return Container(
+                            height: 100,
+                            width: cardWidth,
+                            child: Center(
+                                child: SizedBox(
+                                    width: 100,
+                                    height: 100,
+                                    child: CircularProgressIndicator())));
+                      }
+                    }),
               ),
             ),
             Container(
               width: cardWidth,
               child: Padding(
                 padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                child: StatusCard(
-                    count: "10",
-                    label: "New Appointment\nRequests",
-                    icon: Icons.pending_actions,
-                    overflowLabel: true),
+                child: FutureBuilder<DashboardStats>(
+                    future: fetchStats(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final statData = snapshot.data!;
+                        return StatusCard(
+                            count: statData.numAppointments.toString(),
+                            label: "New Appointment\nRequests",
+                            icon: Icons.pending_actions,
+                            overflowLabel: true);
+                      } else {
+                        return Container(
+                            height: 100,
+                            width: cardWidth,
+                            child: Center(
+                                child: SizedBox(
+                                    width: 100,
+                                    height: 100,
+                                    child: CircularProgressIndicator())));
+                      }
+                    }),
               ),
             ),
           ],

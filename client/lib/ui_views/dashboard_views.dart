@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/ui_views/dashboard_media.dart';
 import 'package:flutter_intro/ui_views/dashboard_menu.dart';
 import 'package:flutter_intro/ui_views/dashboard_messages.dart';
 import 'package:flutter_intro/ui_views/dashboard_profile.dart';
@@ -547,7 +548,7 @@ class DashboardDiscoverCarousel extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: ((context) => UnderstandingSelfPage())));
+                        builder: ((context) => DashboardMedia())));
               },
             ),
             DashboardFeatureContext(
