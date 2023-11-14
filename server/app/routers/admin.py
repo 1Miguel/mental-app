@@ -72,16 +72,27 @@ class AdminManager:
         """
         return self._routing
 
-    async def admin_get_appointments(self, admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
-        self._log.info("Get All Appointments")
-        return [await AppointmentInfoApi.from_model(ap) for ap in await AppointmentModel.all().order_by("-start_time")]
+    async def _internal_get_appointments(self, filter: str) -> List[AppointmentInfoApi]:
+        self._log.info("Get %s appointments", filter)
+        ap_list = []
+
+        if filter == "all":
+            ap_list = await AppointmentModel.all().order_by("-start_time")
+        if filter == "pending":
+            ap_list = await AppointmentModel.filter(status=AppointmentStatus.PENDING).order_by("-start_time")
+        if filter == "approved":
+            ap_list = await AppointmentModel.filter(status=AppointmentStatus.RESERVED).order_by("-start_time")
+        if filter == "today":
+            ap_list = await AppointmentModel.filter(start_time__startswith=date.today().isoformat())
+
+        return [await AppointmentInfoApi.from_model(ap) for ap in ap_list]
+
+    async def admin_get_appointments(self, filter: str="all", admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
+        return await self._internal_get_appointments(filter=filter)
 
     async def admin_get_appointment_today(self, admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
         self._log.info("Get Today's Appointments")
-        today = date.today().isoformat()
-        return [
-            await AppointmentInfoApi.from_model(ap) for ap in await AppointmentModel.filter(start_time__startswith=today)
-        ]
+        return self._internal_get_appointments(filter="today")
 
     async def admin_update_appointment(
         self,
