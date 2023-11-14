@@ -99,6 +99,7 @@ class UserModel(Model):
     occupation = CharField(128, default="")
     birthday = CharField(128, default="")
     mobile_number = CharField(max_length=13, default="")
+    created = DatetimeField(auto_now=True)
 
     @classmethod
     async def get_user(cls, email: str) -> Self:
@@ -110,6 +111,13 @@ class UserModel(Model):
     @property
     def fullname(self) -> str:
         return f"{self.firstname} {self.lastname}"
+
+
+class BannedUsersModel(Model):
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel") 
+    when = DatetimeField(auto_now=True)
+    status = BooleanField(default=True)
 
 
 class UserSettingModel(Model):

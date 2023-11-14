@@ -4,6 +4,7 @@ date: 02/11/2023
 """
 # ---- Standard
 import logging
+from enum import Enum
 from typing import List, Optional
 from datetime import datetime, date
 
@@ -17,6 +18,10 @@ from routers.account import get_admin_user
 from internal.database import *
 from internal.schema import *
 
+
+class _AdminUserAction(str, Enum):
+    BAN = "ban"
+    UNBAN = "unban"
 
 class AdminManager:
     def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
@@ -50,6 +55,32 @@ class AdminManager:
             methods=["POST"],
             response_model=AppointmentInfoApi,
             description="Updates the appointment status.",
+        )
+        self._routing.add_api_route(
+            "/admin/user/",
+            self.admin_get_user_list,
+            methods=["GET"],
+            response_model=List[UserProfileApi],
+            description="Get list of user profile depending on filter.",
+        )
+        self._routing.add_api_route(
+            "/admin/user/{id}/",
+            self.admin_get_user,
+            methods=["GET"],
+            response_model=UserProfileApi,
+            description="Get the user profile.",
+        )
+        self._routing.add_api_route(
+            "/admin/user/{user_id}/",
+            self.admin_delete_user,
+            methods=["DELETE"],
+            description="Delete a user",
+        )
+        self._routing.add_api_route(
+            "/admin/user/{user_id}/{action}/",
+            self.admin_user_action,
+            methods=["POST"],
+            description="Possibe action [\"ban\", \"unban\"]",
         )
 
     async def setup_default_admin(self) -> None:
@@ -121,3 +152,42 @@ class AdminManager:
             num_todays_sessions=await AppointmentModel.filter(start_time__startswith=date.today().isoformat()).count(),
             services_percentages=services_percentages,
         )
+
+    async def _internal_admin_user_action(self, user_id: int, action: str) -> None:
+        try:
+            user: UserModel = UserModel.get(id=user_id)
+
+            if action == "delete":
+                await user.delete()
+
+            if action == "ban":
+                if not await BannedUsersModel.exists(user=user, status=True):
+                    # this user is not yet banned, ban now
+                    await BannedUsersModel(user=user).save()
+
+            if action == "unban":
+                try:
+                    ban_status = await BannedUsersModel(user=user, status=True)
+                    # unset the ban status
+                    ban_status.status = False
+                except DoesNotExist:
+                    # unbanning a user that's not ban, just let it pass
+                    pass
+
+        except DoesNotExist as exc:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"user {user_id} not found") from exc
+
+    async def admin_delete_user(self, user_id: int) -> None:
+        return self._internal_admin_user_action(user_id, "delete")
+
+    async def admin_user_action(self, user_id: int, action: _AdminUserAction) -> None:
+        return self._internal_admin_user_action(user_id, action)
+
+    async def admin_get_user_list(self) -> List[UserModel]:
+        return [UserProfileApi.from_model(model) for model in await UserModel.all().order_by("-created")]
+
+    async def admin_get_user(self, user_id: int) -> UserProfileApi:
+        try:
+            return UserProfileApi.from_model(await UserModel.get(id=user_id))
+        except DoesNotExist as exc:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"user {user_id} not found") from exc
