@@ -22,6 +22,9 @@ from tortoise.fields import (
     BooleanField,
 )
 
+def _generate_default_username() -> None:
+    return ("user_" + "".join([str(i) for i in bcrypt.hash(datetime.now().isoformat().encode()).encode()[-3::]]))
+
 
 def _iso_datetime_month(d: datetime) -> str:
     # the month is in datetime isoformat YYYY-MM-DD to get only the
@@ -90,12 +93,13 @@ class UserModel(Model):
     password_hash = CharField(128, default="")
     firstname = CharField(128, default="")
     lastname = CharField(128, default="")
-    username = CharField(128, default="")
+    username = CharField(128, default=_generate_default_username())
     address = CharField(256, default="")
     age = IntField(default=0)
     occupation = CharField(128, default="")
     birthday = CharField(128, default="")
     mobile_number = CharField(max_length=13, default="")
+    created = DatetimeField(auto_now=True)
 
     @classmethod
     async def get_user(cls, email: str) -> Self:
@@ -109,6 +113,13 @@ class UserModel(Model):
         return f"{self.firstname} {self.lastname}"
 
 
+class BannedUsersModel(Model):
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel") 
+    when = DatetimeField(auto_now=True)
+    status = BooleanField(default=True)
+
+
 class UserSettingModel(Model):
     id = IntField(pk=True)
     user = ForeignKeyField("models.UserModel")
@@ -118,6 +129,7 @@ class UserSettingModel(Model):
 class AdminModel(Model):
     id = IntField(pk=True)
     admin_user = ForeignKeyField("models.UserModel")
+    is_super = BooleanField(default=False)
 
 
 class AppointmentStatus(str, Enum):

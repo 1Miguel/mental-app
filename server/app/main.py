@@ -85,7 +85,12 @@ app.include_router(admin_manager.router)
 async def startup() -> None:
     """Routine at application startup."""
     log.info("App start up routine...")
-    await admin_manager.setup_default_admin()
+    await admin_manager.setup_default_admin(
+        "admin0@mentalapp.com", "testadminpassword", False
+    )
+    await admin_manager.setup_default_admin(
+        "superadmin0@mentalapp.com", "testsuperadminpassword", True
+    )
     await AppointmentServiceModelStats.init_defaults()
 
 
@@ -110,7 +115,7 @@ def index() -> Dict[str, str]:
 def run() -> None:
     import uvicorn
 
-    uvicorn.run(app, host="192.168.1.5", port=8080)
+    uvicorn.run(app, host="192.168.1.10", port=8080)
 
 
 if __name__ == "__main__":

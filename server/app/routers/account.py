@@ -40,7 +40,7 @@ UserSchema = pydantic_model_creator(UserModel, name="User", exclude_readonly=Fal
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-async def _get_authenticated_user(token: str, *, check_admin: bool = False) -> UserProfileApi:
+async def _get_authenticated_user(token: str, *, check_admin: bool = False, check_super: bool = False) -> UserProfileApi:
     """Returns the user database model from given token. This is the validation
     routine when a user attempts to access a page that requries authentication
     via token.
@@ -68,18 +68,38 @@ async def _get_authenticated_user(token: str, *, check_admin: bool = False) -> U
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
+    # ---- check if this is a banned account
+    # if await  BannedUsersModel.exists(user=user, status=True):
+    #     raise HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED,
+    #         detail="This user is banned.",
+    #     )
+    profile = UserProfileApi.from_model(user)
+    if await BannedUsersModel.exists(user=user, status=True):
+        profile.status = "BANNED"
+
     # ---- check if this account is an admin
-    is_admin = await AdminModel.exists(admin_user=user)
-    if check_admin and not is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User attempts to login with invalid admin account.",
-        )
+    profile.is_admin = False
+    try:
+        admin = await AdminModel.get(admin_user=user)
+    except DoesNotExist as exc:
+        if check_admin or check_super:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User attempts to login with invalid admin account.",
+            )
+    else:
+        profile.is_admin = True
+        if check_super and not admin.is_super:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User attempts to login with invalid super admin account.",
+            )
+        else:
+            profile.is_super = True
 
     # ---- return account json profile
     # TODO: should I just return the actual database item?
-    profile = UserProfileApi.from_model(user)
-    profile.is_admin = is_admin
     return profile
 
 
@@ -100,6 +120,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserProfileAp
 async def get_admin_user(token: str = Depends(oauth2_scheme)) -> UserProfileApi:
     return await _get_authenticated_user(token, check_admin=True)
 
+async def get_super_admin_user(token: str = Depends(oauth2_scheme)) -> UserProfileApi:
+    return await _get_authenticated_user(token, check_admin=True, check_super=True)
 
 class AccountManager:
     # temporary file where all files will be stored
@@ -109,7 +131,6 @@ class AccountManager:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         #: ---- Set all routes
-        self._routing.add_api_route("/", self.index, methods=["GET", "POST"])
         self._routing.add_api_route("/login", self.login, methods=["GET"], response_model=UserProfileApi)
         self._routing.add_api_route(
             "/signup",
@@ -121,6 +142,7 @@ class AccountManager:
         self._routing.add_api_route("/user/updateprofile", self.update_profile, methods=["POST"])
         self._routing.add_api_route("/users", self.get_all_users, methods=["GET"], response_model=List[str])
         self._routing.add_api_route("/user/changepassword", self.change_password, methods=["POST"])
+        self._routing.add_api_route("/user/forgotpassword", self.forgot_change_password, methods=["POST"])
 
     @property
     def router(self) -> APIRouter:
@@ -156,7 +178,7 @@ class AccountManager:
             return {"error": f"account does not exist"}
         else:
             if user_model:
-                user = await UserSchema.from_tortoise_orm(user_model)
+                user = UserProfileApi.from_model(user_model)
                 token = jwt.encode(user.model_dump(), _JWT_SECRET)
                 return {"access_token": token, "token_type": "bearer"}
             else:
@@ -168,7 +190,7 @@ class AccountManager:
         if the user has a token. If the user does not have a valid token, reject
         the login request.
         """
-        self._log.info("A  user log in...")
+        self._log.info("A user %s log in...", user)
         # return the profile at login success
         return user
 
@@ -184,10 +206,6 @@ class AccountManager:
                 password_hash=bcrypt.hash(user.password),
                 firstname=user.firstname,
                 lastname=user.lastname,
-                username="",
-                address="",
-                age=0,
-                occupation="",
                 birthday=datetime(year=1900, month=1, day=1).isoformat(),
             )
             await user.save()
@@ -196,7 +214,7 @@ class AccountManager:
             # Path(self._temp_file_storage.name).joinpath(str(user.id)).mkdir(exist_ok=True)
             # create a default user settings
             await UserSettingModel(user=user).save()
-
+            log.info("New user profile %s", UserProfileApi.from_model(user))
         except IntegrityError as err:
             log.critical("Attempt to create user that already exist.")
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="email is already used.") from err
@@ -238,6 +256,21 @@ class AccountManager:
     async def change_password(
         self, new_password: PasswordChangeReqApi, user: UserProfileApi = Depends(get_current_user)
     ) -> None:
+        self._internal_change_password(new_password, user)
+
+    async def forgot_change_password(
+        self, new_password: ForgotPasswordChangeReqApi
+    ) -> None:
+        try:
+            user = UserProfileApi.from_model(await  UserModel.get_user(new_password.user_email))
+            # TODO: Refactor this
+            self._internal_change_password(PasswordChangeReqApi(new_password), user)
+        except DoesNotExist:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="User email invalid.")
+
+    async def _internal_change_password(
+        self, new_password: PasswordChangeReqApi, user: UserProfileApi
+    ) -> None:
         """Updates the user's password request.
 
         Args:
@@ -267,3 +300,4 @@ class AccountManager:
 
     def user_logout(Authorization: str = Header(None)):
         pass
+

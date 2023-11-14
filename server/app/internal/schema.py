@@ -131,7 +131,10 @@ class UserProfileApi(BaseModel):
     mobile_number: str = ""
     membership_type: MembershipType = MembershipType.NONE
     membership_status: MembershipStatus = MembershipStatus.NULL
+    created: str = ""
     is_admin: bool = False
+    is_super: bool = False
+    status: str = ""
 
     @classmethod
     def from_model(cls, model: UserModel) -> "UserProfileApi":
@@ -146,6 +149,7 @@ class UserProfileApi(BaseModel):
             age=model.age,
             occupation=model.occupation,
             mobile_number=model.mobile_number,
+            created=model.created.isoformat()
         )
 
 
@@ -244,3 +248,7 @@ class AdminStatsApi(BaseModel):
 
 class PasswordChangeReqApi(BaseModel):
     new_password: str = Field(..., min_length=8)
+
+class ForgotPasswordChangeReqApi(BaseModel):
+    new_password: str = Field(..., min_length=8)
+    user_email: str
