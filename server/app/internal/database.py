@@ -129,6 +129,7 @@ class UserSettingModel(Model):
 class AdminModel(Model):
     id = IntField(pk=True)
     admin_user = ForeignKeyField("models.UserModel")
+    is_super = BooleanField(default=False)
 
 
 class AppointmentStatus(str, Enum):

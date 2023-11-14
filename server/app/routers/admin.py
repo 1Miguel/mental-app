@@ -14,7 +14,7 @@ from fastapi.routing import APIRouter
 from tortoise.exceptions import DoesNotExist
 
 # ---- Locals
-from routers.account import get_admin_user
+from routers.account import get_admin_user, get_super_admin_user
 from internal.database import *
 from internal.schema import *
 
@@ -90,16 +90,15 @@ class AdminManager:
             description="Possibe action [\"ban\", \"unban\"]",
         )
 
-    async def setup_default_admin(self) -> None:
+    async def setup_default_admin(self, email: str, password: str, is_super: bool=False) -> None:
         try:
-            user = UserModel(
-                email="admin0@mentalapp.com",
-                password_hash=bcrypt.hash("testadminpassword"),
-            )
+            user = UserModel(email=email, password_hash=bcrypt.hash(password))
             await user.save()
-            await AdminModel(admin_user=user).save()
+            await AdminModel(admin_user=user, is_super=is_super).save()
         except:
             self._log.error("Error in creating an admin account")
+        else:
+            self._log.info("Creating account email: %s pw: %s super: %s", email, password, is_super)
 
     @property
     def router(self) -> APIRouter:
@@ -176,7 +175,7 @@ class AdminManager:
 
             if action == "unban":
                 try:
-                    ban_status = await BannedUsersModel(user=user, status=True)
+                    ban_status = await BannedUsersModel.get(user=user, status=True)
                     # unset the ban status
                     self._log.critical("unbanning user %s", user_id)
                     ban_status.status = False
@@ -188,16 +187,16 @@ class AdminManager:
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, f"user {user_id} not found") from exc
 
-    async def admin_delete_user(self, user_id: int, admin: UserProfileApi = Depends(get_admin_user)) -> None:
+    async def admin_delete_user(self, user_id: int, super_admin: UserProfileApi = Depends(get_super_admin_user)) -> None:
         return await self._internal_admin_user_action(user_id, "delete")
 
-    async def admin_user_action(self, user_id: int, action: _AdminUserAction, admin: UserProfileApi = Depends(get_admin_user)) -> None:
+    async def admin_user_action(self, user_id: int, action: _AdminUserAction, super_admin: UserProfileApi = Depends(get_super_admin_user)) -> None:
         return await self._internal_admin_user_action(user_id, action)
 
-    async def admin_get_user_list(self, admin: UserProfileApi = Depends(get_admin_user)) -> List[UserModel]:
+    async def admin_get_user_list(self, admin: UserProfileApi = Depends(get_super_admin_user)) -> List[UserModel]:
         return [UserProfileApi.from_model(model) for model in await UserModel.all().order_by("-created")]
 
-    async def admin_get_user(self, user_id: int, admin: UserProfileApi = Depends(get_admin_user)) -> UserProfileApi:
+    async def admin_get_user(self, user_id: int, admin: UserProfileApi = Depends(get_super_admin_user)) -> UserProfileApi:
         try:
             return UserProfileApi.from_model(await UserModel.get(id=user_id))
         except DoesNotExist as exc:

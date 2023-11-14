@@ -131,8 +131,9 @@ class UserProfileApi(BaseModel):
     mobile_number: str = ""
     membership_type: MembershipType = MembershipType.NONE
     membership_status: MembershipStatus = MembershipStatus.NULL
-    is_admin: bool = False
     created: str = ""
+    is_admin: bool = False
+    is_super: bool = False
 
     @classmethod
     def from_model(cls, model: UserModel) -> "UserProfileApi":

@@ -40,7 +40,7 @@ UserSchema = pydantic_model_creator(UserModel, name="User", exclude_readonly=Fal
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-async def _get_authenticated_user(token: str, *, check_admin: bool = False) -> UserProfileApi:
+async def _get_authenticated_user(token: str, *, check_admin: bool = False, check_super: bool = False) -> UserProfileApi:
     """Returns the user database model from given token. This is the validation
     routine when a user attempts to access a page that requries authentication
     via token.
@@ -74,18 +74,30 @@ async def _get_authenticated_user(token: str, *, check_admin: bool = False) -> U
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="This user is banned.",
         )
+    profile = UserProfileApi.from_model(user)
+
     # ---- check if this account is an admin
-    is_admin = await AdminModel.exists(admin_user=user)
-    if check_admin and not is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User attempts to login with invalid admin account.",
-        )
+    profile.is_admin = False
+    try:
+        admin = await AdminModel.get(admin_user=user)
+    except DoesNotExist as exc:
+        if check_admin or check_super:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User attempts to login with invalid admin account.",
+            )
+    else:
+        profile.is_admin = True
+        if check_super and not admin.is_super:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User attempts to login with invalid super admin account.",
+            )
+        else:
+            profile.is_super = True
 
     # ---- return account json profile
     # TODO: should I just return the actual database item?
-    profile = UserProfileApi.from_model(user)
-    profile.is_admin = is_admin
     return profile
 
 
@@ -106,6 +118,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserProfileAp
 async def get_admin_user(token: str = Depends(oauth2_scheme)) -> UserProfileApi:
     return await _get_authenticated_user(token, check_admin=True)
 
+async def get_super_admin_user(token: str = Depends(oauth2_scheme)) -> UserProfileApi:
+    return await _get_authenticated_user(token, check_admin=True, check_super=True)
 
 class AccountManager:
     # temporary file where all files will be stored
