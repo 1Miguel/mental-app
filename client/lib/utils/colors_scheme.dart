@@ -89,3 +89,16 @@ final conTeal = HexColor("#6ECAC1");
 final contentColor = HexColor('#0F184A');
 final bgDarkColor = HexColor('#66A5E0');
 final bgLightColor = HexColor('##DCF0FC');
+
+// Media
+final HexColor mediaMainBg = HexColor("#7ed957");
+// final HexColor forumButton = HexColor("#17bbb0");
+// final HexColor lightBlueBg = HexColor("#67ddd8");
+// final HexColor greenBlueBg = HexColor("#17bbb0");
+
+// Media - Courses
+final HexColor psychMainBg = HexColor("#df6264");
+final HexColor traumaMainBg = HexColor("#91c49f");
+final HexColor suicideMainBg = HexColor("#dde9f1");
+final HexColor helpMainBg = HexColor("#ffbd59");
+final HexColor truthStressMainBg = HexColor("#d9d9d9");

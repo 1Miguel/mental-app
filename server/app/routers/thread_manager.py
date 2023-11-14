@@ -56,7 +56,7 @@ class ThreadManager:
             response_model=ThreadRequestApi,
         )
         self._routing.add_api_route(
-            "/user/thread/query/",
+            "/user/thread/query",
             self.get_all_thread_with_filter,
             methods=["GET"],
         )
@@ -148,12 +148,13 @@ class ThreadManager:
 
     async def get_thread(self, thread_id: int, user: UserProfileApi = Depends(get_current_user)) -> ThreadRequestApi:
         """A User comment to a thread"""
+        user_model = await UserModel.get(id=user.id)
         try:
             thread: ThreadModel = await ThreadModel.get(id=thread_id)
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist") from exc
         # create the response model
-        response: ThreadRequestApi = await ThreadRequestApi.from_model(thread)
+        response: ThreadRequestApi = await ThreadRequestApi.from_model(user_model, thread)
         # build the list of responses
         for comment in await ThreadCommentModel.get_thread_comments(thread_id):
             response.comments += [
@@ -169,11 +170,11 @@ class ThreadManager:
         self, page: int = 0, limit: int = 5, user: UserProfileApi = Depends(get_current_user)
     ) -> List[ThreadRequestApi]:
         """Get thread list base on page."""
-        user_db = await UserModel.get(email=user.email)
+        user_model = await UserModel.get(id=user.id)
         thread_list = await ThreadModel.all().order_by("-created").offset(page * 5).limit(limit)
         thread_req = []
         for thread in thread_list:
-            _th = await ThreadRequestApi.from_model(thread)
+            _th = await ThreadRequestApi.from_model(user_model, thread)
             _th.is_liked = await ThreadUserLikeModel.exists(user__id=user.id, thread__id=thread.id)
             thread_req.append(_th)
         return thread_req
@@ -181,14 +182,15 @@ class ThreadManager:
     async def get_all_thread_with_filter(
         self, filter: str, limit: int = 100, user: UserProfileApi = Depends(get_current_user)
     ) -> List[ThreadRequestApi]:
+        user_model = await UserModel.get(id=user.id)
         if filter == "liked":
             thread = [
-                await ThreadRequestApi.from_model(await liked_thread.thread)
+                await ThreadRequestApi.from_model(user_model, await liked_thread.thread)
                 for liked_thread in await ThreadUserLikeModel.filter(user__id=user.id).order_by("-liked_at").limit(limit)
             ]
         elif filter == "posted":
             thread = [
-                await ThreadRequestApi.from_model(thread)
+                await ThreadRequestApi.from_model(user_model, thread)
                 for thread in await ThreadModel.filter(user__id=user.id).order_by("-created").limit(limit)
             ]
         else:

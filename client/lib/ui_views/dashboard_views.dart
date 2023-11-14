@@ -285,7 +285,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 fontFamily: 'Proza Libre',
                                 fontWeight: FontWeight.bold,
                                 fontSize: 30,
-                                color: Colors.white),
+                                color: Colors.black),
                           ),
                         );
                       }
@@ -302,7 +302,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     child: IconButton(
                       icon: Icon(
                         Icons.menu,
-                        color: Colors.white,
+                        color: Colors.black,
                         size: 40,
                       ),
                       tooltip: 'Show Snackbar',
@@ -548,7 +548,7 @@ class DashboardDiscoverCarousel extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: ((context) => DashboardMedia())));
+                        builder: ((context) => DashboardMediaIntro())));
               },
             ),
             DashboardFeatureContext(

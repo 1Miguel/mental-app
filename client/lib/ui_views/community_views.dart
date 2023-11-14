@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_intro/model/thread.dart';
 import 'package:flutter_intro/ui_views/comment_box_app.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
+import 'package:flutter_intro/ui_views/forum_members.dart';
+import 'package:flutter_intro/ui_views/forum_myfavorites.dart';
 import 'package:flutter_intro/ui_views/forum_myposts.dart';
 
 // Local import
@@ -1048,10 +1050,10 @@ class ForumMenu extends StatelessWidget {
                 menu: 'Members',
                 menuIcon: Icons.group,
                 onTap: () {
-                  // Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //         builder: ((context) => EditProfilePage())));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: ((context) => ForumMembers())));
                 },
               ),
             ],
@@ -1153,53 +1155,6 @@ class SuccessPostPage extends StatelessWidget {
             ),
           ),
         ));
-  }
-}
-
-class ForumMenuMyFavorites extends StatefulWidget {
-  const ForumMenuMyFavorites({super.key});
-
-  @override
-  State<ForumMenuMyFavorites> createState() => _ForumMenuMyFavoritesState();
-}
-
-class _ForumMenuMyFavoritesState extends State<ForumMenuMyFavorites> {
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraint) {
-      return Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 60,
-          title: Text("My Favorites", style: TextStyle(color: Colors.white)),
-          centerTitle: true,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-                color: Colors.teal,
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.elliptical(50, 20),
-                    bottomRight: Radius.elliptical(50, 20))),
-          ),
-          leading: SizedBox(
-            width: 20,
-            height: 20,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-              child: IconButton(
-                icon: Icon(
-                  Icons.arrow_back,
-                  size: 30,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-    });
   }
 }
 

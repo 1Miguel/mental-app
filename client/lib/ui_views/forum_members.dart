@@ -337,14 +337,14 @@ class _PostCardState extends State<PostCard> {
   }
 }
 
-class ForumMenuMyPosts extends StatefulWidget {
-  const ForumMenuMyPosts({super.key});
+class ForumMembers extends StatefulWidget {
+  const ForumMembers({super.key});
 
   @override
-  State<ForumMenuMyPosts> createState() => _ForumMenuMyPostsState();
+  State<ForumMembers> createState() => _ForumMembersState();
 }
 
-class _ForumMenuMyPostsState extends State<ForumMenuMyPosts> {
+class _ForumMembersState extends State<ForumMembers> {
   late Future<List<Thread>> futureMyThreadList;
   ThreadController threadController = Get.put(ThreadController());
 
@@ -360,7 +360,7 @@ class _ForumMenuMyPostsState extends State<ForumMenuMyPosts> {
       return Scaffold(
         appBar: AppBar(
           toolbarHeight: 60,
-          title: Text("My Posts", style: TextStyle(color: Colors.white)),
+          title: Text("My Members", style: TextStyle(color: Colors.white)),
           centerTitle: true,
           flexibleSpace: Container(
             decoration: BoxDecoration(

@@ -178,7 +178,6 @@ class _PostCardState extends State<PostCard> {
 
   @override
   Widget build(BuildContext context) {
-    print("PostCard Date: $date");
     return LayoutBuilder(
       builder: (context, constraint) {
         return GestureDetector(
@@ -314,17 +313,6 @@ class _PostCardState extends State<PostCard> {
                           },
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5.0),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.delete,
-                            size: 15.0,
-                            color: primaryGrey,
-                          ),
-                          onPressed: () {},
-                        ),
-                      ),
                     ],
                   ),
                 ],
@@ -337,19 +325,19 @@ class _PostCardState extends State<PostCard> {
   }
 }
 
-class ForumMenuMyPosts extends StatefulWidget {
-  const ForumMenuMyPosts({super.key});
+class ForumMenuMyFavorites extends StatefulWidget {
+  const ForumMenuMyFavorites({super.key});
 
   @override
-  State<ForumMenuMyPosts> createState() => _ForumMenuMyPostsState();
+  State<ForumMenuMyFavorites> createState() => _ForumMenuMyFavoritesState();
 }
 
-class _ForumMenuMyPostsState extends State<ForumMenuMyPosts> {
+class _ForumMenuMyFavoritesState extends State<ForumMenuMyFavorites> {
   late Future<List<Thread>> futureMyThreadList;
   ThreadController threadController = Get.put(ThreadController());
 
-  Future<List<Thread>> fetchMyPosts() async {
-    futureMyThreadList = threadController.fetchMyPosts();
+  Future<List<Thread>> fetchMyLikedPosts() async {
+    futureMyThreadList = threadController.fetchMyLikedPosts();
     print(futureMyThreadList);
     return futureMyThreadList;
   }
@@ -360,7 +348,7 @@ class _ForumMenuMyPostsState extends State<ForumMenuMyPosts> {
       return Scaffold(
         appBar: AppBar(
           toolbarHeight: 60,
-          title: Text("My Posts", style: TextStyle(color: Colors.white)),
+          title: Text("My Favorites", style: TextStyle(color: Colors.white)),
           centerTitle: true,
           flexibleSpace: Container(
             decoration: BoxDecoration(
@@ -402,7 +390,7 @@ class _ForumMenuMyPostsState extends State<ForumMenuMyPosts> {
                       height: constraint.maxHeight - 100,
                       width: constraint.maxWidth,
                       child: FutureBuilder<List<Thread>>(
-                        future: fetchMyPosts(),
+                        future: fetchMyLikedPosts(),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             final threads = snapshot.data!;
@@ -421,7 +409,7 @@ class _ForumMenuMyPostsState extends State<ForumMenuMyPosts> {
                                             padding: const EdgeInsets.all(15.0),
                                             child: SizedBox(
                                                 width: constraint.maxWidth,
-                                                child: Text("No posts yet",
+                                                child: Text("No favorites yet",
                                                     textAlign: TextAlign.center,
                                                     style: TextStyle(
                                                       fontWeight:
