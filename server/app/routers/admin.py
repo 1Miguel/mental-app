@@ -23,6 +23,13 @@ class _AdminUserAction(str, Enum):
     BAN = "ban"
     UNBAN = "unban"
 
+class _AdminAppointmentFilter(str, Enum):
+    ALL = "all"
+    PENDING = "pending"
+    APPROVED = "approved"
+    TODAY = "today"
+
+
 class AdminManager:
     def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
         self._log = log if log else logging.getLogger(__name__)
@@ -64,7 +71,7 @@ class AdminManager:
             description="Get list of user profile depending on filter.",
         )
         self._routing.add_api_route(
-            "/admin/user/{id}/",
+            "/admin/user/{user_id}/",
             self.admin_get_user,
             methods=["GET"],
             response_model=UserProfileApi,
@@ -118,12 +125,12 @@ class AdminManager:
 
         return [await AppointmentInfoApi.from_model(ap) for ap in ap_list]
 
-    async def admin_get_appointments(self, filter: str="all", admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
+    async def admin_get_appointments(self, filter: _AdminAppointmentFilter="all", admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
         return await self._internal_get_appointments(filter=filter)
 
     async def admin_get_appointment_today(self, admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
         self._log.info("Get Today's Appointments")
-        return self._internal_get_appointments(filter="today")
+        return self._internal_get_appointments(filter=_AdminAppointmentFilter.TODAY)
 
     async def admin_update_appointment(
         self,
@@ -153,7 +160,7 @@ class AdminManager:
             services_percentages=services_percentages,
         )
 
-    async def _internal_admin_user_action(self, user_id: int, action: str) -> None:
+    async def _internal_admin_user_action(self, user_id: int, action: _AdminUserAction) -> None:
         try:
             user: UserModel = UserModel.get(id=user_id)
 
@@ -177,16 +184,16 @@ class AdminManager:
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, f"user {user_id} not found") from exc
 
-    async def admin_delete_user(self, user_id: int) -> None:
+    async def admin_delete_user(self, user_id: int, admin: UserProfileApi = Depends(get_admin_user)) -> None:
         return self._internal_admin_user_action(user_id, "delete")
 
-    async def admin_user_action(self, user_id: int, action: _AdminUserAction) -> None:
+    async def admin_user_action(self, user_id: int, action: _AdminUserAction, admin: UserProfileApi = Depends(get_admin_user)) -> None:
         return self._internal_admin_user_action(user_id, action)
 
-    async def admin_get_user_list(self) -> List[UserModel]:
+    async def admin_get_user_list(self, admin: UserProfileApi = Depends(get_admin_user)) -> List[UserModel]:
         return [UserProfileApi.from_model(model) for model in await UserModel.all().order_by("-created")]
 
-    async def admin_get_user(self, user_id: int) -> UserProfileApi:
+    async def admin_get_user(self, user_id: int, admin: UserProfileApi = Depends(get_admin_user)) -> UserProfileApi:
         try:
             return UserProfileApi.from_model(await UserModel.get(id=user_id))
         except DoesNotExist as exc:
