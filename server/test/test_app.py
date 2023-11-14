@@ -17,6 +17,8 @@ handler.setLevel(logging.DEBUG)
 handler.setFormatter(logging.Formatter("%(levelname)s: %(asctime)-15s : %(message)s"))
 log.addHandler(handler)
 
+IP_ADDRESS = "192.168.1.10:8080"
+USER_ID = random.randint(0, 100)
 
 class _Helpers:
     """Baseclass that contains all helper functions.
@@ -42,14 +44,14 @@ class _Helpers:
         data = {
             "grant_type": "password",
             "code": "1",
-            "username": "johndoe@gmail.com",
+            "username": f"johndoe{USER_ID}@gmail.com",
             "password": "testpassword",
         }
-        token = self.client.post("http://127.0.0.1:8000/token", headers=headers, data=data).json()
+        token = self.client.post(f"http://{IP_ADDRESS}/token", headers=headers, data=data).json()
         access_token = token["access_token"]
         token_type = token["token_type"]
         headers = {"Authorization": f"{token_type} {access_token}"}
-        user = self.client.get("http://127.0.0.1:8000/login", headers=headers)
+        user = self.client.get(f"http://{IP_ADDRESS}/login", headers=headers)
         return headers, user.json()
 
 
@@ -76,12 +78,12 @@ class TestFeature1AccountFeature(_Helpers, unittest.TestCase):
         """
         headers = {"accept": "application/json", "Content-Type": "application/json"}
         new_user_req = {
-            "email": "johndoe@gmail.com",
+            "email": f"johndoe{USER_ID}@gmail.com",
             "password": "testpassword",
             "firstname": "John",
             "lastname": "Doe",
         }
-        response = self.client.post("http://127.0.0.1:8000/signup", headers=headers, json=new_user_req)
+        response = self.client.post(f"http://{IP_ADDRESS}/signup", headers=headers, json=new_user_req)
         self.assertEqual(response.status_code, 200)
 
     def test_account_feature_1p2_user_login(self) -> None:
@@ -92,10 +94,10 @@ class TestFeature1AccountFeature(_Helpers, unittest.TestCase):
         data = {
             "grant_type": "password",
             "code": "1",
-            "username": "johndoe@gmail.com",
+            "username": f"johndoe{USER_ID}@gmail.com",
             "password": "testpassword",
         }
-        response = self.client.post("http://127.0.0.1:8000/token", headers=headers, data=data)
+        response = self.client.post(f"http://{IP_ADDRESS}/token", headers=headers, data=data)
         token = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertIn("access_token", token)
@@ -103,7 +105,7 @@ class TestFeature1AccountFeature(_Helpers, unittest.TestCase):
         access_token = token["access_token"]
         token_type = token["token_type"]
         headers = {"Authorization": f"{token_type} {access_token}"}
-        response = self.client.get("http://127.0.0.1:8000/login", headers=headers)
+        response = self.client.get(f"http://{IP_ADDRESS}/login", headers=headers)
         self.assertEqual(response.status_code, 200)
 
         log.info("Succesfully login...")
@@ -155,7 +157,7 @@ class TestFeature2MoodLoggingFeature(_Helpers, unittest.TestCase):
             }
             log.info("Random mood logging %s", new_mood)
             # first time setting mood today
-            response = self.client.post(f"http://127.0.0.1:8000/user/mood/log/", headers=headers, json=new_mood)
+            response = self.client.post(f"http://{IP_ADDRESS}/user/mood/log/", headers=headers, json=new_mood)
             log.info("Returned response: %s", response)
             self.assertTrue(response.ok)
 
@@ -173,7 +175,7 @@ class TestFeature2MoodLoggingFeature(_Helpers, unittest.TestCase):
 
         log.info("Get Moods in %s-%s", self.test_year, self.test_month)
         test_response = self.client.get(
-            f"http://127.0.0.1:8000/user/mood/{self.test_year}/{self.test_month}/",
+            f"http://{IP_ADDRESS}/user/mood/{self.test_year}/{self.test_month}/",
             headers=headers,
             params=test_params,
         )
@@ -216,7 +218,7 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
                 "concerns": "No Concerns.",
             }
             test_response = self.client.post(
-                f"http://127.0.0.1:8000/user/appointment/new/",
+                f"http://{IP_ADDRESS}/user/appointment/new/",
                 headers=headers,
                 json=test_json,
             )
@@ -237,7 +239,7 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
             "concerns": "No Concerns.",
         }
         test_response = self.client.get(
-            f"http://127.0.0.1:8000/user/appointment/schedule/{self.test_year}/{self.test_month}/",
+            f"http://{IP_ADDRESS}/user/appointment/schedule/{self.test_year}/{self.test_month}/",
             headers=headers,
             json=test_json,
         )
@@ -252,11 +254,11 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
 
         test_appointment_id = 1
         test_response = self.client.post(
-            f"http://127.0.0.1:8000/user/appointment/myschedule/{test_appointment_id}/cancel/",
+            f"http://{IP_ADDRESS}/user/appointment/myschedule/{test_appointment_id}/cancel/",
             headers=headers,
         )
         test_response = self.client.get(
-            f"http://127.0.0.1:8000/user/appointment/myschedule/{test_appointment_id}",
+            f"http://{IP_ADDRESS}/user/appointment/myschedule/{test_appointment_id}",
             headers=headers,
         )
         self.assertTrue(test_response.ok)
@@ -267,7 +269,7 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
         headers, _ = self.helper_login_routine()
         headers["accept"]: "application/json"
         test_response = self.client.get(
-            f"http://127.0.0.1:8000/user/appointment/myschedule/upcoming/",
+            f"http://{IP_ADDRESS}/user/appointment/myschedule/upcoming/",
             headers=headers,
         )
         self.assertTrue(test_response.ok)
@@ -277,7 +279,7 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
         headers, _ = self.helper_login_routine()
         headers["accept"]: "application/json"
         test_response = self.client.get(
-            f"http://127.0.0.1:8000/user/appointment/myschedule/previous/",
+            f"http://{IP_ADDRESS}/user/appointment/myschedule/previous/",
             headers=headers,
             params={
                 "limit": 5,
@@ -292,7 +294,7 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
 
         # ---- 1. Get list of upcoming reschedule, pick the first one and reschedule
         test_response = self.client.get(
-            f"http://127.0.0.1:8000/user/appointment/myschedule/upcoming/",
+            f"http://{IP_ADDRESS}/user/appointment/myschedule/upcoming/",
             headers=headers,
         )
         test_upcoming_appointment = test_response.json()[0]
@@ -312,7 +314,7 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
 
         log.info("reschedule new appointment: %s", test_new_appointment_json)
         test_response = self.client.post(
-            f"http://127.0.0.1:8000/user/appointment/myschedule/{test_appointment_id}/reschedule/",
+            f"http://{IP_ADDRESS}/user/appointment/myschedule/{test_appointment_id}/reschedule/",
             headers=headers,
             json=test_new_appointment_json,
         )
@@ -349,7 +351,7 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
                 "content": f"My Test Content {thread_id}",
                 "creator": "anoncreator",
             }
-            test_response = self.client.post("http://127.0.0.1:8000/user/thread/submit", headers=headers, json=thread_api)
+            test_response = self.client.post(f"http://{IP_ADDRESS}/user/thread/submit", headers=headers, json=thread_api)
             self.assertTrue(test_response.ok)
 
     def test_thread_feature_4p2_GET_all_threads(self) -> None:
@@ -366,7 +368,7 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
         headers["accept"]: "application/json"
 
         test_limit = 5
-        test_response = self.client.get(f"http://127.0.0.1:8000/user/thread/page/0/?limit={test_limit}", headers=headers)
+        test_response = self.client.get(f"http://{IP_ADDRESS}/user/thread/page/0/?limit={test_limit}", headers=headers)
         self.assertTrue(test_response.ok)
         self.assertLessEqual(len(test_response.json()), test_limit)
         for res in test_response.json():
@@ -378,19 +380,19 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
 
         test_thread_id = 1
 
-        test_response = self.client.get(f"http://127.0.0.1:8000/user/thread/{test_thread_id}/", headers=headers)
+        test_response = self.client.get(f"http://{IP_ADDRESS}/user/thread/{test_thread_id}/", headers=headers)
         print("------------############------", test_response.json())
         expect_num_likes = test_response.json()["num_likes"] + 1
 
         test_like_rest_json = {"like": True}
         test_response = self.client.post(
-            f"http://127.0.0.1:8000/user/thread/{test_thread_id}/like/",
+            f"http://{IP_ADDRESS}/user/thread/{test_thread_id}/like/",
             headers=headers,
             json=test_like_rest_json,
         )
         self.assertTrue(test_response.ok)
 
-        test_response = self.client.get(f"http://127.0.0.1:8000/user/thread/{test_thread_id}/", headers=headers)
+        test_response = self.client.get(f"http://{IP_ADDRESS}/user/thread/{test_thread_id}/", headers=headers)
         self.assertTrue(test_response.ok)
         self.assertEqual(expect_num_likes, test_response.json()["num_likes"])
 
@@ -411,9 +413,9 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
 
         test_data = {"content": "Test Comment"}
 
-        test_response = self.client.post("http://127.0.0.1:8000/user/thread/3/comment/", headers=headers, json=test_data)
+        test_response = self.client.post(f"http://{IP_ADDRESS}/user/thread/3/comment/", headers=headers, json=test_data)
         self.assertTrue(test_response.ok)
-        test_response = self.client.post("http://127.0.0.1:8000/user/thread/99/comment/", headers=headers, json=test_data)
+        test_response = self.client.post(f"http://{IP_ADDRESS}/user/thread/99/comment/", headers=headers, json=test_data)
         self.assertEqual(test_response.status_code, 404)
 
 

@@ -245,3 +245,7 @@ class AdminStatsApi(BaseModel):
 
 class PasswordChangeReqApi(BaseModel):
     new_password: str = Field(..., min_length=8)
+
+class ForgotPasswordChangeReqApi(BaseModel):
+    new_password: str = Field(..., min_length=8)
+    user_email: str

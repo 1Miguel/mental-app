@@ -121,6 +121,7 @@ class AccountManager:
         self._routing.add_api_route("/user/updateprofile", self.update_profile, methods=["POST"])
         self._routing.add_api_route("/users", self.get_all_users, methods=["GET"], response_model=List[str])
         self._routing.add_api_route("/user/changepassword", self.change_password, methods=["POST"])
+        self._routing.add_api_route("/user/forgotpassword", self.forgot_change_password, methods=["POST"])
 
     @property
     def router(self) -> APIRouter:
@@ -168,7 +169,7 @@ class AccountManager:
         if the user has a token. If the user does not have a valid token, reject
         the login request.
         """
-        self._log.info("A  user log in...")
+        self._log.info("A user %s log in...", user)
         # return the profile at login success
         return user
 
@@ -184,10 +185,6 @@ class AccountManager:
                 password_hash=bcrypt.hash(user.password),
                 firstname=user.firstname,
                 lastname=user.lastname,
-                username="",
-                address="",
-                age=0,
-                occupation="",
                 birthday=datetime(year=1900, month=1, day=1).isoformat(),
             )
             await user.save()
@@ -196,7 +193,7 @@ class AccountManager:
             # Path(self._temp_file_storage.name).joinpath(str(user.id)).mkdir(exist_ok=True)
             # create a default user settings
             await UserSettingModel(user=user).save()
-
+            log.info("New user profile %s", UserProfileApi.from_model(user))
         except IntegrityError as err:
             log.critical("Attempt to create user that already exist.")
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="email is already used.") from err
@@ -238,6 +235,21 @@ class AccountManager:
     async def change_password(
         self, new_password: PasswordChangeReqApi, user: UserProfileApi = Depends(get_current_user)
     ) -> None:
+        self._internal_change_password(new_password, user)
+
+    async def forgot_change_password(
+        self, new_password: ForgotPasswordChangeReqApi
+    ) -> None:
+        try:
+            user = UserProfileApi.from_model(await  UserModel.get_user(new_password.user_email))
+            # TODO: Refactor this
+            self._internal_change_password(PasswordChangeReqApi(new_password), user)
+        except DoesNotExist:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="User email invalid.")
+
+    async def _internal_change_password(
+        self, new_password: PasswordChangeReqApi, user: UserProfileApi
+    ) -> None:
         """Updates the user's password request.
 
         Args:
@@ -267,3 +279,4 @@ class AccountManager:
 
     def user_logout(Authorization: str = Header(None)):
         pass
+
