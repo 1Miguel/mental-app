@@ -68,6 +68,12 @@ async def _get_authenticated_user(token: str, *, check_admin: bool = False) -> U
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
+    # ---- check if this is a banned account
+    if await  BannedUsersModel.exists(user=user, status=True):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="This user is banned.",
+        )
     # ---- check if this account is an admin
     is_admin = await AdminModel.exists(admin_user=user)
     if check_admin and not is_admin:
@@ -143,6 +149,9 @@ class AccountManager:
             return None
         if not user.verify_password(password):
             return None
+        if await BannedUsersModel.exists(user=user, status=True):
+            self._log.critical("%s is banne", email)
+            return None
         return user
 
     async def _generate_token(
@@ -156,7 +165,7 @@ class AccountManager:
             return {"error": f"account does not exist"}
         else:
             if user_model:
-                user = await UserSchema.from_tortoise_orm(user_model)
+                user = UserProfileApi.from_model(user_model)
                 token = jwt.encode(user.model_dump(), _JWT_SECRET)
                 return {"access_token": token, "token_type": "bearer"}
             else:

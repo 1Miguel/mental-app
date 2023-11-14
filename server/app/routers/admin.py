@@ -162,12 +162,14 @@ class AdminManager:
 
     async def _internal_admin_user_action(self, user_id: int, action: _AdminUserAction) -> None:
         try:
-            user: UserModel = UserModel.get(id=user_id)
+            user: UserModel = await UserModel.get(id=user_id)
 
             if action == "delete":
+                self._log.critical("deleting user %s", user_id)
                 await user.delete()
 
             if action == "ban":
+                self._log.critical("banning user %s", user_id)
                 if not await BannedUsersModel.exists(user=user, status=True):
                     # this user is not yet banned, ban now
                     await BannedUsersModel(user=user).save()
@@ -176,7 +178,9 @@ class AdminManager:
                 try:
                     ban_status = await BannedUsersModel(user=user, status=True)
                     # unset the ban status
+                    self._log.critical("unbanning user %s", user_id)
                     ban_status.status = False
+                    await ban_status.save()
                 except DoesNotExist:
                     # unbanning a user that's not ban, just let it pass
                     pass
@@ -185,10 +189,10 @@ class AdminManager:
             raise HTTPException(status.HTTP_404_NOT_FOUND, f"user {user_id} not found") from exc
 
     async def admin_delete_user(self, user_id: int, admin: UserProfileApi = Depends(get_admin_user)) -> None:
-        return self._internal_admin_user_action(user_id, "delete")
+        return await self._internal_admin_user_action(user_id, "delete")
 
     async def admin_user_action(self, user_id: int, action: _AdminUserAction, admin: UserProfileApi = Depends(get_admin_user)) -> None:
-        return self._internal_admin_user_action(user_id, action)
+        return await self._internal_admin_user_action(user_id, action)
 
     async def admin_get_user_list(self, admin: UserProfileApi = Depends(get_admin_user)) -> List[UserModel]:
         return [UserProfileApi.from_model(model) for model in await UserModel.all().order_by("-created")]

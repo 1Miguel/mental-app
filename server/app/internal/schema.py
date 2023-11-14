@@ -132,6 +132,7 @@ class UserProfileApi(BaseModel):
     membership_type: MembershipType = MembershipType.NONE
     membership_status: MembershipStatus = MembershipStatus.NULL
     is_admin: bool = False
+    created: str = ""
 
     @classmethod
     def from_model(cls, model: UserModel) -> "UserProfileApi":
@@ -146,6 +147,7 @@ class UserProfileApi(BaseModel):
             age=model.age,
             occupation=model.occupation,
             mobile_number=model.mobile_number,
+            created=model.created.isoformat()
         )
 
 
