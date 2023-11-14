@@ -134,6 +134,7 @@ class UserProfileApi(BaseModel):
     created: str = ""
     is_admin: bool = False
     is_super: bool = False
+    status: str = ""
 
     @classmethod
     def from_model(cls, model: UserModel) -> "UserProfileApi":

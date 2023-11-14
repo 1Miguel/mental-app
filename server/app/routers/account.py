@@ -69,12 +69,14 @@ async def _get_authenticated_user(token: str, *, check_admin: bool = False, chec
             detail="Invalid email or password",
         )
     # ---- check if this is a banned account
-    if await  BannedUsersModel.exists(user=user, status=True):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="This user is banned.",
-        )
+    # if await  BannedUsersModel.exists(user=user, status=True):
+    #     raise HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED,
+    #         detail="This user is banned.",
+    #     )
     profile = UserProfileApi.from_model(user)
+    if await BannedUsersModel.exists(user=user, status=True):
+        profile.status = "BANNED"
 
     # ---- check if this account is an admin
     profile.is_admin = False
@@ -162,9 +164,6 @@ class AccountManager:
         if not user:
             return None
         if not user.verify_password(password):
-            return None
-        if await BannedUsersModel.exists(user=user, status=True):
-            self._log.critical("%s is banne", email)
             return None
         return user
 

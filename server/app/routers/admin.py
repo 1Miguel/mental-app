@@ -194,8 +194,14 @@ class AdminManager:
         return await self._internal_admin_user_action(user_id, action)
 
     async def admin_get_user_list(self, admin: UserProfileApi = Depends(get_super_admin_user)) -> List[UserModel]:
-        return [UserProfileApi.from_model(model) for model in await UserModel.all().order_by("-created")]
-
+        profiles = []
+        for profile in [UserProfileApi.from_model(model) for model in await UserModel.all().order_by("-created")]:
+            if await BannedUsersModel.exists(user__id=profile.id, status=True):
+                # Quick fix, TODO: put this in from model
+                profile.status = "BANNED"
+            profiles += [profile]
+        return profiles
+        
     async def admin_get_user(self, user_id: int, admin: UserProfileApi = Depends(get_super_admin_user)) -> UserProfileApi:
         try:
             return UserProfileApi.from_model(await UserModel.get(id=user_id))
