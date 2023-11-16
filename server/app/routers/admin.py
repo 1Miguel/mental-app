@@ -17,7 +17,6 @@ from tortoise.exceptions import DoesNotExist
 from routers.account import get_admin_user, get_super_admin_user
 from internal.database import *
 from internal.schema import *
-from notification.push_notif import notify_change_appointment_status
 
 
 class _AdminUserAction(str, Enum):
@@ -130,7 +129,7 @@ class AdminManager:
 
     async def admin_get_appointment_today(self, admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
         self._log.info("Get Today's Appointments")
-        return self._internal_get_appointments(filter=_AdminAppointmentFilter.TODAY)
+        return await self._internal_get_appointments(filter=_AdminAppointmentFilter.TODAY)
 
     async def admin_update_appointment(
         self,
@@ -145,10 +144,10 @@ class AdminManager:
 
         if ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.RESERVED:
             user_db: UserModel = await ap.patient
-            await notify_change_appointment_status(user_db.id, ap.start_time, "Approved")
+            #await notify_change_appointment_status(user_db.id, ap.start_time, "Approved")
         elif ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.CANCELLED:
             user_db: UserModel = await ap.patient
-            await notify_change_appointment_status(user_db.id, ap.start_time, "Rejected")
+            #await notify_change_appointment_status(user_db.id, ap.start_time, "Rejected")
 
         if ap.status != update_status.status:
             ap.status = update_status.status

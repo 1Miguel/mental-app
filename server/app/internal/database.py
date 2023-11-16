@@ -22,9 +22,6 @@ from tortoise.fields import (
     BooleanField,
 )
 
-def _generate_default_username() -> None:
-    return ("user_" + "".join([str(i) for i in bcrypt.hash(datetime.now().isoformat().encode()).encode()[-3::]]))
-
 
 def _iso_datetime_month(d: datetime) -> str:
     # the month is in datetime isoformat YYYY-MM-DD to get only the
@@ -93,7 +90,7 @@ class UserModel(Model):
     password_hash = CharField(128, default="")
     firstname = CharField(128, default="")
     lastname = CharField(128, default="")
-    username = CharField(128, default=_generate_default_username())
+    username = CharField(128, default="")
     address = CharField(256, default="")
     age = IntField(default=0)
     occupation = CharField(128, default="")
@@ -306,3 +303,13 @@ class AppointmentModel(Model):
     async def get_upcoming(cls) -> List[Self]:
         date = datetime.now()
         return await cls.filter(Q(start_time__gt=date)).all()
+
+class NotificationMessageModel(Model):
+    id = IntField(pk=True)
+    user = ForeignKeyField("models.UserModel")
+    segment = CharField(max_length=128)
+    title = CharField(max_length=128)
+    message = CharField(max_length=128)
+    is_read = BooleanField(default=False)
+    created = DatetimeField(auto_now=True)
+    read = DatetimeField(null=True, default=None)

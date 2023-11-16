@@ -39,6 +39,8 @@ UserSchema = pydantic_model_creator(UserModel, name="User", exclude_readonly=Fal
 # oauth authentication scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+def _generate_default_username() -> None:
+    return ("user_" + "".join([str(i) for i in bcrypt.hash(datetime.now().isoformat().encode()).encode()[-3::]]))
 
 async def _get_authenticated_user(token: str, *, check_admin: bool = False, check_super: bool = False) -> UserProfileApi:
     """Returns the user database model from given token. This is the validation
@@ -206,6 +208,7 @@ class AccountManager:
                 password_hash=bcrypt.hash(user.password),
                 firstname=user.firstname,
                 lastname=user.lastname,
+                username=_generate_default_username(),
                 birthday=datetime(year=1900, month=1, day=1).isoformat(),
             )
             await user.save()

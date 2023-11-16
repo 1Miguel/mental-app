@@ -14,6 +14,7 @@ from tortoise.exceptions import DoesNotExist
 
 # ---- Locals
 from routers.account import get_current_user
+from routers.notify import NotificationSchema, Notifier
 from internal.database import *
 from internal.schema import *
 
@@ -50,6 +51,8 @@ class Appointment:
     def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
+        self._notifier = Notifier()
+
         # ---- POST methods
         self._routing.add_api_route(
             "/user/appointment/new/",
@@ -104,6 +107,18 @@ class Appointment:
             self.get_blocked_month_appointment_slots,
             methods=["GET"],
             response_model=List[AppointmentBlockedSlot],
+        )
+        self._routing.add_api_route(
+            "/user/notification/{notif_id}",
+            self.get_notification,
+            methods=["POST"],
+            response_model=NotificationSchema
+        )
+        self._routing.add_api_route(
+            "/user/notification/}",
+            self.get_all_notificaton,
+            methods=["POST"],
+            response_model=List[NotificationSchema]
         )
 
     @property
@@ -279,3 +294,46 @@ class Appointment:
         prev_appointment.status = AppointmentStatus.CANCELLED
         # ----- 3. and save
         await prev_appointment.save()
+
+    async def get_notification(
+        self, notif_id: int, user: UserProfileApi = Depends(get_current_user)
+    ) -> NotificationSchema:
+        """GET a notification data.
+
+        Args:
+            notif_id (int): Assigned Notification Id.
+            user (UserModel): User Profile.
+
+        Raises:
+            HTTPException: 404 if notification not found.
+
+        Returns:
+            NotificationSchema: Notification data.
+        """
+        try:
+            notif_data = await NotificationMessageModel.get(
+                user__id=user.id, id=notif_id
+            )
+        except DoesNotExist:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, detail="Notificaton not found."
+            )
+        return NotificationSchema.from_tortoise_orm(notif_data)
+
+    async def get_all_notificaton(
+        self, user: UserProfileApi = Depends(get_current_user)
+    ) -> List[NotificationSchema]:
+        """GET all user history of notifications from the database.
+
+        Args:
+            user (UserModel): User Profile.
+
+        Returns:
+            List[NotificationSchema]: List of notifications.
+        """
+        return [
+            await NotificationSchema.from_tortoise_orm(notif_data)
+            for notif_data in await NotificationMessageModel.filter(
+                user__id=user.id
+            ).order_by("-created")
+        ]

@@ -9,10 +9,10 @@ from fastapi.routing import APIRouter
 from tortoise.exceptions import DoesNotExist
 
 # ---- Locals
+from routers.notify import Notifier
 from routers.account import get_current_user
 from internal.database import *
 from internal.schema import *
-from notification.push_notif import notify_change_thread
 # internal modules
 from internal.database import *
 from internal.schema import *
@@ -25,6 +25,7 @@ class ThreadManager:
     def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
+        self._notifier = Notifier()
 
         # ---- DELETE methods
         self._routing.add_api_route(
@@ -111,8 +112,14 @@ class ThreadManager:
             await ThreadCommentModel(user=commenter, thread=thread, content=thread_comment.content).save()
             thread.num_comments += 1
             await thread.save()
-            creator: UserModel = await thread.creator
-            await notify_change_thread(creator.id, f"{thread.num_comments} comments on your post.")
+            creator: UserModel = await thread.user
+            self._log.info("notify %s thread is commented", creator.id)
+            await self._notifier.notify(
+                creator,
+                topic = "thread/commented",
+                title = thread.topic,
+                message = f"{commenter.username} commented on your post.",
+            )
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist") from exc
 
@@ -148,8 +155,14 @@ class ThreadManager:
                 # then save
                 await thread_db.save()
                 # notify
-                creator = await thread_db.creator
-                await notify_change_thread(creator.id, f"{thread_db.num_likes} like on your post.")
+                creator = await thread_db.user
+                #await notify_change_thread(creator.id, f"{thread_db.num_likes} like on your post.")
+                await self._notifier.notify(
+                    creator,
+                    topic = "thread/liked",
+                    title = thread_db.topic,
+                    message = f"{user_db.username} liked your post.",
+                )
 
     async def get_thread(self, thread_id: int, user: UserProfileApi = Depends(get_current_user)) -> ThreadRequestApi:
         """A User comment to a thread"""
