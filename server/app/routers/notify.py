@@ -31,7 +31,7 @@ from routers.account import get_current_user
 from internal.database import *
 from internal.schema import *
 
-DEFAULT_SEGMENT = "Subscribed Users"
+DEFAULT_SEGMENT = "Total Subscriptions"
 ONESIGNAL_API_KEY = "NTQ0ZDgxMTAtMTczMS00ZjkzLWI5M2UtNzljYmMzOGJhYmUz"
 ONESIGNAL_APP_ID = "b44afb89-b2cb-4382-96a2-edac8b13caa9"
 
