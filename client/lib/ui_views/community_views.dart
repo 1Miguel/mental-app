@@ -13,6 +13,7 @@ import 'package:flutter_intro/controllers/thread_controller.dart';
 import 'package:get/get.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MenuTile extends StatelessWidget {
   final String menu;
@@ -278,7 +279,9 @@ class _CommunityMainPageState extends State<CommunityMainpage> {
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
                               final threads = snapshot.data!;
-                              return buildThreads(threads);
+                              return buildThreads(threads, () {
+                                setState(() {});
+                              });
                             } else {
                               return waitThreads(context);
                             }
@@ -316,29 +319,203 @@ class _CommunityMainPageState extends State<CommunityMainpage> {
     );
   }
 
-  Widget buildThreads(List<Thread> threads) => ListView.builder(
-        itemCount: threads.length,
-        itemBuilder: (context, index) {
-          final thread = threads[index];
-          return LayoutBuilder(builder: (context, constraint) {
-            return Column(
-              children: [
-                PostCard(
-                  id: thread.threadId,
-                  title: thread.topic,
-                  username: thread.creator,
-                  content: thread.content,
-                  date: thread.date,
-                  numComment: thread.numComments,
-                  isLiked: thread.isLiked,
-                  numLikes: thread.numLikes,
-                  onTap: () {},
-                ),
-                Divider(),
-              ],
-            );
+  String formatDate(String date) {
+    String updStartTime =
+        DateFormat('yyyy-MM-dd').format(DateTime.parse(date)).toString();
+    return updStartTime;
+  }
+
+  Widget buildThreads(List<Thread> threads, VoidCallback callback) =>
+      RefreshIndicator(
+        onRefresh: () async {
+          setState(() {
+            callback();
           });
+          await Future.delayed(Duration(seconds: 2));
         },
+        child: ListView.builder(
+          itemCount: threads.length,
+          itemBuilder: (context, index) {
+            final thread = threads[index];
+
+            getLikeColor() {
+              if (thread.isLiked == true) {
+                return Colors.red;
+              }
+              Colors.grey;
+            }
+
+            return LayoutBuilder(builder: (context, constraint) {
+              return Column(
+                children: [
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () async {
+                      List result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          maintainState: false,
+                          builder: ((context) => TopicThread(
+                                topicId: thread.threadId,
+                                topicName: thread.topic,
+                                content: thread.content,
+                                isLiked: thread.isLiked,
+                                numLikes: thread.numLikes,
+                                numComments: thread.numComments,
+                              )),
+                          //maintainState: false,
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: constraint.maxWidth,
+                      child: Card(
+                        elevation: 0.0,
+                        surfaceTintColor: Colors.teal,
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 10.0,
+                                  bottom: 0.0,
+                                  right: 10.0,
+                                  left: 10.0),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: constraint.maxWidth - 30,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 10.0, right: 10.0),
+                                      child: PostTitle(title: thread.topic),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 20.0, right: 10.0, top: 2),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                      minRadius: 15,
+                                      child: Icon(Icons.eco, size: 13)),
+                                  Column(
+                                    children: [
+                                      SizedBox(
+                                        width: 100,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 10.0, right: 10.0),
+                                          child: PostUser(
+                                              username: thread.creator),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 100,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 10.0, right: 10.0),
+                                          child: PostDate(
+                                              date: formatDate(thread.date)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 10.0, right: 10.0, top: 10.0),
+                              child: SizedBox(
+                                width: MediaQuery.sizeOf(context).width,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 10.0, right: 10.0),
+                                  child: PostContent(content: thread.content),
+                                ),
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 25.0,
+                                      top: 10.0,
+                                      bottom: 10,
+                                      right: 10),
+                                  child: Text(
+                                    thread.numComments.toString(),
+                                    style: TextStyle(
+                                      color: primaryGrey,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 10,
+                                      fontFamily: 'Asap',
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 5.0),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.comment,
+                                      size: 15.0,
+                                      color: primaryGrey,
+                                    ),
+                                    onPressed: () {
+                                      // Navigator.push(
+                                      //     context,
+                                      //     MaterialPageRoute(
+                                      //         builder: ((context) => AccountsPage())));
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 25.0,
+                                      top: 10.0,
+                                      bottom: 10,
+                                      right: 10),
+                                  child: Text(
+                                    thread.numLikes.toString(),
+                                    style: TextStyle(
+                                      color: primaryGrey,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 10,
+                                      fontFamily: 'Asap',
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 5.0),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.favorite,
+                                      size: 15.0,
+                                      color: getLikeColor(),
+                                    ),
+                                    onPressed: () {
+                                      threadController.likeThread(
+                                          thread.threadId, !thread.isLiked);
+                                      setState(() {});
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Divider(),
+                ],
+              );
+            });
+          },
+        ),
       );
 
   Widget waitThreads(context) => Container(
@@ -608,7 +785,7 @@ class _PostCardState extends State<PostCard> {
                               child: Padding(
                                 padding: const EdgeInsets.only(
                                     left: 10.0, right: 10.0),
-                                child: PostUser(username: "anonymous"),
+                                child: PostUser(username: username),
                               ),
                             ),
                             SizedBox(
@@ -723,13 +900,29 @@ class CreatePost extends StatefulWidget {
 class _CreatePostState extends State<CreatePost> {
   bool anonymous = true;
   bool notify = false;
+  String postName = "anonymous";
   final _formKey = GlobalKey<FormState>();
   ThreadController threadController = Get.put(ThreadController());
 
+  Future<String?> getUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? name;
+
+    if (prefs.containsKey('username')) {
+      name = prefs.getString('username');
+    }
+    return name;
+  }
+
+  String getPostName() {
+    if (anonymous) {
+      return "anonymous";
+    }
+    return postName;
+  }
+
   @override
   Widget build(BuildContext context) {
-    threadController.topicController.clear();
-    threadController.contentController.clear();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.teal,
@@ -769,207 +962,231 @@ class _CreatePostState extends State<CreatePost> {
           ),
         ),
       ),
-      body: Container(
-        width: MediaQuery.sizeOf(context).width,
-        child: ListView(
-          children: [
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  SizedBox(height: 95),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width,
-                    height: 300,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      image: DecorationImage(
-                        image: AssetImage("images/thought.gif"),
-                        fit: BoxFit.fitHeight,
-                      ),
-                    ),
+      body: FutureBuilder(
+          future: getUserName(),
+          initialData: null,
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.grey,
+                ),
+              );
+            }
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'An ${snapshot.error} occurred',
+                    style: const TextStyle(fontSize: 18, color: Colors.red),
                   ),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width,
-                    decoration: BoxDecoration(
-                        color: lightBlueBg,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(50),
-                          topLeft: Radius.circular(50),
-                        )),
-                    // decoration: BoxDecoration(
-                    //     color: lightBlueBg,
-                    //     border: Border(
-                    //       top: BorderSide(color: backgroundColor, width: 2),
-                    //       left: BorderSide(color: backgroundColor, width: 2),
-                    //       right: BorderSide(color: backgroundColor, width: 2),
-                    //     ),
-                    //     borderRadius: BorderRadius.only(
-                    //         topLeft: Radius.elliptical(40, 20),
-                    //         topRight: Radius.elliptical(50, 20))),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 50),
-                        Container(
-                          width: MediaQuery.sizeOf(context).width,
-                          child: TextFormField(
-                            minLines: 1,
-                            maxLines: 2,
-                            keyboardType: TextInputType.text,
-                            controller: threadController.topicController,
-                            initialValue: null,
-                            style: TextStyle(
-                              fontFamily: 'Roboto',
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: "Title",
-                              hintStyle: TextStyle(color: Colors.white),
-                              errorStyle: TextStyle(
-                                fontFamily: 'Roboto',
-                                color: Colors.red,
-                              ),
-                              contentPadding:
-                                  EdgeInsets.only(left: 20, right: 20),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter a topic title';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        Container(
-                          color: lightBlueBg,
-                          width: MediaQuery.sizeOf(context).width,
-                          child: TextFormField(
-                            minLines: 6,
-                            maxLines: 6,
-                            keyboardType: TextInputType.multiline,
-                            controller: threadController.contentController,
-                            style: TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 20,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.white),
-                            decoration: InputDecoration(
-                              hintText: "Body",
-                              hintStyle: TextStyle(color: Colors.white),
-                              contentPadding:
-                                  EdgeInsets.only(left: 20, right: 20, top: 20),
-                              errorStyle: TextStyle(
-                                fontFamily: 'Roboto',
-                                color: Colors.red,
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter content description';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    height: 90,
-                    color: greenBlueBg,
-                    child: Column(
-                      children: [
-                        Row(
+                );
+              } else if (snapshot.hasData) {
+                final data = snapshot.data;
+                postName = data!;
+
+                return Container(
+                  width: MediaQuery.sizeOf(context).width,
+                  child: ListView(
+                    children: [
+                      Form(
+                        key: _formKey,
+                        child: Column(
                           children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 20.0, right: 10),
-                              child: Text(
-                                'Anonymous',
-                                style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.normal,
-                                  color: primaryGrey,
+                            SizedBox(height: 95),
+                            Container(
+                              width: MediaQuery.sizeOf(context).width,
+                              height: 300,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                image: DecorationImage(
+                                  image: AssetImage("images/thought.gif"),
+                                  fit: BoxFit.fitHeight,
                                 ),
                               ),
                             ),
-                            SizedBox(
-                              width: 50,
-                              height: 30,
-                              child: FittedBox(
-                                fit: BoxFit.fill,
-                                child: Switch(
-                                  // This bool value toggles the switch.
-                                  value: anonymous,
-                                  activeColor: unselectedLightBlue,
-                                  onChanged: (bool value) {
-                                    // This is called when the user toggles the switch.
-                                    setState(() {
-                                      anonymous = value;
-                                    });
-                                  },
-                                ),
+                            Container(
+                              width: MediaQuery.sizeOf(context).width,
+                              decoration: BoxDecoration(
+                                  color: lightBlueBg,
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(50),
+                                    topLeft: Radius.circular(50),
+                                  )),
+                              child: Column(
+                                children: [
+                                  SizedBox(height: 50),
+                                  Container(
+                                    width: MediaQuery.sizeOf(context).width,
+                                    child: TextFormField(
+                                      minLines: 1,
+                                      maxLines: 2,
+                                      keyboardType: TextInputType.text,
+                                      controller:
+                                          threadController.topicController,
+                                      initialValue: null,
+                                      style: TextStyle(
+                                        fontFamily: 'Roboto',
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: "Title",
+                                        hintStyle:
+                                            TextStyle(color: Colors.white),
+                                        errorStyle: TextStyle(
+                                          fontFamily: 'Roboto',
+                                          color: Colors.red,
+                                        ),
+                                        contentPadding: EdgeInsets.only(
+                                            left: 20, right: 20),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter a topic title';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  Container(
+                                    color: lightBlueBg,
+                                    width: MediaQuery.sizeOf(context).width,
+                                    child: TextFormField(
+                                      minLines: 6,
+                                      maxLines: 6,
+                                      keyboardType: TextInputType.multiline,
+                                      controller:
+                                          threadController.contentController,
+                                      style: TextStyle(
+                                          fontFamily: 'Roboto',
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.white),
+                                      decoration: InputDecoration(
+                                        hintText: "Body",
+                                        hintStyle:
+                                            TextStyle(color: Colors.white),
+                                        contentPadding: EdgeInsets.only(
+                                            left: 20, right: 20, top: 20),
+                                        errorStyle: TextStyle(
+                                          fontFamily: 'Roboto',
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter content description';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 20.0, right: 10),
-                              child: Text(
-                                'Notify for replies',
-                                style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.normal,
-                                  color: primaryGrey,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 50,
-                              height: 30,
-                              child: FittedBox(
-                                fit: BoxFit.fill,
-                                child: Switch(
-                                  // This bool value toggles the switch.
-                                  value: notify,
-                                  activeColor: unselectedLightBlue,
-                                  onChanged: (bool value) {
-                                    // This is called when the user toggles the switch.
-                                    setState(() {
-                                      notify = value;
-                                    });
-                                  },
-                                ),
+                            Container(
+                              height: 90,
+                              color: greenBlueBg,
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 20.0, right: 10),
+                                        child: Text(
+                                          'Anonymous',
+                                          style: TextStyle(
+                                            fontFamily: 'Roboto',
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.normal,
+                                            color: primaryGrey,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 50,
+                                        height: 30,
+                                        child: FittedBox(
+                                          fit: BoxFit.fill,
+                                          child: Switch(
+                                            // This bool value toggles the switch.
+                                            value: anonymous,
+                                            activeColor: unselectedLightBlue,
+                                            onChanged: (bool value) {
+                                              // This is called when the user toggles the switch.
+                                              setState(() {
+                                                anonymous = value;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 20.0, right: 10),
+                                        child: Text(
+                                          'Notify for replies',
+                                          style: TextStyle(
+                                            fontFamily: 'Roboto',
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.normal,
+                                            color: primaryGrey,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 50,
+                                        height: 30,
+                                        child: FittedBox(
+                                          fit: BoxFit.fill,
+                                          child: Switch(
+                                            // This bool value toggles the switch.
+                                            value: notify,
+                                            activeColor: unselectedLightBlue,
+                                            onChanged: (bool value) {
+                                              // This is called when the user toggles the switch.
+                                              setState(() {
+                                                notify = value;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    child: MaterialButton(
+                                      color: mainLightBlue,
+                                      child: Text("Post",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold)),
+                                      onPressed: () {
+                                        if (_formKey.currentState!.validate()) {
+                                          threadController
+                                              .createPost(getPostName());
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(
-                          child: MaterialButton(
-                            color: mainLightBlue,
-                            child: Text("Post",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold)),
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                threadController.createPost();
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+                );
+              }
+            }
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }),
     );
   }
 }

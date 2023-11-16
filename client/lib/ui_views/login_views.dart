@@ -3,6 +3,7 @@ import 'package:email_otp/email_otp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
+import 'package:flutter_intro/controllers/forgot_controller.dart';
 
 // Local import
 import 'package:flutter_intro/controllers/signup_controller.dart';
@@ -1104,6 +1105,7 @@ class ForgotPasswordState extends State<ForgotPasswordPage> {
                           child: SizedBox(
                             width: MediaQuery.sizeOf(context).width - 80,
                             child: TextFormField(
+                              controller: forgotEmailController,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter email';
@@ -1134,7 +1136,9 @@ class ForgotPasswordState extends State<ForgotPasswordPage> {
                                 context,
                                 MaterialPageRoute(
                                     builder: ((context) =>
-                                        ForgotPasswordEmailVerifyPage())));
+                                        ForgotPasswordEmailVerifyPage(
+                                            email:
+                                                forgotEmailController.text))));
                           }
                         },
                         style: ButtonStyle(
@@ -1172,19 +1176,52 @@ class ForgotPasswordState extends State<ForgotPasswordPage> {
 }
 
 class ForgotPasswordEmailVerifyPage extends StatefulWidget {
-  const ForgotPasswordEmailVerifyPage({super.key});
+  final String email;
+  const ForgotPasswordEmailVerifyPage({super.key, required this.email});
 
   @override
   ForgotPasswordEmailVerifyState createState() {
-    return ForgotPasswordEmailVerifyState();
+    return ForgotPasswordEmailVerifyState(email: email);
   }
 }
 
 class ForgotPasswordEmailVerifyState
     extends State<ForgotPasswordEmailVerifyPage> {
   final _formKey = GlobalKey<FormState>();
+  final String email;
+  EmailOTP myauth = EmailOTP();
+  TextEditingController otp = TextEditingController();
+
+  ForgotPasswordEmailVerifyState({required this.email});
+
+  @override
+  void initState() {
+    super.initState();
+    sendOtp();
+  }
+
+  void sendOtp() async {
+    myauth.setConfig(
+        appEmail: "pmhi.test.01@gmail.com",
+        appName: "Email OTP",
+        userEmail: "pmhi.test.01@gmail.com",
+        otpLength: 6,
+        otpType: OTPType.digitsOnly);
+
+    if (await myauth.sendOTP() == true) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("OTP has been sent"),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Oops, OTP send failed"),
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("Debug Email: $email");
     return LayoutBuilder(
       builder: (context, constraint) {
         return Scaffold(
@@ -1262,28 +1299,35 @@ class ForgotPasswordEmailVerifyState
                             child: TextFormField(
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please enter email';
-                                } else if (!EmailValidator.validate(value)) {
-                                  return 'Invalid email';
+                                  return 'Please enter the OTP';
                                 }
                                 return null;
                               },
-                              keyboardType: TextInputType.emailAddress,
+                              controller: otp,
                               decoration: getDecor(Icons.code, ""),
                             ),
                           ),
                         ),
                         SizedBox(height: 70),
                         FilledButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
-                              // TODO: REST API
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) =>
-                                          ChangePasswordPage())));
+                              if (await myauth.verifyOTP(otp: otp.text) ==
+                                  true) {
+                                //onPressed();
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: ((context) =>
+                                            ChangePasswordPage(email: email))));
+                              } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text("Invalid OTP"),
+                                ));
+                              }
                             }
+                            ;
                           },
                           style: ButtonStyle(
                             minimumSize:
@@ -1321,16 +1365,39 @@ class ForgotPasswordEmailVerifyState
 }
 
 class ChangePasswordPage extends StatefulWidget {
-  const ChangePasswordPage({super.key});
+  final String email;
+  const ChangePasswordPage({super.key, required this.email});
 
   @override
   _ChangePasswordState createState() {
-    return _ChangePasswordState();
+    return _ChangePasswordState(email: email);
   }
 }
 
 class _ChangePasswordState extends State<ChangePasswordPage> {
+  final String email;
   final _formKey = GlobalKey<FormState>();
+  ForgotPasswordController forgotPasswordController =
+      Get.put(ForgotPasswordController());
+  bool validEmail = false;
+
+  _ChangePasswordState({required this.email});
+
+  @override
+  void initState() {
+    super.initState();
+    forgotPasswordController.newPasswordController.clear();
+    forgotPasswordController.passwordController.clear();
+  }
+
+  @override
+  void dispose() {
+    forgotPasswordController.newPasswordController.clear();
+    forgotPasswordController.passwordController.clear();
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -1408,8 +1475,24 @@ class _ChangePasswordState extends State<ChangePasswordPage> {
                                 }
                                 return null;
                               },
+                              obscureText: true,
+                              controller:
+                                  forgotPasswordController.passwordController,
                               //keyboardType: TextInputType.name,
                               decoration: getDecor(Icons.remove_red_eye, ""),
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                              onChanged: (value) {
+                                if (validEmail == true) {
+                                  setState(() {
+                                    validEmail = true;
+                                  });
+                                } else {
+                                  setState(() {
+                                    validEmail = false;
+                                  });
+                                }
+                              },
                             ),
                           ),
                         ),
@@ -1424,20 +1507,24 @@ class _ChangePasswordState extends State<ChangePasswordPage> {
                             width: MediaQuery.sizeOf(context).width - 80,
                             child: TextFormField(
                               validator: (value) {
-                                String validPattern = '[^ a-zA-Z]';
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter password';
-                                }
-                                if (value.contains(RegExp(validPattern))) {
-                                  return 'Must not contain invalid characters';
-                                }
-                                if (value.length > 128 || value.length < 8) {
+                                } else if (value !=
+                                    forgotPasswordController
+                                        .passwordController.text) {
+                                  return 'Passwords do not match';
+                                } else if (value.length > 128) {
                                   return 'Invalid password length';
                                 }
                                 return null;
                               },
+                              obscureText: true,
+                              controller: forgotPasswordController
+                                  .newPasswordController,
                               keyboardType: TextInputType.emailAddress,
                               decoration: getDecor(Icons.remove_red_eye, ""),
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
                             ),
                           ),
                         ),
@@ -1446,11 +1533,13 @@ class _ChangePasswordState extends State<ChangePasswordPage> {
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               // TODO: REST API
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) =>
-                                          ChangePasswordSuccessPage())));
+                              forgotPasswordController
+                                  .changePasswordWithEmail(email);
+                              // Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: ((context) =>
+                              //             ChangePasswordSuccessPage())));
                             }
                           },
                           style: ButtonStyle(

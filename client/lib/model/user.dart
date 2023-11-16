@@ -4,6 +4,7 @@ class User {
   final String password_hash;
   final String firstname;
   final String lastname;
+  final String username;
   final String address;
   final int age;
   final String occupation;
@@ -15,6 +16,7 @@ class User {
     required this.password_hash,
     required this.firstname,
     required this.lastname,
+    required this.username,
     required this.address,
     required this.age,
     required this.occupation,
@@ -27,6 +29,7 @@ class User {
     String password_hash = "password";
     String firstname = json['firstname'];
     String lastname = json['lastname'];
+    String username = json['username'];
     String address = json['address'];
     int age = json['age'];
     String occupation = json['occupation'];
@@ -38,6 +41,7 @@ class User {
       password_hash: password_hash,
       firstname: firstname,
       lastname: lastname,
+      username: username,
       address: address,
       age: age,
       occupation: occupation,
@@ -51,6 +55,7 @@ class User {
         'password_hash': password_hash,
         'firstname': firstname,
         'lastname': lastname,
+        'username': username,
         'address': address,
         'age': age,
         'occupation': occupation,

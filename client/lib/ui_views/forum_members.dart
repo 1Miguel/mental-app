@@ -1,30 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/controllers/thread_controller.dart';
 import 'package:flutter_intro/model/thread.dart';
+import 'package:flutter_intro/ui_views/users_controller.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:get/get.dart';
-
-class PostTitle extends StatelessWidget {
-  final String title;
-
-  const PostTitle({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      textAlign: TextAlign.start,
-      style: TextStyle(
-        color: Colors.black87,
-        fontWeight: FontWeight.normal,
-        fontFamily: 'Asap',
-        fontSize: 15,
-      ),
-    );
-  }
-}
 
 class PostUser extends StatelessWidget {
   final String username;
@@ -37,50 +18,8 @@ class PostUser extends StatelessWidget {
       username,
       textAlign: TextAlign.start,
       style: TextStyle(
-        color: mainBlue,
-        fontWeight: FontWeight.normal,
-        fontFamily: 'Open Sans',
-        fontSize: 12,
-      ),
-    );
-  }
-}
-
-class PostDate extends StatelessWidget {
-  final String date;
-
-  const PostDate({super.key, required this.date});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      date,
-      textAlign: TextAlign.start,
-      style: TextStyle(
-        color: Colors.grey,
-        fontWeight: FontWeight.normal,
-        fontFamily: 'Open Sans',
-        fontSize: 10,
-      ),
-    );
-  }
-}
-
-class PostContent extends StatelessWidget {
-  final String content;
-
-  const PostContent({super.key, required this.content});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      content,
-      textAlign: TextAlign.start,
-      softWrap: true,
-      maxLines: 3,
-      style: TextStyle(
         color: primaryGrey,
-        fontWeight: FontWeight.normal,
+        fontWeight: FontWeight.bold,
         fontFamily: 'Open Sans',
         fontSize: 12,
       ),
@@ -88,97 +27,34 @@ class PostContent extends StatelessWidget {
   }
 }
 
-class PostCard extends StatefulWidget {
-  final int id;
-  final String title;
+class MemberCard extends StatefulWidget {
   final String username;
-  final String content;
-  final String date;
-  final int numComment;
-  final bool isLiked;
-  final int numLikes;
   final VoidCallback onTap;
 
-  PostCard({
+  MemberCard({
     super.key,
-    required this.id,
-    required this.title,
     required this.username,
-    required this.content,
-    required this.date,
-    required this.numComment,
-    required this.isLiked,
-    required this.numLikes,
     required this.onTap,
   });
 
   @override
-  State<PostCard> createState() => _PostCardState(
-        id: id,
-        title: title,
+  State<MemberCard> createState() => _MemberCardState(
         username: username,
-        content: content,
-        date: date,
-        numComment: numComment,
-        isLiked: isLiked,
-        numLikes: numLikes,
         onTap: onTap,
       );
 }
 
-class _PostCardState extends State<PostCard> {
-  final int id;
-  final String title;
+class _MemberCardState extends State<MemberCard> {
   final String username;
-  final String content;
-  final String date;
-  final int numComment;
-  final bool isLiked;
-  final int numLikes;
   final VoidCallback onTap;
-  ThreadController _threadController = ThreadController();
-  bool likeState = false;
-  int likeCommentState = 0;
-  int commentState = 0;
 
-  _PostCardState({
-    required this.id,
-    required this.title,
+  _MemberCardState({
     required this.username,
-    required this.content,
-    required this.date,
-    required this.numComment,
-    required this.isLiked,
-    required this.numLikes,
     required this.onTap,
   });
 
   @override
-  void initState() {
-    super.initState();
-    setState(() {
-      likeState = isLiked;
-      likeCommentState = numLikes;
-      commentState = numComment;
-    });
-  }
-
-  String formatDate(String date) {
-    String updStartTime =
-        DateFormat('yyyy-MM-dd').format(DateTime.parse(date)).toString();
-    return updStartTime;
-  }
-
-  Color getLikeColor() {
-    if (likeState == true) {
-      return Colors.red;
-    }
-    return Colors.grey;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    print("PostCard Date: $date");
     return LayoutBuilder(
       builder: (context, constraint) {
         return GestureDetector(
@@ -192,140 +68,24 @@ class _PostCardState extends State<PostCard> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(
-                        top: 10.0, bottom: 0.0, right: 10.0, left: 10.0),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: constraint.maxWidth - 30,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.only(left: 10.0, right: 10.0),
-                            child: PostTitle(title: title),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
                     padding:
-                        const EdgeInsets.only(left: 20.0, right: 10.0, top: 2),
+                        const EdgeInsets.only(left: 40.0, right: 10.0, top: 5),
                     child: Row(
                       children: [
                         CircleAvatar(
-                            minRadius: 15, child: Icon(Icons.eco, size: 13)),
-                        Column(
-                          children: [
-                            SizedBox(
-                              width: 100,
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, right: 10.0),
-                                child: PostUser(username: "anonymous"),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 100,
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, right: 10.0),
-                                child: PostDate(date: formatDate(date)),
-                              ),
-                            ),
-                          ],
+                            backgroundColor: Colors.teal.shade200,
+                            minRadius: 15,
+                            child: Icon(Icons.person, size: 15)),
+                        SizedBox(
+                          width: (constraint.maxWidth) / 2,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.only(left: 30.0, right: 10.0),
+                            child: PostUser(username: username),
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 10.0, right: 10.0, top: 10.0),
-                    child: SizedBox(
-                      width: MediaQuery.sizeOf(context).width,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                        child: PostContent(content: content),
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: 25.0, top: 10.0, bottom: 10, right: 10),
-                        child: Text(
-                          commentState.toString(),
-                          style: TextStyle(
-                            color: primaryGrey,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                            fontFamily: 'Asap',
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5.0),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.comment,
-                            size: 15.0,
-                            color: primaryGrey,
-                          ),
-                          onPressed: () {
-                            // Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //         builder: ((context) => AccountsPage())));
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: 25.0, top: 10.0, bottom: 10, right: 10),
-                        child: Text(
-                          likeCommentState.toString(),
-                          style: TextStyle(
-                            color: primaryGrey,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                            fontFamily: 'Asap',
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5.0),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.favorite,
-                            size: 15.0,
-                            color: getLikeColor(),
-                          ),
-                          onPressed: () {
-                            _threadController.likeThread(id, !likeState);
-                            setState(() {
-                              if (likeState == true) {
-                                likeState = false;
-                                likeCommentState -= 1;
-                              } else {
-                                likeState = true;
-                                likeCommentState += 1;
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5.0),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.delete,
-                            size: 15.0,
-                            color: primaryGrey,
-                          ),
-                          onPressed: () {},
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -345,13 +105,13 @@ class ForumMembers extends StatefulWidget {
 }
 
 class _ForumMembersState extends State<ForumMembers> {
-  late Future<List<Thread>> futureMyThreadList;
-  ThreadController threadController = Get.put(ThreadController());
+  late Future<List<String>> futureUsersList;
+  UserController userController = Get.put(UserController());
 
-  Future<List<Thread>> fetchMyPosts() async {
-    futureMyThreadList = threadController.fetchMyPosts();
-    print(futureMyThreadList);
-    return futureMyThreadList;
+  Future<List<String>> fetchUsers() async {
+    futureUsersList = userController.fetchUsers();
+    print(futureUsersList);
+    return futureUsersList;
   }
 
   @override
@@ -360,7 +120,7 @@ class _ForumMembersState extends State<ForumMembers> {
       return Scaffold(
         appBar: AppBar(
           toolbarHeight: 60,
-          title: Text("My Members", style: TextStyle(color: Colors.white)),
+          title: Text("Community", style: TextStyle(color: Colors.white)),
           centerTitle: true,
           flexibleSpace: Container(
             decoration: BoxDecoration(
@@ -394,20 +154,28 @@ class _ForumMembersState extends State<ForumMembers> {
           child: Column(
             children: [
               Container(
-                height: constraint.maxHeight - 84,
+                height: constraint.maxHeight - 84 - 50,
                 child: Column(
                   children: [
-                    SizedBox(height: 10),
-                    Container(
-                      height: constraint.maxHeight - 100,
+                    SizedBox(height: 20),
+                    SizedBox(
                       width: constraint.maxWidth,
-                      child: FutureBuilder<List<Thread>>(
-                        future: fetchMyPosts(),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 30.0),
+                        child: Text("Members", style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                    Divider(),
+                    Container(
+                      height: constraint.maxHeight - 200,
+                      width: constraint.maxWidth,
+                      child: FutureBuilder<List<String>>(
+                        future: fetchUsers(),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             final threads = snapshot.data!;
                             if (threads.length > 0) {
-                              return buildThreads(threads);
+                              return _buildMembers(threads);
                             } else {
                               return Column(
                                 children: [
@@ -421,7 +189,7 @@ class _ForumMembersState extends State<ForumMembers> {
                                             padding: const EdgeInsets.all(15.0),
                                             child: SizedBox(
                                                 width: constraint.maxWidth,
-                                                child: Text("No posts yet",
+                                                child: Text("No members yet",
                                                     textAlign: TextAlign.center,
                                                     style: TextStyle(
                                                       fontWeight:
@@ -452,25 +220,17 @@ class _ForumMembersState extends State<ForumMembers> {
     });
   }
 
-  Widget buildThreads(List<Thread> threads) => ListView.builder(
+  Widget _buildMembers(List<String> threads) => ListView.builder(
         itemCount: threads.length,
         itemBuilder: (context, index) {
           final thread = threads[index];
           return LayoutBuilder(builder: (context, constraint) {
             return Column(
               children: [
-                PostCard(
-                  id: thread.threadId,
-                  title: thread.topic,
-                  username: thread.creator,
-                  content: thread.content,
-                  date: thread.date,
-                  numComment: thread.numComments,
-                  isLiked: thread.isLiked,
-                  numLikes: thread.numLikes,
+                MemberCard(
+                  username: thread,
                   onTap: () {},
                 ),
-                Divider(),
               ],
             );
           });

@@ -1800,6 +1800,7 @@ class _MembershipPaymentFormState extends State<MembershipPaymentForm> {
     password_hash: "",
     firstname: "",
     lastname: "",
+    username: "",
     address: "",
     age: 0,
     occupation: "",

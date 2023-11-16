@@ -103,7 +103,7 @@ class UserModel(Model):
 
     @classmethod
     async def get_user(cls, email: str) -> Self:
-        return cls.get(email=email)
+        return await cls.get(email=email)
 
     def verify_password(self, password) -> bool:
         return bcrypt.verify(password, self.password_hash)

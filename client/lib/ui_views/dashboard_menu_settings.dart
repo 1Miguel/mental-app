@@ -1,4 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
+
+void _handleOptIn() {
+  OneSignal.User.pushSubscription.optIn();
+}
+
+void _handleOptOut() {
+  OneSignal.User.pushSubscription.optOut();
+}
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -85,6 +94,11 @@ class _SettingsState extends State<Settings> {
                     // This is called when the user toggles the switch.
                     setState(() {
                       msgNotif = value;
+                      if (msgNotif == true) {
+                        _handleOptIn();
+                      } else {
+                        _handleOptOut();
+                      }
                     });
                   },
                 ),

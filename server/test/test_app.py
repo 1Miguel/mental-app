@@ -17,7 +17,7 @@ handler.setLevel(logging.DEBUG)
 handler.setFormatter(logging.Formatter("%(levelname)s: %(asctime)-15s : %(message)s"))
 log.addHandler(handler)
 
-IP_ADDRESS = "192.168.1.10:8080"
+IP_ADDRESS = "192.168.1.5:8080"
 USER_ID = random.randint(0, 100)
 
 class _Helpers:

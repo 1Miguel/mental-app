@@ -228,6 +228,7 @@ class AccountManager:
         user_model = await UserModel.get(email=user.email)
         # update only when field exist
         # TODO: there must some way to do this efficiently
+        self._log.info("new profile request %s", profile)
         if profile.address:
             user_model.address = profile.address
         if profile.birthday:
@@ -241,6 +242,7 @@ class AccountManager:
         if profile.address:
             user_model.address = profile.address
         if profile.username:
+            self._log.info("setting username %s", profile.username)
             user_model.username = profile.username
         await user_model.save()
         return UserProfileApi.from_model(user_model)
@@ -256,15 +258,15 @@ class AccountManager:
     async def change_password(
         self, new_password: PasswordChangeReqApi, user: UserProfileApi = Depends(get_current_user)
     ) -> None:
-        self._internal_change_password(new_password, user)
+        await self._internal_change_password(new_password, user)
 
     async def forgot_change_password(
         self, new_password: ForgotPasswordChangeReqApi
     ) -> None:
         try:
-            user = UserProfileApi.from_model(await  UserModel.get_user(new_password.user_email))
+            user = UserProfileApi.from_model(await UserModel.get_user(new_password.user_email))
             # TODO: Refactor this
-            self._internal_change_password(PasswordChangeReqApi(new_password), user)
+            await self._internal_change_password(PasswordChangeReqApi(new_password=new_password.new_password), user)
         except DoesNotExist:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="User email invalid.")
 
@@ -278,7 +280,7 @@ class AccountManager:
             user (UserProfileApi): User Profile dataclass.
         """
         user: UserModel = await UserModel.get(id=user.id)
-        old_token = jwt.encode((await UserSchema.from_tortoise_orm(user)).model_dump(), _JWT_SECRET)
+        old_token = jwt.encode(UserProfileApi.from_model(user).model_dump(), _JWT_SECRET)
         old_password_hash = user.password_hash
 
         # ---- validate if this password is old

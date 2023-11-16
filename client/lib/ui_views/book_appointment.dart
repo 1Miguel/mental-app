@@ -783,6 +783,7 @@ class BookAppointmentPage extends StatelessWidget {
     password_hash: "",
     firstname: "",
     lastname: "",
+    username: "",
     address: "",
     age: 0,
     occupation: "",
@@ -1332,6 +1333,7 @@ class GenericConsultationPage extends StatelessWidget {
     password_hash: "",
     firstname: "",
     lastname: "",
+    username: "",
     address: "",
     age: 0,
     occupation: "",
@@ -1619,6 +1621,7 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
   String selectedService = "OCCUPATIONAL_THERAPY";
   late Future<List<appModel.AppointmentSlot>> futureBlockedSlots;
   List<MonthTimeSlot> monthSlots = [];
+  late DateTime _minDate, _maxDate;
   bool timeSlot1Enabled = true;
   bool timeSlot2Enabled = true;
   bool timeSlot3Enabled = true;
@@ -1749,6 +1752,8 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
   @override
   void initState() {
     super.initState();
+    _minDate = DateTime(2023, 11, 1, 9, 0, 0);
+    _maxDate = DateTime(2024, 01, 30, 9, 0, 0);
     if (service == ConsulationServices.therapy) {
       selectedService = "OCCUPATIONAL_THERAPY";
     } else if (service == ConsulationServices.consultation) {
@@ -1858,6 +1863,8 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
                       selectionColor: primaryLightBlue,
                       headerHeight: 80,
                       showNavigationArrow: true,
+                      minDate: _minDate,
+                      maxDate: _maxDate,
                       monthViewSettings: DateRangePickerMonthViewSettings(
                         //blackoutDates: [DateTime(2023, 10, 20), DateTime(2023, 10, 21)],
                         blackoutDates: dates,

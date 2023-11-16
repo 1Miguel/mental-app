@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 
 class ApiEndPoints {
   static String baseUrl = 'http://192.168.1.5:8080';
+  //static String baseUrl = 'https://vscode.dev/tunnel/desktop-7tecl34/c:/dev/mental-app';
   static _AuthEndPoints authEndPoints = _AuthEndPoints();
   //baseUrl = 'http://10.0.2.2:8000';
 

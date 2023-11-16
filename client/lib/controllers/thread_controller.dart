@@ -186,6 +186,7 @@ class ThreadController extends GetxController {
         List<dynamic> myMap = json.decode(response.body);
         List<Thread> ThreadList = <Thread>[];
 
+        print("myPosts");
         myMap.forEach((element) {
           print(element);
           ThreadList.add(Thread.fromJson(element));
@@ -257,7 +258,7 @@ class ThreadController extends GetxController {
     }
   }
 
-  Future<void> createPost() async {
+  Future<void> createPost(String username) async {
     String? token = await getToken();
     String? token_type = await getTokenType();
 
@@ -276,6 +277,7 @@ class ThreadController extends GetxController {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
+          "creator": username,
           "topic": topicController.text,
           "content": contentController.text,
         }),
@@ -375,6 +377,43 @@ class ThreadController extends GetxController {
         print(json);
         final SharedPreferences? prefs = await _prefs;
         commentController.clear();
+        //go to home
+        //Get.off(() => CommunityMainpage());
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+    }
+  }
+
+  Future<void> deleteThread(int threadId) async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    try {
+      print("Debug Delete Post $threadId");
+      final response = await http.delete(
+        Uri.parse('$baseUrl/user/thread/$threadId/'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
         //go to home
         //Get.off(() => CommunityMainpage());
       } else {

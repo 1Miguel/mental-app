@@ -1048,6 +1048,7 @@ class EditProfilePage extends StatelessWidget {
     password_hash: "",
     firstname: "",
     lastname: "",
+    username: "",
     address: "",
     age: 0,
     occupation: "",

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:get/get.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class PostTitle extends StatelessWidget {
   final String title;
@@ -98,6 +99,8 @@ class PostCard extends StatefulWidget {
   final bool isLiked;
   final int numLikes;
   final VoidCallback onTap;
+  final VoidCallback onPressed;
+  // final VoidCallback onDelete;
 
   PostCard({
     super.key,
@@ -110,6 +113,8 @@ class PostCard extends StatefulWidget {
     required this.isLiked,
     required this.numLikes,
     required this.onTap,
+    required this.onPressed,
+    // required this.onDelete,
   });
 
   @override
@@ -123,6 +128,8 @@ class PostCard extends StatefulWidget {
         isLiked: isLiked,
         numLikes: numLikes,
         onTap: onTap,
+        onPressed: onPressed,
+        // onDelete: onDelete,
       );
 }
 
@@ -136,6 +143,8 @@ class _PostCardState extends State<PostCard> {
   final bool isLiked;
   final int numLikes;
   final VoidCallback onTap;
+  final VoidCallback onPressed;
+  //final VoidCallback onDelete;
   ThreadController _threadController = ThreadController();
   bool likeState = false;
   int likeCommentState = 0;
@@ -151,16 +160,23 @@ class _PostCardState extends State<PostCard> {
     required this.isLiked,
     required this.numLikes,
     required this.onTap,
+    required this.onPressed,
+    // required this.onDelete,
   });
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      likeState = isLiked;
-      likeCommentState = numLikes;
-      commentState = numComment;
-    });
+    print("PostCard State id: $id");
+    likeState = isLiked;
+    likeCommentState = numLikes;
+    commentState = numComment;
   }
 
   String formatDate(String date) {
@@ -176,9 +192,44 @@ class _PostCardState extends State<PostCard> {
     return Colors.grey;
   }
 
+  _onAlertCancelAppointment(context) {
+    Alert(
+        context: context,
+        type: AlertType.warning,
+        title: "Delete Post",
+        desc: "Are you sure you want to delete this post?",
+        buttons: [
+          DialogButton(
+            onPressed: () {
+              setState(() {
+                print("{DEBUG before $id}");
+              });
+              onPressed();
+              setState(() {
+                print("{DEBUG after $id}");
+              });
+              //Navigator.of(context, rootNavigator: true).pop();
+            },
+            child: Text(
+              "Confirm",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          ),
+          DialogButton(
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pop();
+            },
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          )
+        ]).show();
+  }
+
   @override
   Widget build(BuildContext context) {
-    print("PostCard Date: $date");
+    print("PostCard ID: $id");
     return LayoutBuilder(
       builder: (context, constraint) {
         return GestureDetector(
@@ -213,7 +264,7 @@ class _PostCardState extends State<PostCard> {
                     child: Row(
                       children: [
                         CircleAvatar(
-                            minRadius: 15, child: Icon(Icons.eco, size: 13)),
+                            minRadius: 15, child: Icon(Icons.person, size: 15)),
                         Column(
                           children: [
                             SizedBox(
@@ -221,7 +272,7 @@ class _PostCardState extends State<PostCard> {
                               child: Padding(
                                 padding: const EdgeInsets.only(
                                     left: 10.0, right: 10.0),
-                                child: PostUser(username: "anonymous"),
+                                child: PostUser(username: username),
                               ),
                             ),
                             SizedBox(
@@ -320,9 +371,13 @@ class _PostCardState extends State<PostCard> {
                           icon: Icon(
                             Icons.delete,
                             size: 15.0,
-                            color: primaryGrey,
+                            color: loginDarkTeal,
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            onPressed();
+                            //_onAlertCancelAppointment(context);
+                            //onDelete();
+                          },
                         ),
                       ),
                     ],
@@ -352,6 +407,12 @@ class _ForumMenuMyPostsState extends State<ForumMenuMyPosts> {
     futureMyThreadList = threadController.fetchMyPosts();
     print(futureMyThreadList);
     return futureMyThreadList;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
   }
 
   @override
@@ -406,8 +467,11 @@ class _ForumMenuMyPostsState extends State<ForumMenuMyPosts> {
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             final threads = snapshot.data!;
+
                             if (threads.length > 0) {
-                              return buildThreads(threads);
+                              return buildThreads(threads, () {
+                                setState(() {});
+                              });
                             } else {
                               return Column(
                                 children: [
@@ -452,28 +516,185 @@ class _ForumMenuMyPostsState extends State<ForumMenuMyPosts> {
     });
   }
 
-  Widget buildThreads(List<Thread> threads) => ListView.builder(
+  String formatDate(String date) {
+    String updStartTime =
+        DateFormat('yyyy-MM-dd').format(DateTime.parse(date)).toString();
+    return updStartTime;
+  }
+
+  Widget buildThreads(List<Thread> threads, VoidCallback callback) =>
+      ListView.builder(
         itemCount: threads.length,
         itemBuilder: (context, index) {
           final thread = threads[index];
-          return LayoutBuilder(builder: (context, constraint) {
-            return Column(
-              children: [
-                PostCard(
-                  id: thread.threadId,
-                  title: thread.topic,
-                  username: thread.creator,
-                  content: thread.content,
-                  date: thread.date,
-                  numComment: thread.numComments,
-                  isLiked: thread.isLiked,
-                  numLikes: thread.numLikes,
-                  onTap: () {},
+          print("buildThreads: ${thread.threadId} ${thread.topic}");
+
+          getLikeColor() {
+            if (thread.isLiked == true) {
+              return Colors.red;
+            }
+            Colors.grey;
+          }
+
+          return Column(
+            children: [
+              Container(
+                width: MediaQuery.sizeOf(context).width,
+                child: Card(
+                  elevation: 0.0,
+                  surfaceTintColor: Colors.teal,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            top: 10.0, bottom: 0.0, right: 10.0, left: 10.0),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.sizeOf(context).width - 30,
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 10.0, right: 10.0),
+                                child: PostTitle(title: thread.topic),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 20.0, right: 10.0, top: 2),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                                minRadius: 15,
+                                child: Icon(Icons.person, size: 15)),
+                            Column(
+                              children: [
+                                SizedBox(
+                                  width: 100,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 10.0, right: 10.0),
+                                    child: PostUser(username: thread.creator),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 100,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 10.0, right: 10.0),
+                                    child:
+                                        PostDate(date: formatDate(thread.date)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 10.0, right: 10.0, top: 10.0),
+                        child: SizedBox(
+                          width: MediaQuery.sizeOf(context).width,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.only(left: 10.0, right: 10.0),
+                            child: PostContent(content: thread.content),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 25.0, top: 10.0, bottom: 10, right: 10),
+                            child: Text(
+                              thread.numComments.toString(),
+                              style: TextStyle(
+                                color: primaryGrey,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                                fontFamily: 'Asap',
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5.0),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.comment,
+                                size: 15.0,
+                                color: primaryGrey,
+                              ),
+                              onPressed: () {
+                                // Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //         builder: ((context) => AccountsPage())));
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 25.0, top: 10.0, bottom: 10, right: 10),
+                            child: Text(
+                              thread.numLikes.toString(),
+                              style: TextStyle(
+                                color: primaryGrey,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                                fontFamily: 'Asap',
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5.0),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.favorite,
+                                size: 15.0,
+                                color: getLikeColor(),
+                                //color: getLikeColor(),
+                              ),
+                              onPressed: () {
+                                threadController.likeThread(
+                                    thread.threadId, !thread.isLiked);
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5.0),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                size: 15.0,
+                                color: loginDarkTeal,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  threadController
+                                      .deleteThread(thread.threadId);
+                                  threads.removeAt(index);
+                                });
+                                callback();
+                                //onPressed();
+                                //_onAlertCancelAppointment(context);
+                                //onDelete();
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                Divider(),
-              ],
-            );
-          });
+              ),
+              Divider(),
+            ],
+          );
         },
       );
 
@@ -491,4 +712,51 @@ class _ForumMenuMyPostsState extends State<ForumMenuMyPosts> {
           ],
         ),
       );
+}
+
+class SampleDeletePosts extends StatefulWidget {
+  const SampleDeletePosts({super.key});
+
+  @override
+  State<SampleDeletePosts> createState() => _SampleDeletePostsState();
+}
+
+class _SampleDeletePostsState extends State<SampleDeletePosts> {
+  List<String> data = [
+    'one',
+    'two',
+    'three',
+    'four',
+    'five',
+  ];
+  String text = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: ListView.builder(
+            itemCount: data.length,
+            itemBuilder: (context, index) {
+              return Card(
+                  color: Colors.teal,
+                  child: ListTile(
+                    title: Text(data[index]),
+                    trailing: Container(
+                      width: 50,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              setState(() {
+                                data.removeAt(index);
+                              });
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                  ));
+            }));
+  }
 }
