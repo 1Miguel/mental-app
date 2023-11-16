@@ -20,6 +20,7 @@ from tortoise.exceptions import DoesNotExist, IntegrityError
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 # internal modules
+from routers.notify import NotificationSchema, Notifier
 from internal.database import *
 from internal.schema import *
 
@@ -39,10 +40,16 @@ UserSchema = pydantic_model_creator(UserModel, name="User", exclude_readonly=Fal
 # oauth authentication scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-def _generate_default_username() -> None:
-    return ("user_" + "".join([str(i) for i in bcrypt.hash(datetime.now().isoformat().encode()).encode()[-3::]]))
 
-async def _get_authenticated_user(token: str, *, check_admin: bool = False, check_super: bool = False) -> UserProfileApi:
+def _generate_default_username() -> None:
+    return "user_" + "".join(
+        [str(i) for i in bcrypt.hash(datetime.now().isoformat().encode()).encode()[-3::]]
+    )
+
+
+async def _get_authenticated_user(
+    token: str, *, check_admin: bool = False, check_super: bool = False
+) -> UserProfileApi:
     """Returns the user database model from given token. This is the validation
     routine when a user attempts to access a page that requries authentication
     via token.
@@ -63,7 +70,9 @@ async def _get_authenticated_user(token: str, *, check_admin: bool = False, chec
         )
     try:
         # ---- check if this email has valid auth
-        user: UserModel = await UserModel.get(email=jwt.decode(token, _JWT_SECRET, algorithms="HS256").get("email"))
+        user: UserModel = await UserModel.get(
+            email=jwt.decode(token, _JWT_SECRET, algorithms="HS256").get("email")
+        )
     except:
         # ---- account invalid or user does not exist
         raise HTTPException(
@@ -122,29 +131,53 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserProfileAp
 async def get_admin_user(token: str = Depends(oauth2_scheme)) -> UserProfileApi:
     return await _get_authenticated_user(token, check_admin=True)
 
+
 async def get_super_admin_user(token: str = Depends(oauth2_scheme)) -> UserProfileApi:
     return await _get_authenticated_user(token, check_admin=True, check_super=True)
+
 
 class AccountManager:
     # temporary file where all files will be stored
     _temp_file_storage: TemporaryDirectory = "./files"
 
-    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
+    def __init__(
+        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
+    ) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         #: ---- Set all routes
-        self._routing.add_api_route("/login", self.login, methods=["GET"], response_model=UserProfileApi)
+        self._routing.add_api_route(
+            "/login", self.login, methods=["GET"], response_model=UserProfileApi
+        )
         self._routing.add_api_route(
             "/signup",
             self.signup,
             methods=["POST"],
         )
-        self._routing.add_api_route("/token", self._generate_token, methods=["POST"], response_model=Any)
+        self._routing.add_api_route(
+            "/token", self._generate_token, methods=["POST"], response_model=Any
+        )
         self._routing.add_api_route("/user/updatesettings", self.update_settings, methods=["POST"])
         self._routing.add_api_route("/user/updateprofile", self.update_profile, methods=["POST"])
-        self._routing.add_api_route("/users", self.get_all_users, methods=["GET"], response_model=List[str])
+        self._routing.add_api_route(
+            "/users", self.get_all_users, methods=["GET"], response_model=List[str]
+        )
         self._routing.add_api_route("/user/changepassword", self.change_password, methods=["POST"])
-        self._routing.add_api_route("/user/forgotpassword", self.forgot_change_password, methods=["POST"])
+        self._routing.add_api_route(
+            "/user/forgotpassword", self.forgot_change_password, methods=["POST"]
+        )
+        self._routing.add_api_route(
+            "/user/notification/{notif_id}",
+            self.get_notification,
+            methods=["POST"],
+            response_model=NotificationSchema,
+        )
+        self._routing.add_api_route(
+            "/user/notification/}",
+            self.get_all_notificaton,
+            methods=["POST"],
+            response_model=List[NotificationSchema],
+        )
 
     @property
     def router(self) -> APIRouter:
@@ -220,7 +253,9 @@ class AccountManager:
             log.info("New user profile %s", UserProfileApi.from_model(user))
         except IntegrityError as err:
             log.critical("Attempt to create user that already exist.")
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="email is already used.") from err
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="email is already used."
+            ) from err
 
     async def update_profile(
         self,
@@ -250,7 +285,9 @@ class AccountManager:
         await user_model.save()
         return UserProfileApi.from_model(user_model)
 
-    async def update_settings(self, user_settings: UserSettingsApi, user: UserProfileApi = Depends(get_current_user)):
+    async def update_settings(
+        self, user_settings: UserSettingsApi, user: UserProfileApi = Depends(get_current_user)
+    ):
         settings = UserSettingModel.get(user=await UserSettingModel.get(id=user.id))
         settings.local_notif = user_settings.local_notif
         settings.save()
@@ -263,13 +300,13 @@ class AccountManager:
     ) -> None:
         await self._internal_change_password(new_password, user)
 
-    async def forgot_change_password(
-        self, new_password: ForgotPasswordChangeReqApi
-    ) -> None:
+    async def forgot_change_password(self, new_password: ForgotPasswordChangeReqApi) -> None:
         try:
             user = UserProfileApi.from_model(await UserModel.get_user(new_password.user_email))
             # TODO: Refactor this
-            await self._internal_change_password(PasswordChangeReqApi(new_password=new_password.new_password), user)
+            await self._internal_change_password(
+                PasswordChangeReqApi(new_password=new_password.new_password), user
+            )
         except DoesNotExist:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="User email invalid.")
 
@@ -306,3 +343,47 @@ class AccountManager:
     def user_logout(Authorization: str = Header(None)):
         pass
 
+    async def get_notification(
+        self, notif_id: int, user: UserProfileApi = Depends(get_current_user)
+    ) -> NotificationSchema:
+        """GET a notification data.
+
+        Args:
+            notif_id (int): Assigned Notification Id.
+            user (UserModel): User Profile.
+
+        Raises:
+            HTTPException: 404 if notification not found.
+
+        Returns:
+            NotificationSchema: Notification data.
+        """
+        try:
+            notif_data: NotificationMessageModel = await NotificationMessageModel.get(
+                user__id=user.id, id=notif_id
+            )
+            if not notif_data.is_read:
+                notif_data.is_read = True
+                notif_data.read = datetime.now()
+                notif_data.save()
+        except DoesNotExist:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Notificaton not found.")
+        return NotificationSchema.from_tortoise_orm(notif_data)
+
+    async def get_all_notificaton(
+        self, user: UserProfileApi = Depends(get_current_user)
+    ) -> List[NotificationSchema]:
+        """GET all user history of notifications from the database.
+
+        Args:
+            user (UserModel): User Profile.
+
+        Returns:
+            List[NotificationSchema]: List of notifications.
+        """
+        return [
+            await NotificationSchema.from_tortoise_orm(notif_data)
+            for notif_data in await NotificationMessageModel.filter(user__id=user.id).order_by(
+                "-created"
+            )
+        ]

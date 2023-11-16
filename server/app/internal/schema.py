@@ -149,7 +149,7 @@ class UserProfileApi(BaseModel):
             age=model.age,
             occupation=model.occupation,
             mobile_number=model.mobile_number,
-            created=model.created.isoformat()
+            created=model.created.isoformat(),
         )
 
 
@@ -248,6 +248,7 @@ class AdminStatsApi(BaseModel):
 
 class PasswordChangeReqApi(BaseModel):
     new_password: str = Field(..., min_length=8)
+
 
 class ForgotPasswordChangeReqApi(BaseModel):
     new_password: str = Field(..., min_length=8)

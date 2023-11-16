@@ -49,9 +49,8 @@ class _Notification(BaseModel):
 
 
 class Notifier(object):
-
     def __new__(cls):
-        if not hasattr(cls, 'instance'):
+        if not hasattr(cls, "instance"):
             cls.instance = super(Notifier, cls).__new__(cls)
         return cls.instance
 
@@ -62,9 +61,7 @@ class Notifier(object):
     ) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
-        self._client = AsyncClient(
-            app_id=ONESIGNAL_APP_ID, rest_api_key=ONESIGNAL_API_KEY
-        )
+        self._client = AsyncClient(app_id=ONESIGNAL_APP_ID, rest_api_key=ONESIGNAL_API_KEY)
         #: ---- Set all routes
         self._routing.add_api_route(
             "/user/notification/{notif_id}",
@@ -115,11 +112,7 @@ class Notifier(object):
             )
         except OneSignalHTTPError as exc:
             response = exc
-        message = (
-            response.message
-            if isinstance(response, OneSignalHTTPError)
-            else response.body
-        )
+        message = response.message if isinstance(response, OneSignalHTTPError) else response.body
         return response.http_response, response.status_code, message
 
     async def notify(
@@ -166,13 +159,9 @@ class Notifier(object):
             NotificationSchema: Notification data.
         """
         try:
-            notif_data = await NotificationMessageModel.get(
-                user__id=user.id, id=notif_id
-            )
+            notif_data = await NotificationMessageModel.get(user__id=user.id, id=notif_id)
         except DoesNotExist:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, detail="Notificaton not found."
-            )
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Notificaton not found.")
         return NotificationSchema.from_tortoise_orm(notif_data)
 
     async def get_all_notificaton(
@@ -188,7 +177,7 @@ class Notifier(object):
         """
         return [
             await NotificationSchema.from_tortoise_orm(notif_data)
-            for notif_data in await NotificationMessageModel.filter(
-                user__id=user.id
-            ).order_by("-created")
+            for notif_data in await NotificationMessageModel.filter(user__id=user.id).order_by(
+                "-created"
+            )
         ]

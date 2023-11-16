@@ -112,7 +112,7 @@ class UserModel(Model):
 
 class BannedUsersModel(Model):
     id = IntField(pk=True)
-    user = ForeignKeyField("models.UserModel") 
+    user = ForeignKeyField("models.UserModel")
     when = DatetimeField(auto_now=True)
     status = BooleanField(default=True)
 
@@ -166,7 +166,9 @@ class MoodModel(Model):
         """
         # the month is in datetime isoformat YYYY-MM-DD to get only the
         # year and month, we need to cut the string
-        return await cls.filter(user__email=user_email, date__startswith=month.date().isoformat()[:7]).all()
+        return await cls.filter(
+            user__email=user_email, date__startswith=month.date().isoformat()[:7]
+        ).all()
 
     @classmethod
     async def get_today(cls, user_email: str) -> Optional[Self]:
@@ -180,7 +182,9 @@ class MoodModel(Model):
         """
         # the month is in datetime isoformat YYYY-MM-DD to get only the
         # year and month, we need to cut the string
-        q = await cls.filter(user__email=user_email, date__startswith=datetime.today().date().isoformat()).all()
+        q = await cls.filter(
+            user__email=user_email, date__startswith=datetime.today().date().isoformat()
+        ).all()
         return q[0] if q else None
 
 
@@ -296,13 +300,15 @@ class AppointmentModel(Model):
     async def get_by_datetime(cls, start_time: datetime, end_time: datetime) -> List[Self]:
         """Get appointment by datetime."""
         return await cls.filter(
-            Q(start_time__startswith=start_time.isoformat()) | Q(end_time__startswith=end_time.isoformat())
+            Q(start_time__startswith=start_time.isoformat())
+            | Q(end_time__startswith=end_time.isoformat())
         ).all()
 
     @classmethod
     async def get_upcoming(cls) -> List[Self]:
         date = datetime.now()
         return await cls.filter(Q(start_time__gt=date)).all()
+
 
 class NotificationMessageModel(Model):
     id = IntField(pk=True)

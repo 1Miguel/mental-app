@@ -2,7 +2,6 @@
 # std imports
 # --------------------------------
 import logging
-from datetime import datetime
 from typing import List, Dict, Optional
 
 # --------------------------------
@@ -13,11 +12,6 @@ from pydantic import BaseModel, Field
 
 # ----- database
 from tortoise.contrib.pydantic import pydantic_model_creator
-from tortoise.exceptions import DoesNotExist
-
-# ----- fastapi
-from fastapi import HTTPException, status, Depends, Path
-from fastapi.routing import APIRouter
 
 # ----- onesignal notifier
 from onesignal_sdk.client import AsyncClient
@@ -27,7 +21,6 @@ from onesignal_sdk.error import OneSignalHTTPError
 # --------------------------------
 # internal imports
 # --------------------------------
-from routers.account import get_current_user
 from internal.database import *
 from internal.schema import *
 
@@ -43,15 +36,14 @@ class _Notification(BaseModel):
     name: str
     included_segments: List[str]
     contents: Dict[str, str]
-    #include_aliases: Dict[str, List[str]] = Field(default_factory=dict)
+    # include_aliases: Dict[str, List[str]] = Field(default_factory=dict)
     target_channel: str = ""
     custom_data: Dict[str, Any] = Field(default_factory=dict)
 
 
 class Notifier(object):
-
     def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, 'instance'):
+        if not hasattr(cls, "instance"):
             cls.instance = super(Notifier, cls).__new__(cls, *args, **kwargs)
         return cls.instance
 
@@ -60,9 +52,7 @@ class Notifier(object):
         log: Optional[logging.Logger] = None,
     ) -> None:
         self._log = log if log else logging.getLogger(__name__)
-        self._client = AsyncClient(
-            app_id=ONESIGNAL_APP_ID, rest_api_key=ONESIGNAL_API_KEY
-        )        
+        self._client = AsyncClient(app_id=ONESIGNAL_APP_ID, rest_api_key=ONESIGNAL_API_KEY)
 
     async def _new_segment(self, name: str) -> OneSignalResponse:
         return await self._client.create_segment({"name": name})
@@ -94,23 +84,24 @@ class Notifier(object):
         kwargs["name"] = name
         kwargs["contents"] = contents
         kwargs["app_id"] = app_id
-        #kwargs["target_channel"] = "push"
+        # kwargs["target_channel"] = "push"
 
         self._log.info("Sending notification %s", kwargs)
         try:
             response: OneSignalResponse = await self._client.send_notification(kwargs)
-            self._log.info("OneSignal Response: %s | %s | %s", response.http_response, response.status_code, response.body)
+            self._log.info(
+                "OneSignal Response: %s | %s | %s",
+                response.http_response,
+                response.status_code,
+                response.body,
+            )
         except OneSignalHTTPError as exc:
-            self._log.error("OneSignal Erorr: %s | %s | %s", exc.http_response, exc.status_code, exc.message)
+            self._log.error(
+                "OneSignal Erorr: %s | %s | %s", exc.http_response, exc.status_code, exc.message
+            )
 
     async def notify(
-        self,
-        user: UserModel,
-        topic: str,
-        title: str,
-        message: str,
-        *,
-        segment = DEFAULT_SEGMENT
+        self, user: UserModel, topic: str, title: str, message: str, *, segment=DEFAULT_SEGMENT
     ) -> None:
         """Send a push notification to a user."""
         await NotificationMessageModel.create(

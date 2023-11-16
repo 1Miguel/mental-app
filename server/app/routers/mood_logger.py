@@ -22,7 +22,9 @@ class MoodLogger:
     """Mood Logger Class that contains all routes that is
     related to Mood logging services."""
 
-    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
+    def __init__(
+        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
+    ) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         # ---- Set all routes
@@ -53,7 +55,9 @@ class MoodLogger:
         """
         return self._routing
 
-    async def set_mood(self, mood: MoodLog, user: UserProfileApi = Depends(get_current_user)) -> None:
+    async def set_mood(
+        self, mood: MoodLog, user: UserProfileApi = Depends(get_current_user)
+    ) -> None:
         """Daily Mood Logging. if mood score has been log for today, dont lot anymore
         and return an HTTP_409_CONFLICT error."""
         # validate mood id
@@ -92,20 +96,32 @@ class MoodLogger:
         if day is not None:
             date_time_q += f"-{day:02}"
         mood_db_list: List[MoodModel] = (
-            await MoodModel.filter(user__id=user.id, date__startswith=date_time_q).all().order_by("-date")
+            await MoodModel.filter(user__id=user.id, date__startswith=date_time_q)
+            .all()
+            .order_by("-date")
         )
-        self._log.info("user %s:%s | Filter all moods at %s | num moods: %s", user.id, user.email, date_time_q, len(mood_db_list))
+        self._log.info(
+            "user %s:%s | Filter all moods at %s | num moods: %s",
+            user.id,
+            user.email,
+            date_time_q,
+            len(mood_db_list),
+        )
 
         # ---- 2. Iterate thru all the moods and build a response
         response = MoodListResponse(percentages=[0] * (MoodId.NUM_MOODS - 1), mood_list=[])
         for mood_db_data in mood_db_list:
-            mood_log_data = MoodLog(mood=mood_db_data.mood, note=mood_db_data.note, date=mood_db_data.date.isoformat())
+            mood_log_data = MoodLog(
+                mood=mood_db_data.mood, note=mood_db_data.note, date=mood_db_data.date.isoformat()
+            )
             response.percentages[mood_db_data.mood - 1] += 1
             response.mood_list += [mood_log_data]
             self._log.info(mood_log_data)
 
         # ---- 3. Calculate percentage base on moods
         num_moods = len(response.mood_list)
-        response.percentages = [int(100 * p / num_moods) if num_moods else 0 for p in response.percentages]
+        response.percentages = [
+            int(100 * p / num_moods) if num_moods else 0 for p in response.percentages
+        ]
 
         return response

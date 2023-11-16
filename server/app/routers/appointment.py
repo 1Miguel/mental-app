@@ -48,7 +48,9 @@ class Appointment:
                             specific appointment
     """
 
-    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
+    def __init__(
+        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
+    ) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         self._notifier = Notifier()
@@ -108,18 +110,6 @@ class Appointment:
             methods=["GET"],
             response_model=List[AppointmentBlockedSlot],
         )
-        self._routing.add_api_route(
-            "/user/notification/{notif_id}",
-            self.get_notification,
-            methods=["POST"],
-            response_model=NotificationSchema
-        )
-        self._routing.add_api_route(
-            "/user/notification/}",
-            self.get_all_notificaton,
-            methods=["POST"],
-            response_model=List[NotificationSchema]
-        )
 
     @property
     def router(self) -> APIRouter:
@@ -170,7 +160,9 @@ class Appointment:
         ]
         return response
 
-    async def _schedule_new_appointment(self, appointment_api: AppointmentApi, user: UserProfileApi) -> AppointmentInfoApi:
+    async def _schedule_new_appointment(
+        self, appointment_api: AppointmentApi, user: UserProfileApi
+    ) -> AppointmentInfoApi:
         # ----- 1. check if this slot is already taken
         if await AppointmentModel.exists(start_time__startswith=appointment_api.start_time):
             # appointment is already blocked
@@ -244,7 +236,9 @@ class Appointment:
     ) -> List[AppointmentInfoApi]:
         appointments = [
             await AppointmentInfoApi.from_model(appointment)
-            for appointment in await AppointmentModel.filter(status=AppointmentStatus.PENDING, patient__id=user.id)
+            for appointment in await AppointmentModel.filter(
+                status=AppointmentStatus.PENDING, patient__id=user.id
+            )
             .order_by("-created")
             .limit(limit)
         ]
@@ -256,9 +250,13 @@ class Appointment:
     ) -> AppointmentInfoApi:
         """Returns the info of a schedule slot the belong to a user by ID."""
         try:
-            return await AppointmentInfoApi.from_model(await AppointmentModel.get(id=appointment_id, patient__id=user.id))
+            return await AppointmentInfoApi.from_model(
+                await AppointmentModel.get(id=appointment_id, patient__id=user.id)
+            )
         except DoesNotExist as exc:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Appointment slot already blocked.") from exc
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, "Appointment slot already blocked."
+            ) from exc
 
     async def reschedule_user_appointment(
         self,
@@ -282,7 +280,9 @@ class Appointment:
 
         return response
 
-    async def cancel_user_appointment(self, appointment_id: int, user: UserProfileApi = Depends(get_current_user)) -> None:
+    async def cancel_user_appointment(
+        self, appointment_id: int, user: UserProfileApi = Depends(get_current_user)
+    ) -> None:
         """Cancel user appointment."""
         self._log.critical("Cancelling appointment %s.", appointment_id)
         # ----- 1. Check if this is a valid appointment
@@ -294,46 +294,3 @@ class Appointment:
         prev_appointment.status = AppointmentStatus.CANCELLED
         # ----- 3. and save
         await prev_appointment.save()
-
-    async def get_notification(
-        self, notif_id: int, user: UserProfileApi = Depends(get_current_user)
-    ) -> NotificationSchema:
-        """GET a notification data.
-
-        Args:
-            notif_id (int): Assigned Notification Id.
-            user (UserModel): User Profile.
-
-        Raises:
-            HTTPException: 404 if notification not found.
-
-        Returns:
-            NotificationSchema: Notification data.
-        """
-        try:
-            notif_data = await NotificationMessageModel.get(
-                user__id=user.id, id=notif_id
-            )
-        except DoesNotExist:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, detail="Notificaton not found."
-            )
-        return NotificationSchema.from_tortoise_orm(notif_data)
-
-    async def get_all_notificaton(
-        self, user: UserProfileApi = Depends(get_current_user)
-    ) -> List[NotificationSchema]:
-        """GET all user history of notifications from the database.
-
-        Args:
-            user (UserModel): User Profile.
-
-        Returns:
-            List[NotificationSchema]: List of notifications.
-        """
-        return [
-            await NotificationSchema.from_tortoise_orm(notif_data)
-            for notif_data in await NotificationMessageModel.filter(
-                user__id=user.id
-            ).order_by("-created")
-        ]
