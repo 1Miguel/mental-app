@@ -105,5 +105,3 @@ async def main():
     # print(response)
     # await asyncio.sleep(3)
     await notify_change_appointment_status(12345678, datetime.now(), "approved")
-
-asyncio.run(main())
