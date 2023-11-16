@@ -12,7 +12,7 @@ from tortoise.exceptions import DoesNotExist
 from routers.account import get_current_user
 from internal.database import *
 from internal.schema import *
-
+from notification.push_notif import notify_change_thread
 # internal modules
 from internal.database import *
 from internal.schema import *
@@ -111,6 +111,8 @@ class ThreadManager:
             await ThreadCommentModel(user=commenter, thread=thread, content=thread_comment.content).save()
             thread.num_comments += 1
             await thread.save()
+            creator: UserModel = await thread.creator
+            await notify_change_thread(creator.id, f"{thread.num_comments} comments on your post.")
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist") from exc
 
@@ -145,6 +147,9 @@ class ThreadManager:
                 thread_db.num_likes += 1
                 # then save
                 await thread_db.save()
+                # notify
+                creator = await thread_db.creator
+                await notify_change_thread(creator.id, f"{thread_db.num_likes} like on your post.")
 
     async def get_thread(self, thread_id: int, user: UserProfileApi = Depends(get_current_user)) -> ThreadRequestApi:
         """A User comment to a thread"""

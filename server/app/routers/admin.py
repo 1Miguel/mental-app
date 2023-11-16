@@ -17,6 +17,7 @@ from tortoise.exceptions import DoesNotExist
 from routers.account import get_admin_user, get_super_admin_user
 from internal.database import *
 from internal.schema import *
+from notification.push_notif import notify_change_appointment_status
 
 
 class _AdminUserAction(str, Enum):
@@ -141,6 +142,13 @@ class AdminManager:
             ap: AppointmentModel = await AppointmentModel.get(id=appointment_id)
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Appointment {appointment_id} invalid") from exc
+
+        if ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.RESERVED:
+            user_db: UserModel = await ap.patient
+            await notify_change_appointment_status(user_db.id, ap.start_time, "Approved")
+        elif ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.CANCELLED:
+            user_db: UserModel = await ap.patient
+            await notify_change_appointment_status(user_db.id, ap.start_time, "Rejected")
 
         if ap.status != update_status.status:
             ap.status = update_status.status
