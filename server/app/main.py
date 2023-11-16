@@ -23,6 +23,7 @@ from routers.appointment import Appointment
 from routers.mood_logger import MoodLogger
 from routers.thread_manager import ThreadManager
 from routers.admin import AdminManager
+from routers.notify import Notifier
 
 # ------------------------------------------------------ #
 # Debug
@@ -70,6 +71,7 @@ appointment = Appointment(log=log)
 mood_logger = MoodLogger(log=log)
 thread_manager = ThreadManager(log=log)
 admin_manager = AdminManager(log=log)
+notifier = Notifier(log=log)
 
 app.include_router(account_manager.router)
 app.include_router(appointment.router)
@@ -85,9 +87,7 @@ app.include_router(admin_manager.router)
 async def startup() -> None:
     """Routine at application startup."""
     log.info("App start up routine...")
-    await admin_manager.setup_default_admin(
-        "admin0@mentalapp.com", "testadminpassword", False
-    )
+    await admin_manager.setup_default_admin("admin0@mentalapp.com", "testadminpassword", False)
     await admin_manager.setup_default_admin(
         "superadmin0@mentalapp.com", "testsuperadminpassword", True
     )
@@ -115,7 +115,7 @@ def index() -> Dict[str, str]:
 def run() -> None:
     import uvicorn
 
-    uvicorn.run(app, host="192.168.1.5", port=8080)
+    uvicorn.run(app, host="192.168.1.10", port=8080)
 
 
 if __name__ == "__main__":

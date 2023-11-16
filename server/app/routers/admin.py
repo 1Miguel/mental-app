@@ -17,12 +17,12 @@ from tortoise.exceptions import DoesNotExist
 from routers.account import get_admin_user, get_super_admin_user
 from internal.database import *
 from internal.schema import *
-from notification.push_notif import notify_change_appointment_status
 
 
 class _AdminUserAction(str, Enum):
     BAN = "ban"
     UNBAN = "unban"
+
 
 class _AdminAppointmentFilter(str, Enum):
     ALL = "all"
@@ -32,7 +32,9 @@ class _AdminAppointmentFilter(str, Enum):
 
 
 class AdminManager:
-    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
+    def __init__(
+        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
+    ) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         # ---- Set all routes
@@ -88,10 +90,10 @@ class AdminManager:
             "/admin/user/{user_id}/{action}/",
             self.admin_user_action,
             methods=["POST"],
-            description="Possibe action [\"ban\", \"unban\"]",
+            description='Possibe action ["ban", "unban"]',
         )
 
-    async def setup_default_admin(self, email: str, password: str, is_super: bool=False) -> None:
+    async def setup_default_admin(self, email: str, password: str, is_super: bool = False) -> None:
         try:
             user = UserModel(email=email, password_hash=bcrypt.hash(password))
             await user.save()
@@ -117,18 +119,28 @@ class AdminManager:
         if filter == "all":
             ap_list = await AppointmentModel.all().order_by("-start_time")
         if filter == "pending":
-            ap_list = await AppointmentModel.filter(status=AppointmentStatus.PENDING).order_by("-start_time")
+            ap_list = await AppointmentModel.filter(status=AppointmentStatus.PENDING).order_by(
+                "-start_time"
+            )
         if filter == "approved":
-            ap_list = await AppointmentModel.filter(status=AppointmentStatus.RESERVED).order_by("-start_time")
+            ap_list = await AppointmentModel.filter(status=AppointmentStatus.RESERVED).order_by(
+                "-start_time"
+            )
         if filter == "today":
             ap_list = await AppointmentModel.filter(start_time__startswith=date.today().isoformat())
 
         return [await AppointmentInfoApi.from_model(ap) for ap in ap_list]
 
-    async def admin_get_appointments(self, filter: _AdminAppointmentFilter="all", admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
+    async def admin_get_appointments(
+        self,
+        filter: _AdminAppointmentFilter = "all",
+        admin: UserProfileApi = Depends(get_admin_user),
+    ) -> List[AppointmentInfoApi]:
         return await self._internal_get_appointments(filter=filter)
 
-    async def admin_get_appointment_today(self, admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
+    async def admin_get_appointment_today(
+        self, admin: UserProfileApi = Depends(get_admin_user)
+    ) -> List[AppointmentInfoApi]:
         self._log.info("Get Today's Appointments")
         return await self._internal_get_appointments(filter=_AdminAppointmentFilter.TODAY)
 
@@ -141,14 +153,22 @@ class AdminManager:
         try:
             ap: AppointmentModel = await AppointmentModel.get(id=appointment_id)
         except DoesNotExist as exc:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Appointment {appointment_id} invalid") from exc
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, detail="Appointment {appointment_id} invalid"
+            ) from exc
 
-        if ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.RESERVED:
+        if (
+            ap.status == AppointmentStatus.PENDING
+            and update_status.status == AppointmentStatus.RESERVED
+        ):
             user_db: UserModel = await ap.patient
-            await notify_change_appointment_status(user_db.id, ap.start_time, "Approved")
-        elif ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.CANCELLED:
+            # await notify_change_appointment_status(user_db.id, ap.start_time, "Approved")
+        elif (
+            ap.status == AppointmentStatus.PENDING
+            and update_status.status == AppointmentStatus.CANCELLED
+        ):
             user_db: UserModel = await ap.patient
-            await notify_change_appointment_status(user_db.id, ap.start_time, "Rejected")
+            # await notify_change_appointment_status(user_db.id, ap.start_time, "Rejected")
 
         if ap.status != update_status.status:
             ap.status = update_status.status
@@ -156,14 +176,22 @@ class AdminManager:
 
         return await AppointmentInfoApi.from_model(ap)
 
-    async def admin_get_stats(self, admin: UserProfileApi = Depends(get_admin_user)) -> AdminStatsApi:
-        appointment_stats = {stats.service: stats.count for stats in await AppointmentServiceModelStats.all()}
+    async def admin_get_stats(
+        self, admin: UserProfileApi = Depends(get_admin_user)
+    ) -> AdminStatsApi:
+        appointment_stats = {
+            stats.service: stats.count for stats in await AppointmentServiceModelStats.all()
+        }
         total_stats = sum([stats for stats in appointment_stats.values()])
         services_percentages = {k: int(100 * v / total_stats) for k, v in appointment_stats.items()}
         return AdminStatsApi(
             num_patients=await UserModel.all().count() - await AdminModel.all().count(),
-            num_appointments_req=await AppointmentModel.filter(status=AppointmentStatus.PENDING).count(),
-            num_todays_sessions=await AppointmentModel.filter(start_time__startswith=date.today().isoformat()).count(),
+            num_appointments_req=await AppointmentModel.filter(
+                status=AppointmentStatus.PENDING
+            ).count(),
+            num_todays_sessions=await AppointmentModel.filter(
+                start_time__startswith=date.today().isoformat()
+            ).count(),
             services_percentages=services_percentages,
         )
 
@@ -195,22 +223,35 @@ class AdminManager:
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, f"user {user_id} not found") from exc
 
-    async def admin_delete_user(self, user_id: int, super_admin: UserProfileApi = Depends(get_super_admin_user)) -> None:
+    async def admin_delete_user(
+        self, user_id: int, super_admin: UserProfileApi = Depends(get_super_admin_user)
+    ) -> None:
         return await self._internal_admin_user_action(user_id, "delete")
 
-    async def admin_user_action(self, user_id: int, action: _AdminUserAction, super_admin: UserProfileApi = Depends(get_super_admin_user)) -> None:
+    async def admin_user_action(
+        self,
+        user_id: int,
+        action: _AdminUserAction,
+        super_admin: UserProfileApi = Depends(get_super_admin_user),
+    ) -> None:
         return await self._internal_admin_user_action(user_id, action)
 
-    async def admin_get_user_list(self, admin: UserProfileApi = Depends(get_super_admin_user)) -> List[UserModel]:
+    async def admin_get_user_list(
+        self, admin: UserProfileApi = Depends(get_super_admin_user)
+    ) -> List[UserModel]:
         profiles = []
-        for profile in [UserProfileApi.from_model(model) for model in await UserModel.all().order_by("-created")]:
+        for profile in [
+            UserProfileApi.from_model(model) for model in await UserModel.all().order_by("-created")
+        ]:
             if await BannedUsersModel.exists(user__id=profile.id, status=True):
                 # Quick fix, TODO: put this in from model
                 profile.status = "BANNED"
             profiles += [profile]
         return profiles
-        
-    async def admin_get_user(self, user_id: int, admin: UserProfileApi = Depends(get_super_admin_user)) -> UserProfileApi:
+
+    async def admin_get_user(
+        self, user_id: int, admin: UserProfileApi = Depends(get_super_admin_user)
+    ) -> UserProfileApi:
         try:
             return UserProfileApi.from_model(await UserModel.get(id=user_id))
         except DoesNotExist as exc:
