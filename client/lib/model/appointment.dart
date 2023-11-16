@@ -78,6 +78,7 @@ class AppointmentInfo {
   final String endTime;
   final String status;
   final String service;
+  final String concern;
 
   const AppointmentInfo({
     required this.id,
@@ -89,6 +90,7 @@ class AppointmentInfo {
     required this.endTime,
     required this.status,
     required this.service,
+    required this.concern,
   });
 
   factory AppointmentInfo.fromJson(Map<String, dynamic> json) {
@@ -101,6 +103,7 @@ class AppointmentInfo {
     String def_endTime;
     String def_status;
     String def_service;
+    String def_concern;
 
     def_id = json['id'] ?? 0;
     def_patientId = json['patient_id'] ?? 0;
@@ -111,6 +114,7 @@ class AppointmentInfo {
     def_endTime = json['end_time'] ?? DateTime.now.toString();
     def_status = json['status'] ?? '';
     def_service = json['service'] ?? '';
+    def_concern = json['concerns'] ?? '';
 
     String updDate =
         DateFormat('yyyy-MM-dd').format(DateTime.parse(def_date)).toString();
@@ -131,6 +135,7 @@ class AppointmentInfo {
       endTime: updEndTime as String,
       status: def_status as String,
       service: def_service as String,
+      concern: def_concern as String,
     );
   }
 }

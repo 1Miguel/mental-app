@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/controllers/admin_appointment_controller.dart';
 import 'package:flutter_intro/controllers/admin_controller.dart';
 import 'package:flutter_intro/model/admin.dart';
+import 'package:flutter_intro/model/appointment.dart';
 import 'package:flutter_intro/ui_views/login_views.dart';
 
 // Local import
@@ -201,7 +203,8 @@ class StatusBoxList extends StatelessWidget {
                                 child: SizedBox(
                                     width: 100,
                                     height: 100,
-                                    child: CircularProgressIndicator())));
+                                    child: CircularProgressIndicator(
+                                        color: Colors.grey))));
                       }
                     }),
               ),
@@ -229,7 +232,8 @@ class StatusBoxList extends StatelessWidget {
                                 child: SizedBox(
                                     width: 100,
                                     height: 100,
-                                    child: CircularProgressIndicator())));
+                                    child: CircularProgressIndicator(
+                                        color: Colors.grey))));
                       }
                     }),
               ),
@@ -256,7 +260,8 @@ class StatusBoxList extends StatelessWidget {
                                 child: SizedBox(
                                     width: 100,
                                     height: 100,
-                                    child: CircularProgressIndicator())));
+                                    child: CircularProgressIndicator(
+                                        color: Colors.grey))));
                       }
                     }),
               ),
@@ -269,7 +274,7 @@ class StatusBoxList extends StatelessWidget {
 }
 
 class UpcomingEventsList extends StatelessWidget {
-  const UpcomingEventsList({
+  UpcomingEventsList({
     super.key,
   });
 
@@ -309,21 +314,6 @@ class UpcomingEventsList extends StatelessWidget {
                 ),
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.only(right: 20),
-            //   child: Container(
-            //     width: constraint.maxWidth / 3 - 40,
-            //     height: constraint.maxHeight,
-            //     child: Padding(
-            //       padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-            //       child: Donationcard(
-            //         title: "Donation",
-            //         label: "Doctors",
-            //         image: "images/admin_donation.png",
-            //       ),
-            //     ),
-            //   ),
-            // ),
           ],
         );
       },
@@ -536,13 +526,23 @@ class UpcomingAppointmentCard extends StatelessWidget {
   final String title;
   final String label;
   final String image;
+  AdminAppointmentController adminAppointmentController =
+      Get.put(AdminAppointmentController());
+  late Future<List<AppointmentInfo>> futureTodayAppointments;
 
-  const UpcomingAppointmentCard({
+  UpcomingAppointmentCard({
     super.key,
     required this.title,
     required this.label,
     required this.image,
   });
+
+  Future<List<AppointmentInfo>> fetchTodayAppointments() async {
+    futureTodayAppointments =
+        adminAppointmentController.fetchAppointmentsToday();
+    print(futureTodayAppointments);
+    return futureTodayAppointments;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -614,7 +614,19 @@ class UpcomingAppointmentCard extends StatelessWidget {
                 Container(
                   width: constraint.maxWidth,
                   height: constraint.maxHeight / 2,
-                  child: DayView(),
+                  child: FutureBuilder<List<AppointmentInfo>>(
+                      future: fetchTodayAppointments(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final statData = snapshot.data!;
+                          return Container(
+                              width: constraint.maxWidth,
+                              height: constraint.maxHeight / 2,
+                              child: buildTodayList(statData));
+                        } else {
+                          return CircularProgressIndicator(color: Colors.grey);
+                        }
+                      }),
                 ),
               ],
             ),
@@ -623,115 +635,56 @@ class UpcomingAppointmentCard extends StatelessWidget {
       },
     );
   }
-}
 
-class DayView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraint) {
-        double TimeBox = constraint.maxWidth / 5;
-        return Container(
-          width: constraint.maxWidth,
-          height: 300,
-          child: ListView(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 20.0, bottom: 10),
-                child: Row(
-                  children: [
-                    SizedBox(width: TimeBox, child: Text('09:00 - 10:00')),
-                    SizedBox(
-                      width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(type: "Psychiatric Consultation"),
-                    ),
-                  ],
-                ),
+  Widget buildTodayList(List<AppointmentInfo> appointments) => ListView.builder(
+      itemCount: appointments.length,
+      itemBuilder: (context, index) {
+        final appointment = appointments[index];
+
+        return LayoutBuilder(builder: (context, constraint) {
+          double TimeBox = constraint.maxWidth / 5;
+          return Container(
+            width: constraint.maxWidth,
+            height: 70,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20.0, bottom: 10),
+              child: Row(
+                children: [
+                  SizedBox(
+                      width: TimeBox, height: 60, child: Text('09:00 - 10:00')),
+                  SizedBox(
+                    width: constraint.maxWidth - TimeBox - 20 - 16,
+                    height: 60,
+                    child: TimeCard(
+                        type: appointment.service,
+                        name: appointment.patientName),
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20.0, bottom: 10),
-                child: Row(
-                  children: [
-                    SizedBox(width: TimeBox, child: Text('10:00 - 11:00')),
-                    SizedBox(
-                      width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(type: "Counseling"),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20.0, bottom: 10),
-                child: Row(
-                  children: [
-                    SizedBox(width: TimeBox, child: Text('11:00 - 12:00')),
-                    SizedBox(
-                      width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(type: "Occupational Therapy"),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20.0, bottom: 10),
-                child: Row(
-                  children: [
-                    SizedBox(width: TimeBox, child: Text('01:00 - 02:00')),
-                    SizedBox(
-                      width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(type: "Psychological Assesment"),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20.0, bottom: 10),
-                child: Row(
-                  children: [
-                    SizedBox(width: TimeBox, child: Text('02:00 - 03:00')),
-                    SizedBox(
-                      width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(type: "Counseling"),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20.0, bottom: 10),
-                child: Row(
-                  children: [
-                    SizedBox(width: TimeBox, child: Text('03:00 - 04:00')),
-                    SizedBox(
-                      width: constraint.maxWidth - TimeBox - 20 - 16,
-                      child: TimeCard(type: "Counseling"),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+            ),
+          );
+        });
+      });
 }
 
 class TimeCard extends StatelessWidget {
   final String type;
+  final String name;
 
   const TimeCard({
     super.key,
     required this.type,
+    required this.name,
   });
 
   Color getColor() {
-    if (type == "Occupational Therapy") {
+    if (type == "OCCUPATIONAL_THERAPY") {
       return calendarOTColor;
-    } else if (type == "Psychiatric Consultation") {
+    } else if (type == "PSYCHIATRIC_CONSULTATION") {
       return calendarPCColor;
-    } else if (type == "Counseling") {
+    } else if (type == "COUNSELING") {
       return calendarCoColor;
-    } else if (type == "Psychological Assesment") {
+    } else if (type == "PSYCHOLOGICAL_ASSESMENT") {
       return calendarPAColor;
     }
     return unselectedLightBlue;
@@ -776,7 +729,7 @@ class TimeCard extends StatelessWidget {
                       child: SizedBox(
                         width: constraint.maxWidth - 50 - 5,
                         child: Text(
-                          'Patient Name: John Doe',
+                          'Patient Name: $name',
                         ),
                       ),
                     ),
@@ -885,36 +838,72 @@ class MembershipCard extends StatelessWidget {
 }
 
 class MembershipChart extends StatelessWidget {
+  AdminController adminController = Get.put(AdminController());
+  late Future<List<String>> stats;
+
+  Future<List<String>> fetchServiceStats() async {
+    stats = adminController.fetchServiceStats();
+    return stats;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<ChartData> chartData = [
-      ChartData('Counseling', 25),
-      ChartData('Psychiatric Consultation', 38),
-      ChartData('Occupational Therapy', 34),
-      ChartData('Psychological Assesment', 52)
-    ];
-    return Center(
-      child: SfCircularChart(
-          title: ChartTitle(
-              text: 'New Membership Requests',
-              alignment: ChartAlignment.near,
-              textStyle: TextStyle(
-                fontFamily: 'Roboto',
-                fontStyle: FontStyle.italic,
-                fontSize: 12,
-              )),
-          legend: Legend(isVisible: true),
-          series: <CircularSeries>[
-            // Render pie chart
+    return FutureBuilder<List<String>>(
+        future: fetchServiceStats(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final statData = snapshot.data!;
+            final List<ChartData> chartData = [];
 
-            PieSeries<ChartData, String>(
-                dataSource: chartData,
-                xValueMapper: (ChartData data, _) => data.x,
-                yValueMapper: (ChartData data, _) => data.y,
-                radius: '100%',
-                dataLabelSettings: DataLabelSettings(isVisible: true))
-          ]),
-    );
+            if (statData[0] != "0") {
+              chartData.add(ChartData('Counseling', double.parse(statData[0])));
+            }
+            if (statData[1] != "0") {
+              chartData.add(ChartData(
+                  'Psychiatric Consultation', double.parse(statData[1])));
+            }
+            if (statData[2] != "0") {
+              chartData.add(
+                  ChartData('Occupational Therapy', double.parse(statData[2])));
+            }
+            if (statData[3] != "0") {
+              chartData.add(ChartData(
+                  'Psychological Assesment', double.parse(statData[3])));
+            }
+
+            return Center(
+              child: SfCircularChart(
+                  title: ChartTitle(
+                      text: 'New Membership Requests',
+                      alignment: ChartAlignment.near,
+                      textStyle: TextStyle(
+                        fontFamily: 'Roboto',
+                        fontStyle: FontStyle.italic,
+                        fontSize: 12,
+                      )),
+                  legend: Legend(isVisible: true),
+                  series: <CircularSeries>[
+                    // Render pie chart
+
+                    PieSeries<ChartData, String>(
+                        dataSource: chartData,
+                        xValueMapper: (ChartData data, _) => data.x,
+                        yValueMapper: (ChartData data, _) => data.y,
+                        radius: '100%',
+                        dataLabelSettings: DataLabelSettings(isVisible: true))
+                  ]),
+            );
+          } else {
+            return Container(
+                height: 100,
+                width: 100,
+                child: Center(
+                    child: SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: CircularProgressIndicator(color: Colors.grey))));
+          }
+        });
   }
 }
 

@@ -96,7 +96,7 @@ async def _get_authenticated_user(token: str, *, check_admin: bool = False, chec
                 detail="User attempts to login with invalid super admin account.",
             )
         else:
-            profile.is_super = True
+            profile.is_super = admin.is_super
 
     # ---- return account json profile
     # TODO: should I just return the actual database item?

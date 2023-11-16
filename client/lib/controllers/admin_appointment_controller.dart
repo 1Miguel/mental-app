@@ -31,7 +31,7 @@ class AdminAppointmentController extends GetxController {
     return token_type;
   }
 
-  _showSuccessDialog(context, successMessage) {
+  _showSuccessDialog(context, successMessage, onpressed) {
     Alert(
       context: context,
       //style: alertStyle,
@@ -44,7 +44,10 @@ class AdminAppointmentController extends GetxController {
             "OK",
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
-          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+          onPressed: () => {
+            Navigator.of(context, rootNavigator: true).pop(),
+            onpressed(),
+          },
           color: Color.fromRGBO(0, 179, 134, 1.0),
           radius: BorderRadius.circular(0.0),
         ),
@@ -65,7 +68,9 @@ class AdminAppointmentController extends GetxController {
             "OK",
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
-          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+          onPressed: () => {
+            Navigator.of(context, rootNavigator: true).pop(),
+          },
           color: Colors.redAccent,
           radius: BorderRadius.circular(0.0),
         ),
@@ -73,11 +78,12 @@ class AdminAppointmentController extends GetxController {
     ).show();
   }
 
-  Future<void> approveAppointment(int id) async {
+  Future<void> approveAppointment(int id, VoidCallback pressed) async {
     String? token = await getToken();
     String? token_type = await getTokenType();
 
     try {
+      print("approve button");
       final response = await http.post(
         Uri.parse('$baseUrl/admin/appointment/$id/update/'),
         headers: <String, String>{
@@ -92,7 +98,7 @@ class AdminAppointmentController extends GetxController {
 
       if (response.statusCode == 200) {
         _showSuccessDialog(
-            Get.context!, "Appointment is successfully approved");
+            Get.context!, "Appointment is successfully approved", pressed);
       } else {
         _showErrorDialog(
             Get.context!, "This request cannot be processed right now");
@@ -107,7 +113,7 @@ class AdminAppointmentController extends GetxController {
     }
   }
 
-  Future<void> cancelAppointment(int id) async {
+  Future<void> cancelAppointment(int id, VoidCallback pressed) async {
     String? token = await getToken();
     String? token_type = await getTokenType();
 
@@ -125,7 +131,8 @@ class AdminAppointmentController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        _showSuccessDialog(Get.context!, "Appointment successfully cancelled");
+        _showSuccessDialog(
+            Get.context!, "Appointment successfully cancelled", pressed);
       } else {
         _showErrorDialog(
             Get.context!, "This request cannot be processed right now");
@@ -160,6 +167,49 @@ class AdminAppointmentController extends GetxController {
         List<AppointmentInfo> AppointmentList = <AppointmentInfo>[];
         myMap.forEach((element) {
           //print(element);
+          AppointmentList.add(AppointmentInfo.fromJson(element));
+        });
+
+        return AppointmentList;
+      } else {
+        print(response.body);
+        print(response.statusCode);
+        throw jsonDecode(response.body)['Message'] ?? "Unknown Error Occurred";
+      }
+    } catch (e) {
+      Get.back();
+      showDialog(
+          context: Get.context!,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Error!'),
+              contentPadding: EdgeInsets.all(20),
+              children: [Text(e.toString())],
+            );
+          });
+      throw "Unknown Error Occurred";
+    }
+  }
+
+  Future<List<AppointmentInfo>> fetchAppointmentsToday() async {
+    String? token = await getToken();
+    String? token_type = await getTokenType();
+
+    // get 2 months
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/appointment/today'),
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Authorization': '$token_type $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> myMap = json.decode(response.body);
+        List<AppointmentInfo> AppointmentList = <AppointmentInfo>[];
+        myMap.forEach((element) {
           AppointmentList.add(AppointmentInfo.fromJson(element));
         });
 

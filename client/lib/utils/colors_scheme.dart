@@ -102,3 +102,6 @@ final HexColor traumaMainBg = HexColor("#91c49f");
 final HexColor suicideMainBg = HexColor("#dde9f1");
 final HexColor helpMainBg = HexColor("#ffbd59");
 final HexColor truthStressMainBg = HexColor("#d9d9d9");
+
+// Mood
+final HexColor peachMainBg = HexColor("#f8a69f");

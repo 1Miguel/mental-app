@@ -130,7 +130,7 @@ class AdminManager:
 
     async def admin_get_appointment_today(self, admin: UserProfileApi = Depends(get_admin_user)) -> List[AppointmentInfoApi]:
         self._log.info("Get Today's Appointments")
-        return self._internal_get_appointments(filter=_AdminAppointmentFilter.TODAY)
+        return await self._internal_get_appointments(filter=_AdminAppointmentFilter.TODAY)
 
     async def admin_update_appointment(
         self,

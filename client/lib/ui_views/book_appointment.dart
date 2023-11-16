@@ -2213,6 +2213,34 @@ class BookScheduleSuccessPage extends StatelessWidget {
 }
 
 class ScheduleCard extends StatelessWidget {
+  final String name;
+  final String date;
+  final String start;
+  final String end;
+  final String service;
+
+  ScheduleCard({
+    super.key,
+    required this.name,
+    required this.date,
+    required this.start,
+    required this.end,
+    required this.service,
+  });
+
+  String getServiceTypeString(String serviceType) {
+    if (serviceType == "OCCUPATIONAL_THERAPY") {
+      return "Occupational Therapy";
+    } else if (serviceType == "PSYCHIATRIC_CONSULTATION") {
+      return "Psychiatric Consultation";
+    } else if (serviceType == "COUNSELING") {
+      return "Counseling";
+    } else if (serviceType == "PSYCHOLOGICAL_ASSESMENT") {
+      return "Psychological Assesment";
+    }
+    return "Unknown Service";
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraint) {
@@ -2268,7 +2296,8 @@ class ScheduleCard extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 10.0),
                           child: SizedBox(
                             width: constraint.maxWidth - 30 - 20 - 10,
-                            child: Text("Service: Counseling",
+                            child: Text(
+                                "Service: ${getServiceTypeString(service)}",
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
@@ -2280,7 +2309,7 @@ class ScheduleCard extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 10.0),
                           child: SizedBox(
                             width: constraint.maxWidth - 30 - 20 - 10,
-                            child: Text("Patient Name: John Doe",
+                            child: Text("Patient Name: $name",
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: scContentGreen,
@@ -2292,14 +2321,14 @@ class ScheduleCard extends StatelessWidget {
                           child: Row(
                             children: [
                               Icon(Icons.today, size: 15, color: scTitleGreen),
-                              Text(" 2023-11-15  ",
+                              Text(" $date  ",
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: scContentGreen,
                                   )),
                               Icon(Icons.schedule,
                                   size: 15, color: scTitleGreen),
-                              Text("01:00-02:00",
+                              Text("$start-$end",
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: scContentGreen,
@@ -3098,23 +3127,6 @@ class _AppointmentTabState extends State<AppointmentTab> {
                 style: TextStyle(
                     color: Colors.white, fontWeight: FontWeight.w900)),
             centerTitle: true,
-            // leading: SizedBox(
-            //   width: 20,
-            //   height: 20,
-            //   child: Padding(
-            //     padding: EdgeInsets.only(bottom: 3.0, left: 11.0),
-            //     child: IconButton(
-            //       icon: const Icon(
-            //         Icons.arrow_back,
-            //         size: 30,
-            //         color: Colors.white,
-            //       ),
-            //       onPressed: () {
-            //         Navigator.pop(context);
-            //       },
-            //     ),
-            //   ),
-            // ),
           ),
           body: Container(
             width: constraint.maxWidth,
@@ -3144,8 +3156,15 @@ class _AppointmentTabState extends State<AppointmentTab> {
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           final upcList = snapshot.data!;
+                          final list = upcList[0];
                           if (upcList.length > 0) {
-                            return ScheduleCard();
+                            return ScheduleCard(
+                              name: list.patientName,
+                              date: list.date,
+                              start: list.startTime,
+                              end: list.endTime,
+                              service: list.service,
+                            );
                           } else {
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
