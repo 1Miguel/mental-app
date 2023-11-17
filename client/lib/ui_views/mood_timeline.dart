@@ -28,6 +28,54 @@ class MoodTimeline extends StatelessWidget {
     return futureMoodHistory;
   }
 
+  IconData getDominantMoodIcon() {
+    if (dominantMood == 0) {
+      return Icons.sentiment_very_satisfied;
+    }
+    if (dominantMood == 1) {
+      return Icons.sentiment_satisfied;
+    }
+    if (dominantMood == 2) {
+      return Icons.sentiment_neutral;
+    }
+    if (dominantMood == 3) {
+      return Icons.sentiment_dissatisfied;
+    }
+    return Icons.sentiment_very_dissatisfied;
+  }
+
+  Color getPrimaryColor() {
+    if (dominantMood == 0) {
+      return Colors.yellow;
+    }
+    if (dominantMood == 1) {
+      return mainBlue;
+    }
+    if (dominantMood == 2) {
+      return peachMainBg;
+    }
+    if (dominantMood == 3) {
+      return Colors.blueGrey;
+    }
+    return Colors.red;
+  }
+
+  Color getSecondaryColor() {
+    if (dominantMood == 0) {
+      return Colors.orange;
+    }
+    if (dominantMood == 1) {
+      return solidPurple;
+    }
+    if (dominantMood == 2) {
+      return pastelPink;
+    }
+    if (dominantMood == 3) {
+      return Colors.blueGrey;
+    }
+    return Colors.red;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -36,8 +84,8 @@ class MoodTimeline extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomLeft,
           colors: [
-            mainBlue,
-            solidPurple,
+            getPrimaryColor(),
+            getSecondaryColor(),
           ],
         ),
       ),
@@ -56,7 +104,7 @@ class MoodTimeline extends StatelessWidget {
                 indicatorStyle: IndicatorStyle(
                   width: 70,
                   height: 70,
-                  indicator: _Sun(),
+                  indicator: _Sun(icon: getDominantMoodIcon()),
                 ),
                 beforeLineStyle:
                     LineStyle(color: Colors.white.withOpacity(0.7)),
@@ -94,16 +142,16 @@ class MoodTimeline extends StatelessWidget {
           print(moods[index].note);
           bool last = false;
           final thread = moods[index];
-          IconData moodIcon = Icons.sentiment_satisfied;
+          IconData moodIcon = Icons.sentiment_very_satisfied;
           String moodName = "HAPPY";
           if (moods[index].mood == 2) {
-            moodIcon = Icons.sentiment_dissatisfied;
+            moodIcon = Icons.sentiment_satisfied;
             moodName = "SAD";
           } else if (moods[index].mood == 3) {
             moodIcon = Icons.sentiment_neutral;
             moodName = "CONFUSED";
           } else if (moods[index].mood == 4) {
-            moodIcon = Icons.sentiment_very_dissatisfied;
+            moodIcon = Icons.sentiment_dissatisfied;
             moodName = "SCARED";
           } else if (moods[index].mood == 5) {
             moodIcon = Icons.sentiment_very_dissatisfied;
@@ -130,7 +178,7 @@ class MoodTimeline extends StatelessWidget {
       title: Text(
         'Mood Log',
         style: TextStyle(
-          color: unselectedGray,
+          color: Colors.black87,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -179,7 +227,7 @@ class MoodTimeline extends StatelessWidget {
               mood,
               style: TextStyle(
                 fontSize: 18,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.black87,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -189,7 +237,7 @@ class MoodTimeline extends StatelessWidget {
               phrase,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.black87,
                 fontWeight: FontWeight.normal,
               ),
             )
@@ -210,6 +258,23 @@ class _IconIndicator extends StatelessWidget {
   final IconData iconData;
   final double size;
 
+  Color getIconColor() {
+    if (iconData == Icons.sentiment_very_satisfied) {
+      return Colors.orange;
+    }
+    if (iconData == Icons.sentiment_satisfied) {
+      return Colors.blue;
+    }
+    if (iconData == Icons.sentiment_neutral) {
+      return Colors.pink;
+    }
+    if (iconData == Icons.sentiment_dissatisfied) {
+      return Colors.blueGrey;
+    }
+
+    return Colors.red;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -229,7 +294,7 @@ class _IconIndicator extends StatelessWidget {
               child: Icon(
                 iconData,
                 size: size,
-                color: const Color(0xFF9E3773).withOpacity(0.7),
+                color: getIconColor(),
               ),
             ),
           ),
@@ -280,14 +345,14 @@ class _ContainerHeader extends StatelessWidget {
               'Dominant Mood',
               style: TextStyle(
                 fontSize: 18,
-                color: const Color(0xFFF4A5CD),
+                color: Colors.grey.shade800,
               ),
             ),
             Text(
               getMoodString(),
               style: TextStyle(
                 fontSize: 30,
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -316,8 +381,30 @@ class _ContainerHeader extends StatelessWidget {
 }
 
 class _Sun extends StatelessWidget {
+  IconData icon;
+
+  _Sun({required this.icon});
+
+  Color getIconColor() {
+    if (icon == Icons.sentiment_very_satisfied) {
+      return Colors.orange;
+    }
+    if (icon == Icons.sentiment_satisfied) {
+      return Colors.blue.shade500;
+    }
+    if (icon == Icons.sentiment_neutral) {
+      return Colors.pink;
+    }
+    if (icon == Icons.sentiment_dissatisfied) {
+      return Colors.blueGrey.shade500;
+    }
+
+    return Colors.red;
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("Debug Dominant Mood Icon: $icon");
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
@@ -328,16 +415,16 @@ class _Sun extends StatelessWidget {
           ),
         ],
         shape: BoxShape.circle,
-        color: pastelBlue,
+        color: unselectedGray,
       ),
       child: SizedBox(
         height: 30,
         width: 30,
         child: Center(
           child: Icon(
-            Icons.sentiment_dissatisfied,
+            icon,
             size: 50,
-            color: mainBlue,
+            color: getIconColor(),
           ),
         ),
       ),

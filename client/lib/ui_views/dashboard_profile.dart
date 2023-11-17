@@ -332,14 +332,14 @@ class _EditProfileFormState extends State<EditProfileForm> {
   //   return name;
   // }
 
-  Future<String?> getLogOutState() async {
+  Future<void> getLogOutState() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String? name = prefs.getString('first_name')!.toUpperCase();
+    //String? name = prefs.getString('first_name')!.toUpperCase();
     await prefs.setString('islogged_in', "false");
     prefs.remove("islogged_in");
     prefs.clear();
-    return name;
+    //return name;
   }
 
   @override
@@ -392,11 +392,11 @@ class _EditProfileFormState extends State<EditProfileForm> {
                                             color: getPwSaveColor()),
                                       ],
                                     ),
-                                    onPressed: () {
+                                    onPressed: () async {
                                       if (_formPwKey.currentState!.validate()) {
                                         changePasswordController
                                             .changePassword();
-                                        getLogOutState();
+                                        await getLogOutState();
                                         Navigator.push(
                                             context,
                                             MaterialPageRoute(

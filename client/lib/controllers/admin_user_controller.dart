@@ -3,6 +3,7 @@ import 'dart:convert';
 // Local import
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/model/admin.dart';
+import 'package:flutter_intro/model/user.dart';
 import 'package:flutter_intro/utils/api_endpoints.dart';
 
 import 'package:get/get.dart';
@@ -10,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:rflutter_alert/rflutter_alert.dart';
 
-class AdminController extends GetxController {
+class AdminUserController extends GetxController {
   String baseUrl = ApiEndPoints.checkPlatform();
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -28,14 +29,14 @@ class AdminController extends GetxController {
     return token_type;
   }
 
-  Future<DashboardStats> fetchAdminStats() async {
+  Future<List<User>> fetchAllUsers() async {
     String? token = await getToken();
     String? token_type = await getTokenType();
 
     // get 2 months
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/admin/'),
+        Uri.parse('$baseUrl/admin/user/'),
         headers: <String, String>{
           'Accept': 'application/json',
           'Authorization': '$token_type $token',
@@ -44,7 +45,13 @@ class AdminController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        return DashboardStats.fromJson(json.decode(response.body));
+        List<dynamic> usersList = json.decode(response.body);
+        List<User> users = <User>[];
+        usersList.forEach((element) {
+          users.add(User.fromJson(element));
+        });
+
+        return users;
       } else {
         print(response.body);
         print(response.statusCode);

@@ -1,5 +1,6 @@
 // standard import
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/ui_views/admin_users.dart';
 import 'package:flutter_intro/ui_views/login_views.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -85,83 +86,203 @@ class AdminSidebarX extends StatelessWidget {
 
   final SidebarXController _controller;
 
+  Future<bool?> isSuperUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? isSuper;
+
+    if (prefs.containsKey('is_super')) {
+      isSuper = prefs.getBool('is_super');
+    }
+    return isSuper;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SidebarX(
-      controller: _controller,
-      theme: SidebarXTheme(
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: canvasColor,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        hoverColor: scaffoldBackgroundColor,
-        textStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-        selectedTextStyle: const TextStyle(color: Colors.white),
-        itemTextPadding: const EdgeInsets.only(left: 30),
-        selectedItemTextPadding: const EdgeInsets.only(left: 30),
-        itemDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: canvasColor),
-        ),
-        selectedItemDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: actionColor.withOpacity(0.37),
-          ),
-          gradient: const LinearGradient(
-            colors: [accentCanvasColor, canvasColor],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.28),
-              blurRadius: 30,
-            )
-          ],
-        ),
-        iconTheme: IconThemeData(
-          color: Colors.white.withOpacity(0.7),
-          size: 20,
-        ),
-        selectedIconTheme: const IconThemeData(
-          color: Colors.white,
-          size: 20,
-        ),
-      ),
-      extendedTheme: const SidebarXTheme(
-        width: 200,
-        decoration: BoxDecoration(
-          color: canvasColor,
-        ),
-      ),
-      footerDivider: divider,
-      headerBuilder: (context, extended) {
-        return SizedBox(
-          height: 200,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Image.asset('images/pmha_logo_rembg.png'),
-          ),
-        );
-      },
-      items: [
-        SidebarXItem(
-          icon: Icons.home,
-          label: 'Home',
-          onTap: () {
-            debugPrint('Home');
-          },
-        ),
-        const SidebarXItem(
-          icon: Icons.schedule,
-          label: 'Schedule',
-        ),
-        const SidebarXItem(
-          icon: Icons.today,
-          label: 'Appointment',
-        ),
-      ],
-    );
+    return FutureBuilder(
+        future: isSuperUser(),
+        initialData: false,
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.deepPurpleAccent,
+              ),
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'An ${snapshot.error} occurred',
+                  style: const TextStyle(fontSize: 18, color: Colors.red),
+                ),
+              );
+            } else if (snapshot.hasData) {
+              final data = snapshot.data;
+              if (data == true) {
+                return SidebarX(
+                  controller: _controller,
+                  theme: SidebarXTheme(
+                    margin: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: canvasColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    hoverColor: scaffoldBackgroundColor,
+                    textStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                    selectedTextStyle: const TextStyle(color: Colors.white),
+                    itemTextPadding: const EdgeInsets.only(left: 30),
+                    selectedItemTextPadding: const EdgeInsets.only(left: 30),
+                    itemDecoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: canvasColor),
+                    ),
+                    selectedItemDecoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: actionColor.withOpacity(0.37),
+                      ),
+                      gradient: const LinearGradient(
+                        colors: [accentCanvasColor, canvasColor],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.28),
+                          blurRadius: 30,
+                        )
+                      ],
+                    ),
+                    iconTheme: IconThemeData(
+                      color: Colors.white.withOpacity(0.7),
+                      size: 20,
+                    ),
+                    selectedIconTheme: const IconThemeData(
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  extendedTheme: const SidebarXTheme(
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: canvasColor,
+                    ),
+                  ),
+                  footerDivider: divider,
+                  headerBuilder: (context, extended) {
+                    return SizedBox(
+                      height: 200,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Image.asset('images/pmha_logo_rembg.png'),
+                      ),
+                    );
+                  },
+                  items: [
+                    SidebarXItem(
+                      icon: Icons.home,
+                      label: 'Home',
+                      onTap: () {
+                        debugPrint('Home');
+                      },
+                    ),
+                    const SidebarXItem(
+                      icon: Icons.schedule,
+                      label: 'Schedule',
+                    ),
+                    const SidebarXItem(
+                      icon: Icons.today,
+                      label: 'Appointment',
+                    ),
+                    const SidebarXItem(
+                      icon: Icons.group,
+                      label: 'Users',
+                    ),
+                  ],
+                );
+              } else {
+                return SidebarX(
+                  controller: _controller,
+                  theme: SidebarXTheme(
+                    margin: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: canvasColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    hoverColor: scaffoldBackgroundColor,
+                    textStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                    selectedTextStyle: const TextStyle(color: Colors.white),
+                    itemTextPadding: const EdgeInsets.only(left: 30),
+                    selectedItemTextPadding: const EdgeInsets.only(left: 30),
+                    itemDecoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: canvasColor),
+                    ),
+                    selectedItemDecoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: actionColor.withOpacity(0.37),
+                      ),
+                      gradient: const LinearGradient(
+                        colors: [accentCanvasColor, canvasColor],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.28),
+                          blurRadius: 30,
+                        )
+                      ],
+                    ),
+                    iconTheme: IconThemeData(
+                      color: Colors.white.withOpacity(0.7),
+                      size: 20,
+                    ),
+                    selectedIconTheme: const IconThemeData(
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  extendedTheme: const SidebarXTheme(
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: canvasColor,
+                    ),
+                  ),
+                  footerDivider: divider,
+                  headerBuilder: (context, extended) {
+                    return SizedBox(
+                      height: 200,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Image.asset('images/pmha_logo_rembg.png'),
+                      ),
+                    );
+                  },
+                  items: [
+                    SidebarXItem(
+                      icon: Icons.home,
+                      label: 'Home',
+                      onTap: () {
+                        debugPrint('Home');
+                      },
+                    ),
+                    const SidebarXItem(
+                      icon: Icons.schedule,
+                      label: 'Schedule',
+                    ),
+                    const SidebarXItem(
+                      icon: Icons.today,
+                      label: 'Appointment',
+                    ),
+                  ],
+                );
+              }
+            }
+          }
+          // non data
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        });
   }
 }
 
@@ -173,28 +294,92 @@ class _ScreensExample extends StatelessWidget {
 
   final SidebarXController controller;
 
+  Future<bool?> isSuperUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? isSuper;
+
+    if (prefs.containsKey('is_super')) {
+      isSuper = prefs.getBool('is_super');
+    }
+    return isSuper;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return AnimatedBuilder(
-        animation: controller,
-        builder: (context, child) {
-          final pageTitle = _getTitleByIndex(controller.selectedIndex);
-          switch (controller.selectedIndex) {
-            case 0:
-              return MainBody();
-            case 1:
-              return ScheduleCalendarView();
-            case 2:
-              return AppointmentRequestsMainView();
+    return FutureBuilder(
+      future: isSuperUser(),
+      initialData: false,
+      builder: (BuildContext context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Colors.deepPurpleAccent,
+            ),
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'An ${snapshot.error} occurred',
+                style: const TextStyle(fontSize: 18, color: Colors.red),
+              ),
+            );
+          } else if (snapshot.hasData) {
+            final data = snapshot.data;
+            if (data == true) {
+              return AnimatedBuilder(
+                  animation: controller,
+                  builder: (context, child) {
+                    final pageTitle =
+                        _getTitleByIndexSuper(controller.selectedIndex);
+                    switch (controller.selectedIndex) {
+                      case 0:
+                        return MainBody();
+                      case 1:
+                        return ScheduleCalendarView();
+                      case 2:
+                        return AppointmentRequestsMainView();
+                      case 3:
+                        return AdminUsersMainView();
 
-            default:
-              return Text(
-                pageTitle,
-                style: theme.textTheme.headlineSmall,
-              );
+                      default:
+                        return Text(
+                          pageTitle,
+                          style: theme.textTheme.headlineSmall,
+                        );
+                    }
+                  });
+            } else {
+              return AnimatedBuilder(
+                  animation: controller,
+                  builder: (context, child) {
+                    final pageTitle =
+                        _getTitleByIndex(controller.selectedIndex);
+                    switch (controller.selectedIndex) {
+                      case 0:
+                        return MainBody();
+                      case 1:
+                        return ScheduleCalendarView();
+                      case 2:
+                        return AppointmentRequestsMainView();
+
+                      default:
+                        return Text(
+                          pageTitle,
+                          style: theme.textTheme.headlineSmall,
+                        );
+                    }
+                  });
+            }
           }
-        });
+        }
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
   }
 }
 
@@ -211,11 +396,31 @@ String _getTitleByIndex(int index) {
   }
 }
 
-const primaryColor = Color(0xFF445fd2);
-const canvasColor = Color(0xFF445fd2);
+String _getTitleByIndexSuper(int index) {
+  switch (index) {
+    case 0:
+      return 'Home';
+    case 1:
+      return 'Schedule';
+    case 2:
+      return 'Appointment';
+    case 3:
+      return 'Users';
+    default:
+      return 'Not found page';
+  }
+}
+
+const primaryColor = Colors.teal;
+const canvasColor = Colors.teal;
+const accentCanvasColor = Colors.tealAccent;
+final actionColor = Colors.teal.shade900;
+
+//const primaryColor = Color(0xFF445fd2);
+//const canvasColor = Color(0xFF445fd2);
 //const canvasColor = Color(0xFF445fd2);
 const scaffoldBackgroundColor = Color(0xFFf9fafb);
-const accentCanvasColor = Color(0xFF2196F3);
+//const accentCanvasColor = Color(0xFF2196F3);
 const white = Colors.white;
-final actionColor = const Color(0xFF5F5FA7).withOpacity(0.6);
+// final actionColor = const Color(0xFF5F5FA7).withOpacity(0.6);
 final divider = Divider(color: white.withOpacity(0.3), height: 1);

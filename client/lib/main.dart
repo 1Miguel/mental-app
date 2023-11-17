@@ -64,7 +64,7 @@ class _MyAppState extends State<MyApp> {
       this.setState(() {
         _debugLabelString =
             "Clicked notification: \n${event.notification.jsonRepresentation().replaceAll("\\n", "\n")}";
-        print(_debugLabelString);
+        //print(_debugLabelString);
       });
     });
 

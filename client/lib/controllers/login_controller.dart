@@ -1,6 +1,7 @@
 // Standard import
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 // Local import
 import 'package:flutter_intro/ui_views/login_views.dart';
@@ -77,15 +78,25 @@ class LoginController extends GetxController {
           await prefs?.setString('first_name', userdata['firstname']);
           await prefs?.setString('last_name', userdata['lastname']);
           await prefs?.setString('username', userdata['username']);
+          await prefs?.setBool('is_admin', userdata['is_admin']);
+          await prefs?.setBool('is_super', userdata['is_super']);
           await prefs?.setString('islogged_in', "true");
           emailController.clear();
           passwordController.clear();
 
           if (userdata['email'] == "admin0@mentalapp.com") {
             Get.off(() => AdminApp());
+          } else if (userdata['email'] == "superadmin0@mentalapp.com") {
+            Get.off(() => AdminApp());
           } else {
             //Go to Home
-            Get.off(() => WelcomePage());
+            if (kIsWeb) {
+              await prefs?.setString('islogged_in', "false");
+              prefs?.remove("islogged_in");
+              Get.off(() => LoginMainPage());
+            } else {
+              Get.off(() => WelcomePage());
+            }
           }
         } else {
           // If the server did not return a 201 CREATED response,

@@ -14,47 +14,86 @@ import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:get/get.dart';
 
-class AppointmentRequestsMainView extends StatelessWidget {
+class AppointmentRequestsMainView extends StatefulWidget {
+  const AppointmentRequestsMainView({super.key});
+
+  @override
+  _AppointmentRequestsMainViewState createState() =>
+      _AppointmentRequestsMainViewState();
+}
+
+class _AppointmentRequestsMainViewState
+    extends State<AppointmentRequestsMainView> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       initialIndex: 0,
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: Text(
             'Appointments Request List',
             style: TextStyle(
-              color: primaryBlue,
+              color: loginDarkTeal,
               fontSize: 20,
               fontWeight: FontWeight.w600,
               fontFamily: 'Roboto',
             ),
           ),
-          bottom: const TabBar(
+          bottom: TabBar(
+            labelColor: loginDarkTeal,
+            indicatorColor: Colors.tealAccent,
             tabs: <Widget>[
-              Tab(
-                text: 'All Appointments',
-              ),
               Tab(
                 text: 'Pending',
               ),
               Tab(
                 text: 'Approved',
               ),
+              Tab(
+                text: 'Cancelled',
+              ),
+              Tab(
+                text: 'All Appointments',
+              ),
             ],
           ),
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: <Widget>[
             Center(
-              child: AppointmentsTable(),
+              child: AppointmentsTable(
+                filter: "pending",
+                onPressed: () {
+                  setState(() {});
+                },
+              ),
             ),
             Center(
-              child: AppointmentsTable(),
+              child: AppointmentsTable(
+                filter: "reserved",
+                onPressed: () {
+                  setState(() {});
+                },
+              ),
             ),
             Center(
-              child: AppointmentsTable(),
+              child: AppointmentsTable(
+                filter: "cancelled",
+                onPressed: () {
+                  setState(() {});
+                },
+              ),
+            ),
+            Center(
+              child: AppointmentsTable(
+                filter: "",
+                onPressed: () {
+                  setState(() {
+                    print('set state in tab');
+                  });
+                },
+              ),
             ),
           ],
         ),
@@ -63,16 +102,38 @@ class AppointmentRequestsMainView extends StatelessWidget {
   }
 }
 
-class AppointmentsTable extends StatelessWidget {
+class AppointmentsTable extends StatefulWidget {
+  /// Creates the home page.
+  final VoidCallback onPressed;
+  final String filter;
   const AppointmentsTable({
     super.key,
+    required this.onPressed,
+    required this.filter,
   });
+
+  @override
+  _AppointmentsTableState createState() =>
+      _AppointmentsTableState(onPressed: onPressed, filter: filter);
+}
+
+class _AppointmentsTableState extends State<AppointmentsTable> {
+  final VoidCallback onPressed;
+  final String filter;
+
+  _AppointmentsTableState({required this.onPressed, required this.filter});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 1200,
-      child: AppointmentRequestsView(),
+      child: AppointmentRequestsView(
+        onPressed: () {
+          setState(() {});
+          onPressed();
+        },
+        filter: filter,
+      ),
     );
   }
 }
@@ -83,10 +144,14 @@ bool showLoadingIndicator = true;
 /// The home page of the application which hosts the datagrid.
 class AppointmentRequestsView extends StatefulWidget {
   /// Creates the home page.
-  const AppointmentRequestsView({Key? key}) : super(key: key);
+  final VoidCallback onPressed;
+  final String filter;
+  const AppointmentRequestsView(
+      {super.key, required this.onPressed, required this.filter});
 
   @override
-  _AppointmentRequestsState createState() => _AppointmentRequestsState();
+  _AppointmentRequestsState createState() =>
+      _AppointmentRequestsState(onPressed: onPressed, filter: filter);
 }
 
 class _AppointmentRequestsState extends State<AppointmentRequestsView> {
@@ -95,6 +160,10 @@ class _AppointmentRequestsState extends State<AppointmentRequestsView> {
   late Future<List<AppointmentInfo>> futureAppointmentList;
   AppointmentController appointmentController =
       Get.put(AppointmentController());
+  final VoidCallback onPressed;
+  final String filter;
+
+  _AppointmentRequestsState({required this.onPressed, required this.filter});
 
   @override
   void initState() {
@@ -105,6 +174,7 @@ class _AppointmentRequestsState extends State<AppointmentRequestsView> {
         setState(() {
           print("set state in parent");
         });
+        onPressed();
       },
     );
   }
@@ -112,6 +182,7 @@ class _AppointmentRequestsState extends State<AppointmentRequestsView> {
   Future<List<AppointmentInfo>> fethAppointmentRequests() async {
     futureAppointmentList = appointmentController.fetchAppointmentInfo();
     print(futureAppointmentList);
+    print("fetched Updated Lists");
     return futureAppointmentList;
   }
 
@@ -135,95 +206,56 @@ class _AppointmentRequestsState extends State<AppointmentRequestsView> {
                       setState(() {
                         print("set state in main");
                       });
+                      onPressed();
                     });
+                if (filter == "pending") {
+                  appointmentDataSource.addFilter(
+                      'status',
+                      FilterCondition(
+                          type: FilterType.equals, value: "PENDING"));
+                }
+                if (filter == "reserved") {
+                  appointmentDataSource.addFilter(
+                      'status',
+                      FilterCondition(
+                          type: FilterType.equals, value: "RESERVED"));
+                }
+                if (filter == "cancelled") {
+                  appointmentDataSource.addFilter(
+                      'status',
+                      FilterCondition(
+                          type: FilterType.equals, value: "CANCELLED"));
+                }
                 return Column(
                   children: [
                     Container(
                       height: constraint.maxHeight - _dataPagerHeight,
                       child: SfDataGridTheme(
                         data: SfDataGridThemeData(
-                            headerColor: primaryLightBlue,
+                            headerColor: Colors.teal,
                             headerHoverColor: backgroundColor),
                         child: SfDataGrid(
+                          allowPullToRefresh: true,
+                          allowFiltering: true,
                           source: appointmentDataSource,
                           columnWidthMode: ColumnWidthMode.fill,
-                          columns: <GridColumn>[
-                            GridColumn(
-                                minimumWidth: 150,
-                                maximumWidth: 250,
-                                columnName: 'id',
-                                label: Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    alignment: Alignment.center,
-                                    child: const Text('Appointment ID'))),
-                            GridColumn(
-                                minimumWidth: 200,
-                                maximumWidth: 300,
-                                columnName: 'patientId',
-                                label: Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    alignment: Alignment.center,
-                                    child: const Text('Patient ID'))),
-                            GridColumn(
-                                minimumWidth: 200,
-                                maximumWidth: 300,
-                                columnName: 'center',
-                                label: Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    alignment: Alignment.center,
-                                    child: const Text('Consulation Type',
-                                        overflow: TextOverflow.ellipsis))),
-                            GridColumn(
-                                minimumWidth: 200,
-                                maximumWidth: 300,
-                                columnName: 'date',
-                                label: Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    alignment: Alignment.center,
-                                    child: const Text('Date',
-                                        overflow: TextOverflow.ellipsis))),
-                            GridColumn(
-                                minimumWidth: 200,
-                                maximumWidth: 300,
-                                columnName: 'timeSlot',
-                                label: Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    alignment: Alignment.center,
-                                    child: const Text('Time Slot',
-                                        overflow: TextOverflow.ellipsis))),
-                            GridColumn(
-                                minimumWidth: 200,
-                                maximumWidth: 300,
-                                columnName: 'status',
-                                label: Container(
-                                    padding: const EdgeInsets.all(8.0),
-                                    alignment: Alignment.center,
-                                    child: const Text('Status'))),
-                            GridColumn(
-                              minimumWidth: 300,
-                              maximumWidth: 350,
-                              columnName: 'button',
-                              label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                child: const Text('Action '),
-                              ),
-                            ),
-                          ],
+                          columns: getColumns,
+
+                          allowSorting: true,
                           //selectionMode: SelectionMode.multiple,
                         ),
                       ),
                     ),
-                    Container(
-                      height: _dataPagerHeight,
-                      color: Colors.white,
-                      child: SfDataPager(
-                        pageCount:
-                            (requestList.length / rowsPerPage).ceilToDouble(),
-                        delegate: appointmentDataSource,
-                        direction: Axis.horizontal,
-                      ),
-                    )
+                    // Container(
+                    //   height: _dataPagerHeight,
+                    //   color: Colors.white,
+                    //   child: SfDataPager(
+                    //     pageCount:
+                    //         (requestList.length / rowsPerPage).ceilToDouble(),
+                    //     delegate: appointmentDataSource,
+                    //     direction: Axis.horizontal,
+                    //   ),
+                    // )
                   ],
                 );
               } else {
@@ -233,22 +265,148 @@ class _AppointmentRequestsState extends State<AppointmentRequestsView> {
       );
     });
   }
+
+  List<GridColumn> get getColumns {
+    return <GridColumn>[
+      GridColumn(
+          minimumWidth: 150,
+          maximumWidth: 250,
+          columnName: 'id',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.center,
+              child: const Text(
+                'Appointment ID',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ))),
+      GridColumn(
+          minimumWidth: 200,
+          maximumWidth: 300,
+          columnName: 'patientName',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.center,
+              child: const Text(
+                'Patient Name',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ))),
+      GridColumn(
+          minimumWidth: 200,
+          maximumWidth: 300,
+          columnName: 'serviceType',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.center,
+              child: const Text(
+                'Service Type',
+                overflow: TextOverflow.ellipsis,
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ))),
+      GridColumn(
+          minimumWidth: 200,
+          maximumWidth: 300,
+          columnName: 'concern',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.center,
+              child: const Text(
+                'Concerns',
+                overflow: TextOverflow.ellipsis,
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ))),
+      GridColumn(
+          minimumWidth: 200,
+          maximumWidth: 300,
+          columnName: 'date',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.center,
+              child: const Text(
+                'Date',
+                overflow: TextOverflow.ellipsis,
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ))),
+      GridColumn(
+          minimumWidth: 200,
+          maximumWidth: 300,
+          columnName: 'timeSlot',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.center,
+              child: const Text(
+                'Time Slot',
+                overflow: TextOverflow.ellipsis,
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ))),
+      GridColumn(
+          minimumWidth: 200,
+          maximumWidth: 300,
+          columnName: 'status',
+          label: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.center,
+              child: const Text(
+                'Status',
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ))),
+      GridColumn(
+        minimumWidth: 300,
+        maximumWidth: 350,
+        columnName: 'button',
+        allowSorting: false,
+        label: Container(
+          padding: const EdgeInsets.all(8.0),
+          alignment: Alignment.center,
+          child: const Text(
+            'Action ',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+    ];
+  }
 }
 
 class AppointmentDataSource extends DataGridSource {
   final VoidCallback onPressed;
   AdminAppointmentController adminAppointmentController =
       Get.put(AdminAppointmentController());
+  late VoidCallback onApprovedSetState;
+
+  String getServiceTypeString(String serviceType) {
+    if (serviceType == "OCCUPATIONAL_THERAPY") {
+      return "Occupational Therapy";
+    } else if (serviceType == "PSYCHIATRIC_CONSULTATION") {
+      return "Psychiatric Consultation";
+    } else if (serviceType == "COUNSELING") {
+      return "Counseling";
+    } else if (serviceType == "PSYCHOLOGICAL_ASSESMENT") {
+      return "Psychological Assesment";
+    }
+    return "Unknown Service";
+  }
 
   /// Creates the employee data source class with required details.
   AppointmentDataSource(
       {required List<AppointmentInfo> appointmentData,
       required this.onPressed}) {
+    onApprovedSetState = onPressed;
     _appointmentDataGridRows = appointmentData
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
-              DataGridCell<int>(columnName: 'patientId', value: e.patientId),
-              DataGridCell<String>(columnName: 'center', value: e.center),
+              DataGridCell<String>(
+                  columnName: 'patientName', value: e.patientName),
+              DataGridCell<String>(
+                  columnName: 'serviceType',
+                  value: getServiceTypeString(e.service)),
+              DataGridCell<String>(columnName: 'concern', value: e.concern),
               DataGridCell<String>(columnName: 'date', value: e.date),
               DataGridCell<String>(
                   columnName: 'timeSlot', value: '${e.startTime}-${e.endTime}'),
@@ -257,22 +415,26 @@ class AppointmentDataSource extends DataGridSource {
             ]))
         .toList();
     _appointmentData = appointmentData;
-    _paginatedRows = appointmentData
-        .getRange(
-            0,
-            appointmentData.length < rowsPerPage
-                ? appointmentData.length
-                : rowsPerPage)
-        .toList(growable: false);
+    // _paginatedRows = appointmentData
+    //     .getRange(
+    //         0,
+    //         appointmentData.length < rowsPerPage
+    //             ? appointmentData.length
+    //             : rowsPerPage)
+    //     .toList(growable: false);
     buildDataGridRow();
   }
 
   void buildDataGridRow() {
-    _appointmentDataGridRows = _paginatedRows
+    _appointmentDataGridRows = _appointmentData
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<int>(columnName: 'id', value: e.id),
-              DataGridCell<int>(columnName: 'patientId', value: e.patientId),
-              DataGridCell<String>(columnName: 'center', value: e.center),
+              DataGridCell<String>(
+                  columnName: 'patientName', value: e.patientName),
+              DataGridCell<String>(
+                  columnName: 'serviceType',
+                  value: getServiceTypeString(e.service)),
+              DataGridCell<String>(columnName: 'concern', value: e.concern),
               DataGridCell<String>(columnName: 'date', value: e.date),
               DataGridCell<String>(
                   columnName: 'timeSlot', value: '${e.startTime}-${e.endTime}'),
@@ -314,7 +476,7 @@ class AppointmentDataSource extends DataGridSource {
                   ? LayoutBuilder(builder:
                       (BuildContext context, BoxConstraints constraints) {
                       var enabled =
-                          row.getCells()[5].value.toString() == "PENDING"
+                          row.getCells()[6].value.toString() == "PENDING"
                               ? true
                               : false;
                       return Row(
@@ -330,6 +492,15 @@ class AppointmentDataSource extends DataGridSource {
                                         _onApproveButtonPressed(
                                             context, row.getCells()[0].value),
                                       },
+                              // onPressed: enabled == false
+                              //     ? null
+                              //     : () => {
+                              //           _onApproveButtonPressed(
+                              //               context, row.getCells()[0].value),
+                              //           onPressed(),
+                              //           onApprovedSetState(),
+                              //           onPressed(),
+                              //         },
                               style: ButtonStyle(
                                   minimumSize: MaterialStateProperty.all<Size>(
                                       Size(40, 40)),
@@ -396,7 +567,7 @@ class AppointmentDataSource extends DataGridSource {
             style: TextStyle(color: Colors.white, fontSize: 18),
           ),
           onPressed: () {
-            adminAppointmentController.approveAppointment(id);
+            adminAppointmentController.approveAppointment(id, onPressed);
             Navigator.of(context, rootNavigator: true).pop();
             onPressed();
             buildDataGridRow();
@@ -431,7 +602,7 @@ class AppointmentDataSource extends DataGridSource {
             style: TextStyle(color: Colors.white, fontSize: 18),
           ),
           onPressed: () {
-            adminAppointmentController.cancelAppointment(id);
+            adminAppointmentController.cancelAppointment(id, onPressed);
             Navigator.of(context, rootNavigator: true).pop();
             onPressed();
             buildDataGridRow();
