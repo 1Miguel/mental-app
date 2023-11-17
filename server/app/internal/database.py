@@ -153,6 +153,7 @@ class ArchiveUserModel(UserModel):
             created=self.created,
         )
 
+
 ArchiveUserSchema = pydantic_model_creator(ArchiveUserModel)
 
 
@@ -162,7 +163,9 @@ class BannedUsersModel(Model):
     when = DatetimeField(auto_now=True)
     status = BooleanField(default=True)
 
+
 BannedUserSchema = pydantic_model_creator(BannedUsersModel)
+
 
 class UserSettingModel(Model):
     id = IntField(pk=True)
@@ -242,6 +245,10 @@ class ThreadModel(Model):
     num_likes = IntField(default=0)
     num_comments = IntField(default=0)
 
+
+ThreadModelSchema = pydantic_model_creator(ThreadModel)
+
+
 class BannedThreadModel(Model):
     id = IntField(pk=True)
     creator = CharField(max_length=64)
@@ -249,7 +256,43 @@ class BannedThreadModel(Model):
     content = CharField(max_length=256)
     created = DatetimeField(auto_now=True)
 
+
 BannedThreadSchema = pydantic_model_creator(BannedThreadModel)
+
+
+class ArchivedThreadModel(ThreadModel):
+    """Archived thread model."""
+
+    async def recover_thread(self) -> ThreadModel:
+        return ThreadModel.create(
+            id=self.id,
+            user=self.user,
+            creator=self.creator,
+            created=self.created,
+            topic=self.topic,
+            content=self.content,
+            comments=self.comments,
+            num_likes=self.num_likes,
+            num_comments=self.num_comments,
+        )
+
+    @classmethod
+    async def archive_thread(cls, thread: ThreadModel) -> "ArchivedThreadModel":
+        return cls.create(
+            id=thread.id,
+            user=thread.user,
+            creator=thread.creator,
+            created=thread.created,
+            topic=thread.topic,
+            content=thread.content,
+            comments=thread.comments,
+            num_likes=thread.num_likes,
+            num_comments=thread.num_comments,
+        )
+
+
+ArchivedThreadSchema = pydantic_model_creator(ArchivedThreadModel)
+
 
 class ThreadCommentModel(Model):
     id = IntField(pk=True)
