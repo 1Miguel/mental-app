@@ -19,7 +19,8 @@ log.addHandler(handler)
 
 IP_ADDRESS = "192.168.1.10:8080"
 USER_ID = random.randint(0, 100)
-
+USER_NAME = f"johndoe{USER_ID}@gmail.com"
+SUPER_USERNAME = "superadmin0@mentalapp.com"
 
 class _Helpers:
     """Baseclass that contains all helper functions.
@@ -31,22 +32,10 @@ class _Helpers:
     def tearDown(self):
         self.client.close()
 
-    def helper_login_routine(self) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-        """Helper function for logging in.
-
-        Returns:
-            Tuple[Dict[str, str]]: Returns two things,
-                the access token and the user profile.
-        """
+    def _login_request(self, data: Dict[str, str]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-        }
-        data = {
-            "grant_type": "password",
-            "code": "1",
-            "username": f"johndoe{USER_ID}@gmail.com",
-            "password": "testpassword",
         }
         token = self.client.post(f"http://{IP_ADDRESS}/token", headers=headers, data=data).json()
         access_token = token["access_token"]
@@ -54,6 +43,30 @@ class _Helpers:
         headers = {"Authorization": f"{token_type} {access_token}"}
         user = self.client.get(f"http://{IP_ADDRESS}/login", headers=headers)
         return headers, user.json()
+
+    def helper_login_super_user_routine(self) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        data = {
+            "grant_type": "password",
+            "code": "1",
+            "username": SUPER_USERNAME,
+            "password": "testsuperadminpassword",
+        }
+        return self._login_request(data)
+
+    def helper_login_routine(self) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        """Helper function for logging in.
+
+        Returns:
+            Tuple[Dict[str, str]]: Returns two things,
+                the access token and the user profile.
+        """
+        data = {
+            "grant_type": "password",
+            "code": "1",
+            "username": USER_NAME,
+            "password": "testpassword",
+        }
+        return self._login_request(data)
 
 
 class TestFeature1AccountFeature(_Helpers, unittest.TestCase):
@@ -446,11 +459,20 @@ class TestFeature5AdminFeature(_Helpers, unittest.TestCase):
 
       Requirements:
     ----------------
-        [4.1. Appointments]
-            4.1.1. As an Admin I must be able to view all appointments.
-            4.1.2. As an Admin I must be able to approve/decline/ignore appointment schedule.
+        [5.1. Appointments]
+            5.1.1. As an Admin I must be able to view all appointments.
+            5.1.2. As an Admin I must be able to approve/decline/ignore appointment schedule.
     """
 
+class TestFeature6SuperAdminFeature(_Helpers, unittest.TestCase):
+    """Feature 4:  AAdmin Features.
+
+      Requirements:
+    ----------------
+        [6.1. Appointments]
+            6.1.1. As an Super Admin I must be able to delete and archive a user.
+            6.1.2. As an Admin I must be able to recover an archived user.
+    """
 
 if __name__ == "__main__":
     unittest.main()

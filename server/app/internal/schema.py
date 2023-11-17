@@ -253,3 +253,8 @@ class PasswordChangeReqApi(BaseModel):
 class ForgotPasswordChangeReqApi(BaseModel):
     new_password: str = Field(..., min_length=8)
     user_email: str
+
+class ArchiveFilterApi:
+    id: int = 0
+    user_id: int = 0
+    email: str = ""

@@ -179,13 +179,13 @@ class AccountManager:
         self._routing.add_api_route(
             "/user/notification/{notif_id}",
             self.get_notification,
-            methods=["POST"],
+            methods=["GET"],
             response_model=NotificationSchema,
         )
         self._routing.add_api_route(
             "/user/notification/",
             self.get_all_notificaton,
-            methods=["POST"],
+            methods=["GET"],
             response_model=List[NotificationSchema],
         )
 
@@ -376,7 +376,7 @@ class AccountManager:
                 notif_data.save()
         except DoesNotExist:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Notificaton not found.")
-        return NotificationSchema.from_tortoise_orm(notif_data)
+        return await NotificationSchema.from_tortoise_orm(notif_data)
 
     async def get_all_notificaton(self, user: UserProfileApi = Depends(get_current_user)) -> List[NotificationSchema]:
         """GET all user history of notifications from the database.

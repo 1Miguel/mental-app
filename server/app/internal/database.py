@@ -21,6 +21,7 @@ from tortoise.fields import (
     ReverseRelation,
     BooleanField,
 )
+from tortoise.contrib.pydantic import pydantic_model_creator
 
 
 def _iso_datetime_month(d: datetime) -> str:
@@ -117,11 +118,12 @@ class ArchiveUserModel(UserModel):
 
     This is a direct copy of the usermodel."""
 
-    archived = DatetimeField(auto_now=True)
+    archived_when = DatetimeField(auto_now=True)
 
     @classmethod
     async def archive(cls, user: UserModel):
         return await ArchiveUserModel.create(
+            id=user.id,
             email=user.email,
             password_hash=user.password_hash,
             firstname=user.firstname,
@@ -135,22 +137,23 @@ class ArchiveUserModel(UserModel):
             created=user.created,
         )
 
-    @classmethod
-    async def recover(cls, archive_id: int) -> UserModel:
-        archived_user = await ArchiveUserModel.get(id=archive_id)
+    async def recover(self, email: str) -> UserModel:
         return await UserModel.create(
-            email=archived_user.email,
-            password_hash=archived_user.password_hash,
-            firstname=archived_user.firstname,
-            lastname=archived_user.lastname,
-            username=archived_user.username,
-            address=archived_user.address,
-            age=archived_user.age,
-            occupation=archived_user.occupation,
-            birthday=archived_user.birthday,
-            mobile_number=archived_user.mobile_number,
-            created=archived_user.created,
+            id=self.id,
+            email=self.email,
+            password_hash=self.password_hash,
+            firstname=self.firstname,
+            lastname=self.lastname,
+            username=self.username,
+            address=self.address,
+            age=self.age,
+            occupation=self.occupation,
+            birthday=self.birthday,
+            mobile_number=self.mobile_number,
+            created=self.created,
         )
+
+ArchiveUserSchema = pydantic_model_creator(ArchiveUserModel)
 
 
 class BannedUsersModel(Model):

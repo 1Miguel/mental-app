@@ -5,7 +5,7 @@ date: 02/11/2023
 # ---- Standard
 import logging
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 from datetime import datetime, date
 
 # ---- Thirdparty
@@ -23,6 +23,8 @@ class _AdminUserAction(str, Enum):
     BAN = "ban"
     UNBAN = "unban"
 
+class _AdminArchiveAction(str, Enum):
+    RECOVER = "recover"
 
 class _AdminAppointmentFilter(str, Enum):
     ALL = "all"
@@ -89,6 +91,27 @@ class AdminManager:
             self.admin_user_action,
             methods=["POST"],
             description='Possibe action ["ban", "unban"]',
+        )
+        self._routing.add_api_route(
+            "/admin/archive/",
+            self.admin_archive_get_all,
+            methods=["GET"],
+            description='Get the all archive data',
+            response_model=List[ArchiveUserSchema]
+        )
+        self._routing.add_api_route(
+            "/admin/archive/recover/",
+            self.admin_recover_user,
+            methods=["POST"],
+            description='Do action on archive data',
+            response_model=UserProfileApi
+        )
+        self._routing.add_api_route(
+            "/admin/archive/query/",
+            self.admin_archive_get,
+            methods=["GET"],
+            description='Get an archive data',
+            response_model=ArchiveUserSchema
         )
 
     async def setup_default_admin(self, email: str, password: str, is_super: bool = False) -> None:
@@ -231,3 +254,40 @@ class AdminManager:
             return UserProfileApi.from_model(await UserModel.get(id=user_id))
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, f"user {user_id} not found") from exc
+
+    async def admin_archive_get(self, id: Optional[int]=None, email: Optional[str]=None, admin: UserProfileApi = Depends(get_super_admin_user)) -> None:
+        self._log.error("Get all archives with filter (id: %s, email: %s)", id, email)
+        _filter = {}
+        if id:
+            _filter["id"] = id
+        if email:
+            _filter["email"] = email
+        if not _filter:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Invalid Query Parameters.")
+        try:
+            return await ArchiveUserSchema.from_queryset_single(ArchiveUserModel.get(**_filter))
+        except DoesNotExist:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"cannot find archive with filter {_filter}")
+
+    async def admin_recover_user(self, email: str, admin: UserProfileApi = Depends(get_super_admin_user)) -> UserProfileApi:
+        """Recover a user account using user email."""
+        self._log.error("Recovering user %s", email)
+        if await UserModel.exists(email=email):
+            # check if this user is active, if not then recover
+            self._log.error("User is still active")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, f"User profile with {email} already exists")
+        try:
+            archive = await ArchiveUserModel.get(email=email)
+        except DoesNotExist:
+            self._log.error("Archive with email %s does not exist", email)
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Profile with email {email} never existed.")
+
+        user = UserProfileApi.from_model(await archive.recover(email=email))
+        # then delete the archive profile
+        await archive.delete()
+        self._log.error("User successfully recovered %s", archive)
+        return user
+
+    async def admin_archive_get_all(self, admin: UserProfileApi = Depends(get_super_admin_user)) -> List[ArchiveUserSchema]:
+        """Get all archive data model."""
+        return await ArchiveUserSchema.from_queryset(ArchiveUserModel.all().order_by("-archived_when"))
