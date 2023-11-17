@@ -373,7 +373,7 @@ class AccountManager:
             if not notif_data.is_read:
                 notif_data.is_read = True
                 notif_data.read = datetime.now()
-                notif_data.save()
+                await notif_data.save()
         except DoesNotExist:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Notificaton not found.")
         return await NotificationSchema.from_tortoise_orm(notif_data)
