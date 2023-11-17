@@ -188,6 +188,12 @@ class AccountManager:
             methods=["GET"],
             response_model=List[NotificationSchema],
         )
+        self._routing.add_api_route(
+            "/user/notification/unread/",
+            self.get_unread_notificaton,
+            methods=["GET"],
+            response_model=int,
+        )
 
     @property
     def router(self) -> APIRouter:
@@ -391,3 +397,7 @@ class AccountManager:
             await NotificationSchema.from_tortoise_orm(notif_data)
             for notif_data in await NotificationMessageModel.filter(user__id=user.id).order_by("-created")
         ]
+
+    async def get_unread_notificaton() -> int:
+        """Returns the count of threads pending to be read."""
+        return await NotificationMessageModel.filter(is_read=False).count()
