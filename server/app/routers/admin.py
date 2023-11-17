@@ -89,7 +89,7 @@ class AdminManager:
             description="Delete a user",
         )
         self._routing.add_api_route(
-            "/admin/user/banned/",
+            "/admin/user/banned/all/",
             self.admin_get_banned_users,
             methods=["GET"],
             response_model=List[UserProfileApi],
@@ -123,7 +123,7 @@ class AdminManager:
             response_model=ArchiveUserSchema,
         )
         self._routing.add_api_route(
-            "/user/thread/banned/",
+            "/admin/thread/banned/",
             self.get_banned_thread_list,
             methods=["GET"],
             response_model=List[BannedThreadSchema],
@@ -259,7 +259,8 @@ class AdminManager:
             if await BannedUsersModel.exists(user__id=profile.id, status=True):
                 # Quick fix, TODO: put this in from model
                 profile.status = "BANNED"
-            profiles += [profile]
+            else:
+                profiles += [profile]
         return profiles
 
     async def admin_get_user(
@@ -314,14 +315,16 @@ class AdminManager:
         self, admin: UserProfileApi = Depends(get_super_admin_user)
     ) -> List[ArchiveUserSchema]:
         """Get all archive data model."""
-        return await ArchiveUserSchema.from_queryset(await ArchiveUserModel.all().order_by("-archived_when"))
+        return await ArchiveUserSchema.from_queryset(ArchiveUserModel.all().order_by("-archived_when"))
 
     async def get_banned_thread_list(self) -> List[BannedThreadSchema]:
-        return await BannedThreadSchema.from_queryset(await BannedThreadModel.all().order_by("-created"))
+        return await BannedThreadSchema.from_queryset(BannedThreadModel.all().order_by("-created"))
 
     async def admin_get_banned_users(
         self, admin: UserProfileApi = Depends(get_super_admin_user)
     ) -> List[UserProfileApi]:
-        return await [
-            UserProfileApi.from_model(model) for model in await UserModel.filter(status="BANNED").order_by("id")
+        data = [
+            UserProfileApi.from_model(await model.user) for model in await BannedUsersModel.filter(status=True)
         ]
+        self._log.info("Get all banned users %s...", data)
+        return data

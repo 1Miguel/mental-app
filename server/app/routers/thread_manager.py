@@ -95,10 +95,18 @@ class ThreadManager:
     ) -> Any:
         """User create and submits a new thread."""
         model = ThreadModel
+        user = await UserModel.get(email=user.email)
+        self._log.info("New Thread Create %s %s.", thread_request.topic, thread_request.content)
         if _profanity.contains_profanity(thread_request.topic) or _profanity.contains_profanity(thread_request.content):
+            self._log.info("Thread contains profanity.")
             model = BannedThreadModel
+            if not await BannedUsersModel.exists(user=user, status=True):
+                # this user is not yet banned, ban now
+                await BannedUsersModel(user=user).save()
+            
+            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="This post violates the community rules.")
         await model.create(
-            user=await UserModel.get(email=user.email),
+            user=user,
             creator=thread_request.creator,
             topic=thread_request.topic,
             content=thread_request.content,
