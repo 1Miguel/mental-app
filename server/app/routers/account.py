@@ -398,6 +398,6 @@ class AccountManager:
             for notif_data in await NotificationMessageModel.filter(user__id=user.id).order_by("-created")
         ]
 
-    async def get_unread_notificaton() -> int:
+    async def get_unread_notificaton(self) -> int:
         """Returns the count of threads pending to be read."""
         return await NotificationMessageModel.filter(is_read=False).count()

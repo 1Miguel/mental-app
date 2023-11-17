@@ -230,31 +230,6 @@ class MoodModel(Model):
         return q[0] if q else None
 
 
-class MembershipModel(Model):
-    """Membership model. Contains information related to
-    a user membership which includes type of membership
-    and expiration date.
-
-    The status field indicatest the membership status
-        - ACTIVE: membership is active and can be cancelled
-        - EXPIRED: membership is at past expiration date,
-                membership could be renewed, which will change status
-                back to ACTIVE.
-        - CANCELLED: membership was cancelled. When membership is cancelled
-                cancel_reason and cancel_suggestion might contain some data.
-                Will only get to this status from ACTIVE.
-    """
-
-    id = IntField(pk=True)
-    user = ForeignKeyField("models.UserModel")
-    type = IntEnumField(MembershipType)
-    start_time = DateField(default=datetime.today())
-    end_time = DateField(default=datetime.today())
-    status = CharEnumField(MembershipStatus, max_length=64)
-    cancel_reason = CharField(max_length=160, default="")
-    cancel_suggestion = CharField(max_length=160, default="")
-
-
 class ThreadModel(Model):
     id = IntField(pk=True)
     user = ForeignKeyField("models.UserModel")
@@ -266,6 +241,12 @@ class ThreadModel(Model):
     num_likes = IntField(default=0)
     num_comments = IntField(default=0)
 
+class BannedThreadModel(Model):
+    id = IntField(pk=True)
+    creator = CharField(max_length=64)
+    topic = CharField(max_length=160)
+    content = CharField(max_length=256)
+    created = DatetimeField(auto_now=True)
 
 class ThreadCommentModel(Model):
     id = IntField(pk=True)
