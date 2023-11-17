@@ -87,6 +87,13 @@ class AdminManager:
             description="Delete a user",
         )
         self._routing.add_api_route(
+            "/admin/user/banned/",
+            self.admin_get_banned_users,
+            methods=["GET"],
+            response_model=List[BannedUserSchema],
+            description="Get all banned user",
+        )
+        self._routing.add_api_route(
             "/admin/user/{user_id}/{action}/",
             self.admin_user_action,
             methods=["POST"],
@@ -296,7 +303,10 @@ class AdminManager:
 
     async def admin_archive_get_all(self, admin: UserProfileApi = Depends(get_super_admin_user)) -> List[ArchiveUserSchema]:
         """Get all archive data model."""
-        return await ArchiveUserSchema.from_queryset(ArchiveUserModel.all().order_by("-archived_when"))
+        return await ArchiveUserSchema.from_queryset(await ArchiveUserModel.all().order_by("-archived_when"))
 
     async def get_banned_thread_list(self) -> List[BannedThreadSchema]:
-        return await BannedThreadSchema.from_queryset(BannedThreadModel.all().order_by('-created'))
+        return await BannedThreadSchema.from_queryset(await BannedThreadModel.all().order_by('-created'))
+
+    async def admin_get_banned_users(self, admin: UserProfileApi = Depends(get_super_admin_user)) -> List[BannedUserSchema]:
+        return await BannedUserSchema.from_queryset(await BannedUsersModel.all().order_by('id'))

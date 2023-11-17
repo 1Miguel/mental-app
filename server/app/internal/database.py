@@ -162,6 +162,7 @@ class BannedUsersModel(Model):
     when = DatetimeField(auto_now=True)
     status = BooleanField(default=True)
 
+BannedUserSchema = pydantic_model_creator(BannedUsersModel)
 
 class UserSettingModel(Model):
     id = IntField(pk=True)
