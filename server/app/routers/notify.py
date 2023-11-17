@@ -97,16 +97,23 @@ class Notifier(object):
             )
         except OneSignalHTTPError as exc:
             self._log.error(
-                "OneSignal Erorr: %s | %s | %s", exc.http_response, exc.status_code, exc.message
+                "OneSignal Erorr: %s | %s | %s",
+                exc.http_response,
+                exc.status_code,
+                exc.message,
             )
 
     async def notify(
-        self, user: UserModel, topic: str, title: str, message: str, *, segment=DEFAULT_SEGMENT
+        self,
+        user: UserModel,
+        topic: str,
+        title: str,
+        message: str,
+        *,
+        segment=DEFAULT_SEGMENT,
     ) -> None:
         """Send a push notification to a user."""
-        await NotificationMessageModel.create(
-            user=user, segment=segment, title=title, message=message
-        )
+        await NotificationMessageModel.create(user=user, segment=segment, title=title, message=message)
         await self._push_notify(
             title,
             segments=[

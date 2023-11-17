@@ -68,9 +68,7 @@ class Notifier(object):
             self.get_notification,
             methods=["POST"],
         )
-        self._routing.add_api_route(
-            "/user/notification/}", self.get_all_notificaton, methods=["POST"]
-        )
+        self._routing.add_api_route("/user/notification/}", self.get_all_notificaton, methods=["POST"])
 
     async def _new_segment(self, name: str) -> OneSignalResponse:
         return await self._client.create_segment({"name": name})
@@ -107,9 +105,7 @@ class Notifier(object):
         notification = _Notification(**kwargs)
         self._log.info("Sending notification %s", notification)
         try:
-            response: OneSignalResponse = await self._client.send_notification(
-                notification.model_dump()
-            )
+            response: OneSignalResponse = await self._client.send_notification(notification.model_dump())
         except OneSignalHTTPError as exc:
             response = exc
         message = response.message if isinstance(response, OneSignalHTTPError) else response.body
@@ -124,9 +120,7 @@ class Notifier(object):
         message: str,
     ) -> None:
         """Send a push notification to a user."""
-        await NotificationMessageModel.create(
-            user=user, segment=segment, title=title, message=message
-        )
+        await NotificationMessageModel.create(user=user, segment=segment, title=title, message=message)
         await self._push_notify(
             title,
             segments=[
@@ -164,9 +158,7 @@ class Notifier(object):
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Notificaton not found.")
         return NotificationSchema.from_tortoise_orm(notif_data)
 
-    async def get_all_notificaton(
-        self, user: UserProfileApi = Depends(get_current_user)
-    ) -> List[NotificationSchema]:
+    async def get_all_notificaton(self, user: UserProfileApi = Depends(get_current_user)) -> List[NotificationSchema]:
         """GET all user history of notifications from the database.
 
         Args:
@@ -177,7 +169,5 @@ class Notifier(object):
         """
         return [
             await NotificationSchema.from_tortoise_orm(notif_data)
-            for notif_data in await NotificationMessageModel.filter(user__id=user.id).order_by(
-                "-created"
-            )
+            for notif_data in await NotificationMessageModel.filter(user__id=user.id).order_by("-created")
         ]

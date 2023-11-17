@@ -84,9 +84,7 @@ class TestFeature1AccountFeature(_Helpers, unittest.TestCase):
             "firstname": "John",
             "lastname": "Doe",
         }
-        response = self.client.post(
-            f"http://{IP_ADDRESS}/signup", headers=headers, json=new_user_req
-        )
+        response = self.client.post(f"http://{IP_ADDRESS}/signup", headers=headers, json=new_user_req)
         self.assertEqual(response.status_code, 200)
 
     def test_account_feature_1p2_user_login(self) -> None:
@@ -160,9 +158,7 @@ class TestFeature2MoodLoggingFeature(_Helpers, unittest.TestCase):
             }
             log.info("Random mood logging %s", new_mood)
             # first time setting mood today
-            response = self.client.post(
-                f"http://{IP_ADDRESS}/user/mood/log/", headers=headers, json=new_mood
-            )
+            response = self.client.post(f"http://{IP_ADDRESS}/user/mood/log/", headers=headers, json=new_mood)
             log.info("Returned response: %s", response)
             self.assertTrue(response.ok)
 
@@ -217,11 +213,13 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
         for test_day in range(1, 28):
             test_day_occured.append(test_day)
             test_json = {
-                "start_time": datetime(
-                    self.test_year, self.test_month, test_day, test_hour, 0
-                ).isoformat(),
+                "start_time": datetime(self.test_year, self.test_month, test_day, test_hour, 0).isoformat(),
                 "end_time": datetime(
-                    self.test_year, self.test_month, test_day, test_hour + test_duration, 0
+                    self.test_year,
+                    self.test_month,
+                    test_day,
+                    test_hour + test_duration,
+                    0,
                 ).isoformat(),
                 "service": "PSYCHIATRIC_CONSULTATION",
                 "concerns": "No Concerns.",
@@ -242,12 +240,8 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
         test_hour = 9
         test_duration = 1
         test_json = {
-            "start_time": datetime(
-                self.test_year, self.test_month, test_day, test_hour, 0
-            ).isoformat(),
-            "end_time": datetime(
-                self.test_year, self.test_month, test_day, test_hour + test_duration, 0
-            ).isoformat(),
+            "start_time": datetime(self.test_year, self.test_month, test_day, test_hour, 0).isoformat(),
+            "end_time": datetime(self.test_year, self.test_month, test_day, test_hour + test_duration, 0).isoformat(),
             "service": "COUNSELING",
             "concerns": "No Concerns.",
         }
@@ -319,12 +313,8 @@ class TestFeature3AppointmentScheduleFeature(_Helpers, unittest.TestCase):
         test_hour = 9
         test_duration = 1
         test_new_appointment_json = {
-            "start_time": datetime(
-                self.test_year, self.test_month, test_day, test_hour, 0
-            ).isoformat(),
-            "end_time": datetime(
-                self.test_year, self.test_month, test_day, test_hour + test_duration, 0
-            ).isoformat(),
+            "start_time": datetime(self.test_year, self.test_month, test_day, test_hour, 0).isoformat(),
+            "end_time": datetime(self.test_year, self.test_month, test_day, test_hour + test_duration, 0).isoformat(),
             "service": "COUNSELING",
             "concerns": "No Concerns.",
         }
@@ -369,7 +359,9 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
                 "creator": "anoncreator",
             }
             test_response = self.client.post(
-                f"http://{IP_ADDRESS}/user/thread/submit", headers=headers, json=thread_api
+                f"http://{IP_ADDRESS}/user/thread/submit",
+                headers=headers,
+                json=thread_api,
             )
             self.assertTrue(test_response.ok)
 
@@ -388,7 +380,8 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
 
         test_limit = 5
         test_response = self.client.get(
-            f"http://{IP_ADDRESS}/user/thread/page/0/?limit={test_limit}", headers=headers
+            f"http://{IP_ADDRESS}/user/thread/page/0/?limit={test_limit}",
+            headers=headers,
         )
         self.assertTrue(test_response.ok)
         self.assertLessEqual(len(test_response.json()), test_limit)
@@ -401,9 +394,7 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
 
         test_thread_id = 1
 
-        test_response = self.client.get(
-            f"http://{IP_ADDRESS}/user/thread/{test_thread_id}/", headers=headers
-        )
+        test_response = self.client.get(f"http://{IP_ADDRESS}/user/thread/{test_thread_id}/", headers=headers)
         print("------------############------", test_response.json())
         expect_num_likes = test_response.json()["num_likes"] + 1
 
@@ -415,9 +406,7 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
         )
         self.assertTrue(test_response.ok)
 
-        test_response = self.client.get(
-            f"http://{IP_ADDRESS}/user/thread/{test_thread_id}/", headers=headers
-        )
+        test_response = self.client.get(f"http://{IP_ADDRESS}/user/thread/{test_thread_id}/", headers=headers)
         self.assertTrue(test_response.ok)
         self.assertEqual(expect_num_likes, test_response.json()["num_likes"])
 
@@ -439,11 +428,15 @@ class TestFeature4ThreadFeature(_Helpers, unittest.TestCase):
         test_data = {"content": "Test Comment"}
 
         test_response = self.client.post(
-            f"http://{IP_ADDRESS}/user/thread/3/comment/", headers=headers, json=test_data
+            f"http://{IP_ADDRESS}/user/thread/3/comment/",
+            headers=headers,
+            json=test_data,
         )
         self.assertTrue(test_response.ok)
         test_response = self.client.post(
-            f"http://{IP_ADDRESS}/user/thread/99/comment/", headers=headers, json=test_data
+            f"http://{IP_ADDRESS}/user/thread/99/comment/",
+            headers=headers,
+            json=test_data,
         )
         self.assertEqual(test_response.status_code, 404)
 

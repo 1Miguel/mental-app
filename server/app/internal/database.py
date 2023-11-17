@@ -110,6 +110,49 @@ class UserModel(Model):
         return f"{self.firstname} {self.lastname}"
 
 
+class ArchiveUserModel(UserModel):
+    """Archived user model. This stores all user database
+    items that was meant to be deleted. Instead of deleting
+    it will be stored so it can be recovered when needed.
+
+    This is a direct copy of the usermodel."""
+
+    archived = DatetimeField(auto_now=True)
+
+    @classmethod
+    async def archive(cls, user: UserModel):
+        return await ArchiveUserModel.create(
+            email=user.email,
+            password_hash=user.password_hash,
+            firstname=user.firstname,
+            lastname=user.lastname,
+            username=user.username,
+            address=user.address,
+            age=user.age,
+            occupation=user.occupation,
+            birthday=user.birthday,
+            mobile_number=user.mobile_number,
+            created=user.created,
+        )
+
+    @classmethod
+    async def recover(cls, archive_id: int) -> UserModel:
+        archived_user = await ArchiveUserModel.get(id=archive_id)
+        return await UserModel.create(
+            email=archived_user.email,
+            password_hash=archived_user.password_hash,
+            firstname=archived_user.firstname,
+            lastname=archived_user.lastname,
+            username=archived_user.username,
+            address=archived_user.address,
+            age=archived_user.age,
+            occupation=archived_user.occupation,
+            birthday=archived_user.birthday,
+            mobile_number=archived_user.mobile_number,
+            created=archived_user.created,
+        )
+
+
 class BannedUsersModel(Model):
     id = IntField(pk=True)
     user = ForeignKeyField("models.UserModel")
@@ -166,9 +209,7 @@ class MoodModel(Model):
         """
         # the month is in datetime isoformat YYYY-MM-DD to get only the
         # year and month, we need to cut the string
-        return await cls.filter(
-            user__email=user_email, date__startswith=month.date().isoformat()[:7]
-        ).all()
+        return await cls.filter(user__email=user_email, date__startswith=month.date().isoformat()[:7]).all()
 
     @classmethod
     async def get_today(cls, user_email: str) -> Optional[Self]:
@@ -182,9 +223,7 @@ class MoodModel(Model):
         """
         # the month is in datetime isoformat YYYY-MM-DD to get only the
         # year and month, we need to cut the string
-        q = await cls.filter(
-            user__email=user_email, date__startswith=datetime.today().date().isoformat()
-        ).all()
+        q = await cls.filter(user__email=user_email, date__startswith=datetime.today().date().isoformat()).all()
         return q[0] if q else None
 
 
@@ -300,8 +339,7 @@ class AppointmentModel(Model):
     async def get_by_datetime(cls, start_time: datetime, end_time: datetime) -> List[Self]:
         """Get appointment by datetime."""
         return await cls.filter(
-            Q(start_time__startswith=start_time.isoformat())
-            | Q(end_time__startswith=end_time.isoformat())
+            Q(start_time__startswith=start_time.isoformat()) | Q(end_time__startswith=end_time.isoformat())
         ).all()
 
     @classmethod

@@ -42,9 +42,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 def _generate_default_username() -> None:
-    return "user_" + "".join(
-        [str(i) for i in bcrypt.hash(datetime.now().isoformat().encode()).encode()[-3::]]
-    )
+    return "user_" + "".join([str(i) for i in bcrypt.hash(datetime.now().isoformat().encode()).encode()[-3::]])
 
 
 async def _get_authenticated_user(
@@ -70,9 +68,7 @@ async def _get_authenticated_user(
         )
     try:
         # ---- check if this email has valid auth
-        user: UserModel = await UserModel.get(
-            email=jwt.decode(token, _JWT_SECRET, algorithms="HS256").get("email")
-        )
+        user: UserModel = await UserModel.get(email=jwt.decode(token, _JWT_SECRET, algorithms="HS256").get("email"))
     except:
         # ---- account invalid or user does not exist
         raise HTTPException(
@@ -140,31 +136,45 @@ class AccountManager:
     # temporary file where all files will be stored
     _temp_file_storage: TemporaryDirectory = "./files"
 
-    def __init__(
-        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
-    ) -> None:
+    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         #: ---- Set all routes
-        self._routing.add_api_route(
-            "/login", self.login, methods=["GET"], response_model=UserProfileApi
+        self._routing.add_api_route("/login",
+            self.login,
+            methods=["GET"],
+            response_model=UserProfileApi
         )
         self._routing.add_api_route(
             "/signup",
             self.signup,
             methods=["POST"],
         )
-        self._routing.add_api_route(
-            "/token", self._generate_token, methods=["POST"], response_model=Any
+        self._routing.add_api_route("/token",
+            self._generate_token,
+            methods=["POST"],
+            response_model=Any
         )
-        self._routing.add_api_route("/user/updatesettings", self.update_settings, methods=["POST"])
-        self._routing.add_api_route("/user/updateprofile", self.update_profile, methods=["POST"])
-        self._routing.add_api_route(
-            "/users", self.get_all_users, methods=["GET"], response_model=List[str]
+        self._routing.add_api_route("/user/updatesettings",
+            self.update_settings,
+            methods=["POST"]
         )
-        self._routing.add_api_route("/user/changepassword", self.change_password, methods=["POST"])
-        self._routing.add_api_route(
-            "/user/forgotpassword", self.forgot_change_password, methods=["POST"]
+        self._routing.add_api_route("/user/updateprofile",
+            self.update_profile,
+            methods=["POST"]
+        )
+        self._routing.add_api_route("/users",
+            self.get_all_users,
+            methods=["GET"],
+            response_model=List[str]
+        )
+        self._routing.add_api_route("/user/changepassword",
+            self.change_password,
+            methods=["POST"]
+        )
+        self._routing.add_api_route("/user/forgotpassword",
+            self.forgot_change_password,
+            methods=["POST"]
         )
         self._routing.add_api_route(
             "/user/notification/{notif_id}",
@@ -173,7 +183,7 @@ class AccountManager:
             response_model=NotificationSchema,
         )
         self._routing.add_api_route(
-            "/user/notification/}",
+            "/user/notification/",
             self.get_all_notificaton,
             methods=["POST"],
             response_model=List[NotificationSchema],
@@ -203,7 +213,9 @@ class AccountManager:
         return user
 
     async def _generate_token(
-        self, form_data: OAuth2PasswordRequestForm = Depends(), response: Response = Response()
+        self,
+        form_data: OAuth2PasswordRequestForm = Depends(),
+        response: Response = Response(),
     ) -> Any:
         """Generates a session token."""
         try:
@@ -253,9 +265,7 @@ class AccountManager:
             log.info("New user profile %s", UserProfileApi.from_model(user))
         except IntegrityError as err:
             log.critical("Attempt to create user that already exist.")
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="email is already used."
-            ) from err
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="email is already used.") from err
 
     async def update_profile(
         self,
@@ -286,7 +296,9 @@ class AccountManager:
         return UserProfileApi.from_model(user_model)
 
     async def update_settings(
-        self, user_settings: UserSettingsApi, user: UserProfileApi = Depends(get_current_user)
+        self,
+        user_settings: UserSettingsApi,
+        user: UserProfileApi = Depends(get_current_user),
     ):
         settings = UserSettingModel.get(user=await UserSettingModel.get(id=user.id))
         settings.local_notif = user_settings.local_notif
@@ -296,7 +308,9 @@ class AccountManager:
         return [user.username for user in await UserModel.all() if user.username]
 
     async def change_password(
-        self, new_password: PasswordChangeReqApi, user: UserProfileApi = Depends(get_current_user)
+        self,
+        new_password: PasswordChangeReqApi,
+        user: UserProfileApi = Depends(get_current_user),
     ) -> None:
         await self._internal_change_password(new_password, user)
 
@@ -304,15 +318,11 @@ class AccountManager:
         try:
             user = UserProfileApi.from_model(await UserModel.get_user(new_password.user_email))
             # TODO: Refactor this
-            await self._internal_change_password(
-                PasswordChangeReqApi(new_password=new_password.new_password), user
-            )
+            await self._internal_change_password(PasswordChangeReqApi(new_password=new_password.new_password), user)
         except DoesNotExist:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="User email invalid.")
 
-    async def _internal_change_password(
-        self, new_password: PasswordChangeReqApi, user: UserProfileApi
-    ) -> None:
+    async def _internal_change_password(self, new_password: PasswordChangeReqApi, user: UserProfileApi) -> None:
         """Updates the user's password request.
 
         Args:
@@ -359,9 +369,7 @@ class AccountManager:
             NotificationSchema: Notification data.
         """
         try:
-            notif_data: NotificationMessageModel = await NotificationMessageModel.get(
-                user__id=user.id, id=notif_id
-            )
+            notif_data: NotificationMessageModel = await NotificationMessageModel.get(user__id=user.id, id=notif_id)
             if not notif_data.is_read:
                 notif_data.is_read = True
                 notif_data.read = datetime.now()
@@ -370,9 +378,7 @@ class AccountManager:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Notificaton not found.")
         return NotificationSchema.from_tortoise_orm(notif_data)
 
-    async def get_all_notificaton(
-        self, user: UserProfileApi = Depends(get_current_user)
-    ) -> List[NotificationSchema]:
+    async def get_all_notificaton(self, user: UserProfileApi = Depends(get_current_user)) -> List[NotificationSchema]:
         """GET all user history of notifications from the database.
 
         Args:
@@ -383,7 +389,5 @@ class AccountManager:
         """
         return [
             await NotificationSchema.from_tortoise_orm(notif_data)
-            for notif_data in await NotificationMessageModel.filter(user__id=user.id).order_by(
-                "-created"
-            )
+            for notif_data in await NotificationMessageModel.filter(user__id=user.id).order_by("-created")
         ]

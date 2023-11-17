@@ -32,9 +32,7 @@ class _AdminAppointmentFilter(str, Enum):
 
 
 class AdminManager:
-    def __init__(
-        self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None
-    ) -> None:
+    def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         # ---- Set all routes
@@ -119,13 +117,9 @@ class AdminManager:
         if filter == "all":
             ap_list = await AppointmentModel.all().order_by("-start_time")
         if filter == "pending":
-            ap_list = await AppointmentModel.filter(status=AppointmentStatus.PENDING).order_by(
-                "-start_time"
-            )
+            ap_list = await AppointmentModel.filter(status=AppointmentStatus.PENDING).order_by("-start_time")
         if filter == "approved":
-            ap_list = await AppointmentModel.filter(status=AppointmentStatus.RESERVED).order_by(
-                "-start_time"
-            )
+            ap_list = await AppointmentModel.filter(status=AppointmentStatus.RESERVED).order_by("-start_time")
         if filter == "today":
             ap_list = await AppointmentModel.filter(start_time__startswith=date.today().isoformat())
 
@@ -153,20 +147,12 @@ class AdminManager:
         try:
             ap: AppointmentModel = await AppointmentModel.get(id=appointment_id)
         except DoesNotExist as exc:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, detail="Appointment {appointment_id} invalid"
-            ) from exc
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Appointment {appointment_id} invalid") from exc
 
-        if (
-            ap.status == AppointmentStatus.PENDING
-            and update_status.status == AppointmentStatus.RESERVED
-        ):
+        if ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.RESERVED:
             user_db: UserModel = await ap.patient
             # await notify_change_appointment_status(user_db.id, ap.start_time, "Approved")
-        elif (
-            ap.status == AppointmentStatus.PENDING
-            and update_status.status == AppointmentStatus.CANCELLED
-        ):
+        elif ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.CANCELLED:
             user_db: UserModel = await ap.patient
             # await notify_change_appointment_status(user_db.id, ap.start_time, "Rejected")
 
@@ -176,22 +162,14 @@ class AdminManager:
 
         return await AppointmentInfoApi.from_model(ap)
 
-    async def admin_get_stats(
-        self, admin: UserProfileApi = Depends(get_admin_user)
-    ) -> AdminStatsApi:
-        appointment_stats = {
-            stats.service: stats.count for stats in await AppointmentServiceModelStats.all()
-        }
+    async def admin_get_stats(self, admin: UserProfileApi = Depends(get_admin_user)) -> AdminStatsApi:
+        appointment_stats = {stats.service: stats.count for stats in await AppointmentServiceModelStats.all()}
         total_stats = sum([stats for stats in appointment_stats.values()])
         services_percentages = {k: int(100 * v / total_stats) for k, v in appointment_stats.items()}
         return AdminStatsApi(
             num_patients=await UserModel.all().count() - await AdminModel.all().count(),
-            num_appointments_req=await AppointmentModel.filter(
-                status=AppointmentStatus.PENDING
-            ).count(),
-            num_todays_sessions=await AppointmentModel.filter(
-                start_time__startswith=date.today().isoformat()
-            ).count(),
+            num_appointments_req=await AppointmentModel.filter(status=AppointmentStatus.PENDING).count(),
+            num_todays_sessions=await AppointmentModel.filter(start_time__startswith=date.today().isoformat()).count(),
             services_percentages=services_percentages,
         )
 
@@ -201,6 +179,7 @@ class AdminManager:
 
             if action == "delete":
                 self._log.critical("deleting user %s", user_id)
+                await ArchiveUserModel(user)
                 await user.delete()
 
             if action == "ban":
@@ -236,13 +215,9 @@ class AdminManager:
     ) -> None:
         return await self._internal_admin_user_action(user_id, action)
 
-    async def admin_get_user_list(
-        self, admin: UserProfileApi = Depends(get_super_admin_user)
-    ) -> List[UserModel]:
+    async def admin_get_user_list(self, admin: UserProfileApi = Depends(get_super_admin_user)) -> List[UserModel]:
         profiles = []
-        for profile in [
-            UserProfileApi.from_model(model) for model in await UserModel.all().order_by("-created")
-        ]:
+        for profile in [UserProfileApi.from_model(model) for model in await UserModel.all().order_by("-created")]:
             if await BannedUsersModel.exists(user__id=profile.id, status=True):
                 # Quick fix, TODO: put this in from model
                 profile.status = "BANNED"
