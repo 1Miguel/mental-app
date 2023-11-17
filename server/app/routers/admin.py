@@ -113,6 +113,12 @@ class AdminManager:
             description='Get an archive data',
             response_model=ArchiveUserSchema
         )
+        self._routing.add_api_route(
+            "/user/thread/banned/",
+            self.get_banned_thread_list,
+            methods=["GET"],
+            response_model=List[BannedThreadSchema],
+        )
 
     async def setup_default_admin(self, email: str, password: str, is_super: bool = False) -> None:
         try:
@@ -291,3 +297,6 @@ class AdminManager:
     async def admin_archive_get_all(self, admin: UserProfileApi = Depends(get_super_admin_user)) -> List[ArchiveUserSchema]:
         """Get all archive data model."""
         return await ArchiveUserSchema.from_queryset(ArchiveUserModel.all().order_by("-archived_when"))
+
+    async def get_banned_thread_list(self) -> List[BannedThreadSchema]:
+        return await BannedThreadSchema.from_queryset(BannedThreadModel.all().order_by('-created'))

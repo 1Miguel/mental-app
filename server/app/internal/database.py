@@ -248,12 +248,14 @@ class BannedThreadModel(Model):
     content = CharField(max_length=256)
     created = DatetimeField(auto_now=True)
 
+BannedThreadSchema = pydantic_model_creator(BannedThreadModel)
+
 class ThreadCommentModel(Model):
     id = IntField(pk=True)
     user = ForeignKeyField("models.UserModel")
     thread = ForeignKeyField("models.ThreadModel")
-    created = DatetimeField(auto_now=True)
     content = CharField(max_length=256)
+    created = DatetimeField(auto_now=True)
 
     @classmethod
     async def get_thread_comments(cls, thread_id: int) -> List["ThreadCommentModel"]:
