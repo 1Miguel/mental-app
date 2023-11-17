@@ -179,7 +179,7 @@ class AdminManager:
 
             if action == "delete":
                 self._log.critical("deleting user %s", user_id)
-                await ArchiveUserModel(user)
+                await ArchiveUserModel.archive(user)
                 await user.delete()
 
             if action == "ban":
