@@ -140,42 +140,18 @@ class AccountManager:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
         #: ---- Set all routes
-        self._routing.add_api_route("/login",
-            self.login,
-            methods=["GET"],
-            response_model=UserProfileApi
-        )
+        self._routing.add_api_route("/login", self.login, methods=["GET"], response_model=UserProfileApi)
         self._routing.add_api_route(
             "/signup",
             self.signup,
             methods=["POST"],
         )
-        self._routing.add_api_route("/token",
-            self._generate_token,
-            methods=["POST"],
-            response_model=Any
-        )
-        self._routing.add_api_route("/user/updatesettings",
-            self.update_settings,
-            methods=["POST"]
-        )
-        self._routing.add_api_route("/user/updateprofile",
-            self.update_profile,
-            methods=["POST"]
-        )
-        self._routing.add_api_route("/users",
-            self.get_all_users,
-            methods=["GET"],
-            response_model=List[str]
-        )
-        self._routing.add_api_route("/user/changepassword",
-            self.change_password,
-            methods=["POST"]
-        )
-        self._routing.add_api_route("/user/forgotpassword",
-            self.forgot_change_password,
-            methods=["POST"]
-        )
+        self._routing.add_api_route("/token", self._generate_token, methods=["POST"], response_model=Any)
+        self._routing.add_api_route("/user/updatesettings", self.update_settings, methods=["POST"])
+        self._routing.add_api_route("/user/updateprofile", self.update_profile, methods=["POST"])
+        self._routing.add_api_route("/users", self.get_all_users, methods=["GET"], response_model=List[str])
+        self._routing.add_api_route("/user/changepassword", self.change_password, methods=["POST"])
+        self._routing.add_api_route("/user/forgotpassword", self.forgot_change_password, methods=["POST"])
         self._routing.add_api_route(
             "/user/notification/{notif_id}",
             self.get_notification,

@@ -22,6 +22,7 @@ USER_ID = random.randint(0, 100)
 USER_NAME = f"johndoe{USER_ID}@gmail.com"
 SUPER_USERNAME = "superadmin0@mentalapp.com"
 
+
 class _Helpers:
     """Baseclass that contains all helper functions.
     A TestCase child class must inherit this class."""
@@ -464,6 +465,7 @@ class TestFeature5AdminFeature(_Helpers, unittest.TestCase):
             5.1.2. As an Admin I must be able to approve/decline/ignore appointment schedule.
     """
 
+
 class TestFeature6SuperAdminFeature(_Helpers, unittest.TestCase):
     """Feature 4:  AAdmin Features.
 
@@ -473,6 +475,7 @@ class TestFeature6SuperAdminFeature(_Helpers, unittest.TestCase):
             6.1.1. As an Super Admin I must be able to delete and archive a user.
             6.1.2. As an Admin I must be able to recover an archived user.
     """
+
 
 if __name__ == "__main__":
     unittest.main()

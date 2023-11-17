@@ -9,6 +9,7 @@ from fastapi import HTTPException, status, Depends, Path
 from fastapi.routing import APIRouter
 from tortoise.exceptions import DoesNotExist
 from better_profanity import Profanity
+
 # ---- Locals
 from routers.notify import Notifier
 from routers.account import get_current_user
@@ -22,9 +23,8 @@ from internal.schema import *
 # logger module
 log = logging.getLogger(__name__)
 
-_profanity = Profanity(
-    pathlib.Path("server/app/resources/profanities.txt").read_text().split("\n")
-)
+_profanity = Profanity(pathlib.Path("server/app/resources/profanities.txt").read_text().split("\n"))
+
 
 class ThreadManager:
     def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
@@ -72,6 +72,12 @@ class ThreadManager:
             methods=["GET"],
             response_model=List[ThreadRequestApi],
         )
+        self._routing.add_api_route(
+            "/user/thread/archived/",
+            self.get_thread_archived,
+            methods=["GET"],
+            response_model=List[ArchivedThreadSchema],
+        )
 
     @property
     def router(self) -> APIRouter:
@@ -92,13 +98,14 @@ class ThreadManager:
         if _profanity.contains_profanity(thread_request.topic) or _profanity.contains_profanity(thread_request.content):
             model = BannedThreadModel
         await model.create(
-            user = await UserModel.get(email=user.email),
+            user=await UserModel.get(email=user.email),
             creator=thread_request.creator,
             topic=thread_request.topic,
             content=thread_request.content,
         )
 
     async def thread_delete(self, thread_id: int, user: UserProfileApi = Depends(get_current_user)) -> Any:
+        self._log.info("Deleting Thread...")
         try:
             thread_db = await ThreadModel.get(id=thread_id)
         except DoesNotExist as exc:
@@ -109,6 +116,8 @@ class ThreadManager:
                 status.HTTP_401_UNAUTHORIZED,
                 detail="attempting to delete a thread not created by the User.",
             )
+        self._log.info("Thread archiving...")
+        await ArchivedThreadModel.archive_thread(thread_db)
         await thread_db.delete()
 
     async def thread_comment(
@@ -234,3 +243,6 @@ class ThreadManager:
         else:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=f"invalid filter {filter}")
         return thread
+
+    async def get_thread_archived(self) -> List[ArchivedThreadSchema]:
+        return await ArchivedThreadSchema.from_queryset(await ArchivedThreadModel.all())

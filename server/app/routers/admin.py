@@ -5,11 +5,11 @@ date: 02/11/2023
 # ---- Standard
 import logging
 from enum import Enum
-from typing import List, Optional, Union
-from datetime import datetime, date
+from typing import List, Optional
+from datetime import date
 
 # ---- Thirdparty
-from fastapi import HTTPException, status, Depends, Path
+from fastapi import HTTPException, status, Depends
 from fastapi.routing import APIRouter
 from tortoise.exceptions import DoesNotExist
 
@@ -23,8 +23,10 @@ class _AdminUserAction(str, Enum):
     BAN = "ban"
     UNBAN = "unban"
 
+
 class _AdminArchiveAction(str, Enum):
     RECOVER = "recover"
+
 
 class _AdminAppointmentFilter(str, Enum):
     ALL = "all"
@@ -87,6 +89,13 @@ class AdminManager:
             description="Delete a user",
         )
         self._routing.add_api_route(
+            "/admin/user/banned/",
+            self.admin_get_banned_users,
+            methods=["GET"],
+            response_model=List[UserProfileApi],
+            description="Get all banned user",
+        )
+        self._routing.add_api_route(
             "/admin/user/{user_id}/{action}/",
             self.admin_user_action,
             methods=["POST"],
@@ -96,22 +105,22 @@ class AdminManager:
             "/admin/archive/",
             self.admin_archive_get_all,
             methods=["GET"],
-            description='Get the all archive data',
-            response_model=List[ArchiveUserSchema]
+            description="Get the all archive data",
+            response_model=List[ArchiveUserSchema],
         )
         self._routing.add_api_route(
             "/admin/archive/recover/",
             self.admin_recover_user,
             methods=["POST"],
-            description='Do action on archive data',
-            response_model=UserProfileApi
+            description="Do action on archive data",
+            response_model=UserProfileApi,
         )
         self._routing.add_api_route(
             "/admin/archive/query/",
             self.admin_archive_get,
             methods=["GET"],
-            description='Get an archive data',
-            response_model=ArchiveUserSchema
+            description="Get an archive data",
+            response_model=ArchiveUserSchema,
         )
         self._routing.add_api_route(
             "/user/thread/banned/",
@@ -261,7 +270,12 @@ class AdminManager:
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, f"user {user_id} not found") from exc
 
-    async def admin_archive_get(self, id: Optional[int]=None, email: Optional[str]=None, admin: UserProfileApi = Depends(get_super_admin_user)) -> None:
+    async def admin_archive_get(
+        self,
+        id: Optional[int] = None,
+        email: Optional[str] = None,
+        admin: UserProfileApi = Depends(get_super_admin_user),
+    ) -> None:
         self._log.error("Get all archives with filter (id: %s, email: %s)", id, email)
         _filter = {}
         if id:
@@ -275,7 +289,9 @@ class AdminManager:
         except DoesNotExist:
             raise HTTPException(status.HTTP_404_NOT_FOUND, f"cannot find archive with filter {_filter}")
 
-    async def admin_recover_user(self, email: str, admin: UserProfileApi = Depends(get_super_admin_user)) -> UserProfileApi:
+    async def admin_recover_user(
+        self, email: str, admin: UserProfileApi = Depends(get_super_admin_user)
+    ) -> UserProfileApi:
         """Recover a user account using user email."""
         self._log.error("Recovering user %s", email)
         if await UserModel.exists(email=email):
@@ -294,9 +310,18 @@ class AdminManager:
         self._log.error("User successfully recovered %s", archive)
         return user
 
-    async def admin_archive_get_all(self, admin: UserProfileApi = Depends(get_super_admin_user)) -> List[ArchiveUserSchema]:
+    async def admin_archive_get_all(
+        self, admin: UserProfileApi = Depends(get_super_admin_user)
+    ) -> List[ArchiveUserSchema]:
         """Get all archive data model."""
-        return await ArchiveUserSchema.from_queryset(ArchiveUserModel.all().order_by("-archived_when"))
+        return await ArchiveUserSchema.from_queryset(await ArchiveUserModel.all().order_by("-archived_when"))
 
     async def get_banned_thread_list(self) -> List[BannedThreadSchema]:
-        return await BannedThreadSchema.from_queryset(BannedThreadModel.all().order_by('-created'))
+        return await BannedThreadSchema.from_queryset(await BannedThreadModel.all().order_by("-created"))
+
+    async def admin_get_banned_users(
+        self, admin: UserProfileApi = Depends(get_super_admin_user)
+    ) -> List[UserProfileApi]:
+        return await [
+            UserProfileApi.from_model(model) for model in await UserModel.filter(status="BANNED").order_by("id")
+        ]
