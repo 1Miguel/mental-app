@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/controllers/notification_controller.dart';
 import 'package:flutter_intro/ui_views/book_appointment.dart';
 import 'package:flutter_intro/ui_views/dashboard_profile.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:flutter_intro/model/notification.dart' as notifModel;
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class MessagesTab extends StatefulWidget {
   const MessagesTab({super.key});
@@ -17,7 +21,9 @@ class MessagesTab extends StatefulWidget {
 
 class _MessagesTabState extends State<MessagesTab> {
   int _selectedIndex = 1;
-  List<notifModel.Notification> notifList = getNotifications();
+  late Future<List<notifModel.Notification>> futureNotifList;
+  NotificationController notificationController =
+      Get.put(NotificationController());
 
   void _onItemTapped(int index) {
     setState(() {
@@ -35,33 +41,14 @@ class _MessagesTabState extends State<MessagesTab> {
     });
   }
 
-  static List<notifModel.Notification> getNotifications() {
-    const data = [
-      {
-        "title": "Psychological Assesment Schedule Approved",
-        "content": "Your request for psychological assessment...",
-        "date": "023-11-06T09:00:00+00:00",
-        "read": false,
-      },
-      {
-        "title": "Psychological Assesment Schedule Approved",
-        "content": "Your request for psychological assessment...",
-        "date": "023-11-06T09:00:00+00:00",
-        "read": false,
-      },
-      {
-        "title": "Psychological Assesment Schedule Approved",
-        "content": "Your request for psychological assessment...",
-        "date": "023-11-06T09:00:00+00:00",
-        "read": false,
-      }
-    ];
-    return data
-        .map<notifModel.Notification>(notifModel.Notification.fromJson)
-        .toList();
+  Future<List<notifModel.Notification>> fetchUserNotifcation() async {
+    futureNotifList = notificationController.fetchUserNotifications();
+    print(futureNotifList);
+    return futureNotifList;
   }
 
-  Widget buildUpcoming(List<notifModel.Notification> notifList) =>
+  Widget buildNotifList(
+          List<notifModel.Notification> notifList, VoidCallback callback) =>
       ListView.builder(
         itemCount: notifList.length,
         itemBuilder: (context, index) {
@@ -70,12 +57,39 @@ class _MessagesTabState extends State<MessagesTab> {
             return Column(
               children: [
                 Container(
-                    width: constraint.maxWidth, height: 80, child: NotifCard()),
+                  width: constraint.maxWidth,
+                  height: 80,
+                  child: NotifCard(
+                    id: notif.id,
+                    title: notif.title,
+                    content: notif.content,
+                    date: notif.date,
+                    isRead: notif.read,
+                    onTap: () {
+                      callback();
+                    },
+                  ),
+                ),
                 Divider(),
               ],
             );
           });
         },
+      );
+
+  Widget waitThreads(context) => Container(
+        width: MediaQuery.sizeOf(context).width,
+        child: Column(
+          children: [
+            SizedBox(
+              width: 100,
+              height: 100,
+              child: CircularProgressIndicator(
+                color: primaryGrey,
+              ),
+            ),
+          ],
+        ),
       );
 
   @override
@@ -110,11 +124,37 @@ class _MessagesTabState extends State<MessagesTab> {
             height: bodyHeight,
             child: Column(
               children: [
-                Divider(),
+                //Divider(),
                 Container(
                   width: constraint.maxWidth,
                   height: bodyHeight - 40,
-                  child: buildUpcoming(notifList),
+                  child: FutureBuilder<List<notifModel.Notification>>(
+                      future: fetchUserNotifcation(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final notifList = snapshot.data!;
+                          if (notifList.length > 0) {
+                            return buildNotifList(notifList, () {
+                              setState(() {});
+                            });
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: SizedBox(
+                              width: constraint.maxWidth - 30 - 20 - 10,
+                              child: Text("No Available Data",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey.shade800,
+                                  )),
+                            ),
+                          );
+                        } else {
+                          return waitThreads(context);
+                        }
+                      }),
                 )
               ],
             ),
@@ -157,60 +197,109 @@ class _MessagesTabState extends State<MessagesTab> {
 }
 
 class NotifCard extends StatelessWidget {
+  final int id;
+  final String title;
+  final String content;
+  final String date;
+  final bool isRead;
+  final VoidCallback onTap;
+  NotificationController notificationController =
+      Get.put(NotificationController());
+
+  NotifCard({
+    super.key,
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.date,
+    required this.isRead,
+    required this.onTap,
+  });
+
+  // _onBasicAlertPressed(context) {
+  //   Alert(
+  //     context: context,
+  //     title: "RFLUTTER ALERT",
+  //     desc: "Flutter is more awesome with RFlutter Alert.",
+  //   ).show();
+  // }
+
   @override
   Widget build(BuildContext context) {
+    String notifDate =
+        DateFormat('MMMM dd, yyyy HH:mm').format(DateTime.parse(date));
     return LayoutBuilder(builder: (context, constraint) {
-      return Container(
-        width: constraint.maxWidth,
-        height: constraint.maxHeight,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.all(
-            Radius.circular(10),
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          notificationController.readNotification(id);
+          showDialog<String>(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+              title: Text(title),
+              content: Text(content),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'OK'),
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          );
+          onTap();
+        },
+        child: Container(
+          width: constraint.maxWidth,
+          height: constraint.maxHeight,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
           ),
-        ),
-        child: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-              child: SizedBox(
-                width: 50,
-                height: 50,
-                child: Icon(
-                  Icons.mark_email_unread,
-                  size: 35,
-                  color: Colors.teal,
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                child: SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: Icon(
+                    (isRead == true) ? Icons.email : Icons.mark_email_unread,
+                    size: 35,
+                    color: (isRead == true) ? Colors.grey : Colors.teal,
+                  ),
                 ),
               ),
-            ),
-            Container(
-              width: constraint.maxWidth - 100,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                child: Column(
-                  children: [
-                    SizedBox(
-                        width: constraint.maxWidth,
-                        child: Text(
-                          "Appointment Request has been approved",
-                        )),
-                    SizedBox(
-                        width: constraint.maxWidth,
-                        child: Text(
-                          "Your request for psychological assesment...",
-                          style: TextStyle(color: Colors.grey.shade600),
-                        )),
-                    SizedBox(
-                        width: constraint.maxWidth,
-                        child: Text(
-                          "December 25, 2023 08:14 am",
-                          style: TextStyle(fontSize: 10, color: Colors.grey),
-                        )),
-                  ],
+              Container(
+                width: constraint.maxWidth - 100,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                          width: constraint.maxWidth,
+                          child: Text(
+                            title,
+                          )),
+                      SizedBox(
+                          width: constraint.maxWidth,
+                          child: Text(
+                            content,
+                            style: TextStyle(color: Colors.grey.shade600),
+                          )),
+                      SizedBox(
+                          width: constraint.maxWidth,
+                          child: Text(
+                            notifDate,
+                            style: TextStyle(fontSize: 10, color: Colors.grey),
+                          )),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     });

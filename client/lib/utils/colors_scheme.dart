@@ -105,3 +105,6 @@ final HexColor truthStressMainBg = HexColor("#d9d9d9");
 
 // Mood
 final HexColor peachMainBg = HexColor("#f8a69f");
+
+// Sound Player
+final HexColor SoundPlayerBg = HexColor("#093757");

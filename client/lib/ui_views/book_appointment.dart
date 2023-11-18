@@ -788,6 +788,8 @@ class BookAppointmentPage extends StatelessWidget {
     age: 0,
     occupation: "",
     contact_number: "",
+    status: "",
+    dateCreated: "",
   );
 
   getUserData() async {
@@ -1338,6 +1340,8 @@ class GenericConsultationPage extends StatelessWidget {
     age: 0,
     occupation: "",
     contact_number: "",
+    status: "",
+    dateCreated: "",
   );
 
   GenericConsultationPage({
@@ -3156,8 +3160,8 @@ class _AppointmentTabState extends State<AppointmentTab> {
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           final upcList = snapshot.data!;
-                          final list = upcList[0];
                           if (upcList.length > 0) {
+                            final list = upcList[0];
                             return ScheduleCard(
                               name: list.patientName,
                               date: list.date,

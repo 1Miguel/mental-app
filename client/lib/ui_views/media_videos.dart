@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/ui_views/youtube_player.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 const FB_VIDEO_URL =
     "https://web.facebook.com/YouthLifeEnrichmentProgram/videos/385779920179224";
 
 class VideoScreen extends StatelessWidget {
-  // This widget is the root of your application.
+  final String title;
+  final String videoId;
+
+  VideoScreen({
+    super.key,
+    required this.title,
+    required this.videoId,
+  });
+
   @override
   Widget build(BuildContext context) {
-    String html = '''
-           <iframe width="200" height='200'
-            src="https://www.facebook.com/v2.3/plugins/video.php? 
-            allowfullscreen=false&autoplay=true&href=${FB_VIDEO_URL}" </iframe>
-     ''';
-
-    return MaterialApp(
-      home: Scaffold(
+    return LayoutBuilder(builder: (context, constraint) {
+      return Scaffold(
         appBar: AppBar(
           toolbarHeight: 80,
           automaticallyImplyLeading: false,
@@ -53,7 +56,7 @@ class VideoScreen extends StatelessWidget {
                       child: SizedBox(
                           width: MediaQuery.sizeOf(context).width,
                           child: Text(
-                            "Course: \nMaking the right choices",
+                            "Course Video: \n$title",
                             style: TextStyle(
                                 color: Colors.teal,
                                 fontWeight: FontWeight.bold,
@@ -64,9 +67,9 @@ class VideoScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              HtmlWidget(
-                html,
-                //webView: true,
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width,
+                child: YoutubeApp(videoId: videoId),
               ),
             ],
           ),
@@ -77,7 +80,7 @@ class VideoScreen extends StatelessWidget {
         //     //webView: true,
         //   ),
         // ),
-      ),
-    );
+      );
+    });
   }
 }

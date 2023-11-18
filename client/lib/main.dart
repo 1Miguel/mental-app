@@ -1,6 +1,7 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/ui_views/book_appointment.dart';
+import 'package:flutter_intro/ui_views/sound_player.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'ui_views/login_views.dart';
@@ -121,7 +122,7 @@ class _MyAppState extends State<MyApp> {
         initialRoute: '/',
         routes: {
           '/': (context) => LoginMainPage(),
-          //'/': (context) => BookScheduleSuccessPage(),
+          //'/': (context) => MySoundApp(),
           //'/': (context) => kIsWeb ? AdminApp() : LoginMainPage(),
           '/admin': (context) => AdminApp(),
         });

@@ -6,7 +6,7 @@ void _handleOptIn() {
 }
 
 void _handleOptOut() {
-  OneSignal.User.pushSubscription.optOut();
+  //OneSignal.User.pushSubscription.optOut();
 }
 
 class Settings extends StatefulWidget {
@@ -90,6 +90,7 @@ class _SettingsState extends State<Settings> {
                   // This bool value toggles the switch.
                   value: msgNotif,
                   activeColor: Colors.lightBlueAccent,
+
                   onChanged: (bool value) {
                     // This is called when the user toggles the switch.
                     setState(() {

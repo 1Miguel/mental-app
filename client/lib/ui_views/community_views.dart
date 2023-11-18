@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/model/thread.dart';
+import 'package:flutter_intro/model/user.dart';
 import 'package:flutter_intro/ui_views/comment_box_app.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
 import 'package:flutter_intro/ui_views/forum_members.dart';
@@ -13,6 +17,7 @@ import 'package:flutter_intro/controllers/thread_controller.dart';
 import 'package:get/get.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MenuTile extends StatelessWidget {
@@ -50,6 +55,52 @@ class MenuTile extends StatelessWidget {
 }
 
 class CommunityIntroPage extends StatelessWidget {
+  User emptyUser = User(
+    id: 0,
+    email: "",
+    password_hash: "",
+    firstname: "",
+    lastname: "",
+    username: "",
+    address: "",
+    age: 0,
+    occupation: "",
+    contact_number: "",
+    status: "",
+    dateCreated: "",
+  );
+
+  Future<String?> getUserStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? status = prefs.getString('status')!.toUpperCase();
+    return status;
+  }
+
+  _showErrorDialog(context, errorMessage) {
+    Alert(
+      context: context,
+      //style: alertStyle,
+      type: AlertType.error,
+      title: "User Banned",
+      desc: errorMessage,
+      buttons: [
+        DialogButton(
+          child: Text(
+            "OK",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () => {
+            Navigator.push(context,
+                MaterialPageRoute(builder: ((context) => DashboardPage()))),
+          },
+          color: Colors.redAccent,
+          radius: BorderRadius.circular(0.0),
+        ),
+      ],
+    ).show();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -90,30 +141,50 @@ class CommunityIntroPage extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 70),
-              FilledButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => CommunityMainpage())));
-                },
-                style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all<Size>(Size(200, 50)),
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(forumButton),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18.0),
-                      side: BorderSide(width: 2.0, color: loginDarkTeal),
-                    ),
-                  ),
-                ),
-                child: Text(
-                  'GET STARTED',
-                  style: TextStyle(
-                      fontFamily: 'Open Sans', fontWeight: FontWeight.bold),
-                ),
-              ),
+              FutureBuilder<dynamic>(
+                  future: getUserStatus(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final requestList = snapshot.data!;
+                      print(requestList);
+                      return FilledButton(
+                        onPressed: () async {
+                          if (requestList != "BANNED") {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) =>
+                                        CommunityMainpage())));
+                          } else {
+                            print("Debug: user is banned");
+                            _showErrorDialog(context,
+                                "Your account has been banned. Kindly contact PMHA to appeal your account.");
+                          }
+                        },
+                        style: ButtonStyle(
+                          minimumSize:
+                              MaterialStateProperty.all<Size>(Size(200, 50)),
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(forumButton),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side:
+                                  BorderSide(width: 2.0, color: loginDarkTeal),
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          'GET STARTED',
+                          style: TextStyle(
+                              fontFamily: 'Open Sans',
+                              fontWeight: FontWeight.bold),
+                        ),
+                      );
+                    }
+                    return CircularProgressIndicator();
+                  }),
             ],
           ),
         ),
@@ -182,6 +253,15 @@ class _CommunityMainPageState extends State<CommunityMainpage> {
   _onPagePop(context) {
     Navigator.push(
         context, MaterialPageRoute(builder: ((context) => DashboardPage())));
+  }
+
+  @override
+  void initState() {
+    setState(() {});
+    super.initState();
+    //Timer.periodic(Duration(seconds: 2), (timer) {
+    //setState(() {});
+    //});
   }
 
   @override
@@ -1043,8 +1123,17 @@ class _CreatePostState extends State<CreatePost> {
                                             left: 20, right: 20),
                                       ),
                                       validator: (value) {
+                                        String validPattern =
+                                            '[^ a-zA-Z?!0-9.,]';
                                         if (value == null || value.isEmpty) {
                                           return 'Please enter a topic title';
+                                        }
+                                        if (value
+                                            .contains(RegExp(validPattern))) {
+                                          return 'Must not contain invalid characters';
+                                        }
+                                        if (value.length > 50) {
+                                          return 'Invalid title length';
                                         }
                                         return null;
                                       },
@@ -1076,8 +1165,17 @@ class _CreatePostState extends State<CreatePost> {
                                         ),
                                       ),
                                       validator: (value) {
+                                        String validPattern =
+                                            '[^ a-zA-Z?!0-9.,]';
                                         if (value == null || value.isEmpty) {
                                           return 'Please enter content description';
+                                        }
+                                        if (value
+                                            .contains(RegExp(validPattern))) {
+                                          return 'Must not contain invalid characters';
+                                        }
+                                        if (value.length > 255) {
+                                          return 'Invalid content length';
                                         }
                                         return null;
                                       },

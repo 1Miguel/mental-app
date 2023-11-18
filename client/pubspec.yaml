@@ -52,6 +52,9 @@ dependencies:
   onesignal_flutter: ^5.0.3
   flutter_carousel_widget: ^2.1.2
   progress_stepper: ^1.0.0
+  just_audio: ^0.9.36
+  audio_session: ^0.1.18
+  rxdart: ^0.27.7
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +71,7 @@ flutter:
       - images/courses/stress/
       - images/courses/seekinghelp/
       - images/courses/mentalhealthproblem/
+      - sounds/
   fonts:
     - family: Roboto
       fonts:

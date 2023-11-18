@@ -376,7 +376,9 @@ class DashboardMedia extends StatelessWidget {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: ((context) => VideoScreen())));
+                                    builder: ((context) => VideoScreen(
+                                        title: "Thriving in Well-being",
+                                        videoId: "DX7Lz0WMkZc"))));
                           },
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -387,7 +389,7 @@ class DashboardMedia extends StatelessWidget {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8.0),
                                   child: Image.asset(
-                                      'images/videos_making_right_choices.png',
+                                      'images/videos_thrive_wellbeing.png',
                                       fit: BoxFit.fill),
                                 ),
                               ),
@@ -397,56 +399,90 @@ class DashboardMedia extends StatelessWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: constraint.maxWidth - 30,
-                              height: (bodyHeight / 6) + 20,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                    'images/videos_using_empathy.png',
-                                    fit: BoxFit.fill),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) => VideoScreen(
+                                        title:
+                                            "National Mental Health Week 2022",
+                                        videoId: "rt1y_NPm5us"))));
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: constraint.maxWidth - 30,
+                                height: (bodyHeight / 6) + 20,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.asset(
+                                      'images/videos_national_mental_week_2022.png',
+                                      fit: BoxFit.fill),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: constraint.maxWidth - 30,
-                              height: (bodyHeight / 6) + 20,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                    'images/videos_recognizing_emotions.png',
-                                    fit: BoxFit.fill),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) => VideoScreen(
+                                        title: "Breathing Lines",
+                                        videoId: "giGOAH-5MJ8"))));
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: constraint.maxWidth - 30,
+                                height: (bodyHeight / 6) + 20,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.asset(
+                                      'images/videos_breathing_lines.png',
+                                      fit: BoxFit.fill),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: constraint.maxWidth - 30,
-                              height: (bodyHeight / 6) + 20,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                    'images/videos_developing_coping.png',
-                                    fit: BoxFit.fill),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) => VideoScreen(
+                                        title: "How To Apply Mindful Parenting",
+                                        videoId: "GuUg-FgIG5I"))));
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: constraint.maxWidth - 30,
+                                height: (bodyHeight / 6) + 20,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.asset(
+                                      'images/videos_mindful_parenting.png',
+                                      fit: BoxFit.fill),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
