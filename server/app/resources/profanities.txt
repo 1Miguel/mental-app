@@ -945,3 +945,6 @@ bobo
 b0b0
 0b0b
 obob
+tanga
+t4nga
+t4ng4
