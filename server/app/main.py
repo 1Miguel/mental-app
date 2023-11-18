@@ -56,9 +56,10 @@ app.add_middleware(
 # ------------------------------------------------------ #
 # connect to the database, create a database if does not exist
 from pathlib import Path as _Path
-db = _Path(__file__).parent.joinpath("db.sqlite3")
-
-log.info("application starting... connecting to database at %s", db)
+db_path = _Path("tmp")
+db_path.mkdir(parents=True, exist_ok=True)
+db = _Path("tmp").joinpath("db.sqlite3")
+log.info("application starting at %s... connecting to database at %s", _Path.cwd(), db)
 register_tortoise(
     app,
     db_url=f"sqlite://{db}",
