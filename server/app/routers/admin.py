@@ -14,6 +14,7 @@ from fastapi.routing import APIRouter
 from tortoise.exceptions import DoesNotExist
 
 # ---- Locals
+from routers.notify import Notifier
 from routers.account import get_admin_user, get_super_admin_user
 from internal.database import *
 from internal.schema import *
@@ -39,6 +40,7 @@ class AdminManager:
     def __init__(self, router: Optional[APIRouter] = None, log: Optional[logging.Logger] = None) -> None:
         self._log = log if log else logging.getLogger(__name__)
         self._routing = router if router else APIRouter()
+        self._notifier = Notifier()
         # ---- Set all routes
         self._routing.add_api_route(
             "/admin/",
@@ -106,7 +108,7 @@ class AdminManager:
             self.admin_archive_get_all,
             methods=["GET"],
             description="Get the all archive data",
-            response_model=List[ArchiveUserSchema],
+            response_model=List[UserProfileApi],
         )
         self._routing.add_api_route(
             "/admin/archive/recover/",
@@ -120,7 +122,7 @@ class AdminManager:
             self.admin_archive_get,
             methods=["GET"],
             description="Get an archive data",
-            response_model=ArchiveUserSchema,
+            response_model=UserProfileApi,
         )
         self._routing.add_api_route(
             "/admin/thread/banned/",
@@ -189,11 +191,21 @@ class AdminManager:
 
         if ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.RESERVED:
             user_db: UserModel = await ap.patient
-            # await notify_change_appointment_status(user_db.id, ap.start_time, "Approved")
+            await self._notifier.notify(
+                user_db,
+                topic="appointment/approved",
+                title="Appointment has been approved.",
+                message=f"Appointment has been approved.",
+            )
         elif ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.CANCELLED:
             user_db: UserModel = await ap.patient
             # await notify_change_appointment_status(user_db.id, ap.start_time, "Rejected")
-
+            await self._notifier.notify(
+                user_db,
+                topic="appointment/rejected",
+                title="Appointment has been rejected.",
+                message=f"Appointment has been rejected.",
+            )
         if ap.status != update_status.status:
             ap.status = update_status.status
             await ap.save()
@@ -286,7 +298,7 @@ class AdminManager:
         if not _filter:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Invalid Query Parameters.")
         try:
-            return await ArchiveUserSchema.from_queryset_single(ArchiveUserModel.get(**_filter))
+            return UserProfileApi.from_model(await ArchiveUserModel.get(**_filter))
         except DoesNotExist:
             raise HTTPException(status.HTTP_404_NOT_FOUND, f"cannot find archive with filter {_filter}")
 
@@ -313,9 +325,9 @@ class AdminManager:
 
     async def admin_archive_get_all(
         self, admin: UserProfileApi = Depends(get_super_admin_user)
-    ) -> List[ArchiveUserSchema]:
+    ) -> List[UserProfileApi]:
         """Get all archive data model."""
-        return await ArchiveUserSchema.from_queryset(ArchiveUserModel.all().order_by("-archived_when"))
+        return [UserProfileApi.from_model(model) for model in await ArchiveUserModel.all().order_by("-archived_when")]
 
     async def get_banned_thread_list(self) -> List[BannedThreadSchema]:
         return await BannedThreadSchema.from_queryset(BannedThreadModel.all().order_by("-created"))
