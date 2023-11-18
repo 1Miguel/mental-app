@@ -23,7 +23,8 @@ from internal.schema import *
 # logger module
 log = logging.getLogger(__name__)
 
-_profanity = Profanity(pathlib.Path("server/app/resources/profanities.txt").read_text().split("\n"))
+_path = pathlib.Path(__file__).parents[1].joinpath("resources", "profanities.txt")
+_profanity = Profanity(_path.read_text().split("\n"))
 
 
 class ThreadManager:
