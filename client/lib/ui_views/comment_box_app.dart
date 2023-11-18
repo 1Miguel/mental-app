@@ -170,14 +170,7 @@ class _TopicThreadState extends State<TopicThread> {
             sendButtonMethod: () {
               if (formKey.currentState!.validate()) {
                 print(threadController.commentController.text);
-                // setState(() {
-                //   var post = {
-                //     'creator': 'anonymous',
-                //     'content': threadController.commentController.text,
-                //     'date': DateTime.now().toString(),
-                //   };
-                //   //filedata.insert(0, value);
-                // });
+
                 threadController.createComment(topicId);
                 //threadController.commentController.clear();
                 FocusScope.of(context).unfocus();
@@ -289,12 +282,7 @@ class _TopicThreadState extends State<TopicThread> {
                         size: 15.0,
                         color: primaryGrey,
                       ),
-                      onPressed: () {
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: ((context) => AccountsPage())));
-                      },
+                      onPressed: () {},
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 25.0, bottom: 10),
@@ -325,10 +313,6 @@ class _TopicThreadState extends State<TopicThread> {
                             likeState = false;
                           }
                         });
-                        // Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: ((context) => AccountsPage())));
                       },
                     ),
                   ],

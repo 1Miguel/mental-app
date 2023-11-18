@@ -1805,6 +1805,8 @@ class _MembershipPaymentFormState extends State<MembershipPaymentForm> {
     age: 0,
     occupation: "",
     contact_number: "",
+    status: "",
+    dateCreated: "",
   );
 
   final _formKey = GlobalKey<FormState>();

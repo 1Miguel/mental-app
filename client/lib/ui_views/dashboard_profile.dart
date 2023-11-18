@@ -1,9 +1,14 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_intro/controllers/change_password_controller.dart';
 import 'package:flutter_intro/controllers/update_profile_controller.dart';
+import 'package:flutter_intro/ui_views/dashboard_menu_aboutus.dart';
+import 'package:flutter_intro/ui_views/dashboard_menu_contactus.dart';
+import 'package:flutter_intro/ui_views/dashboard_menu_settings.dart';
 import 'dart:convert';
 import 'package:flutter_intro/ui_views/dashboard_messages.dart';
 import 'package:flutter_intro/ui_views/book_appointment.dart';
+import 'package:flutter_intro/ui_views/dashboard_profile_edit.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
 import 'package:flutter_intro/ui_views/login_views.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -30,6 +35,43 @@ InputDecoration getFormDecor(String labelText) {
   );
 }
 
+class AccountMenuTile extends StatelessWidget {
+  final String menu;
+  final IconData menuIcon;
+  final VoidCallback onTap;
+  final Color bgColor;
+  final Color conColor;
+
+  const AccountMenuTile({
+    super.key,
+    required this.menu,
+    required this.menuIcon,
+    required this.onTap,
+    required this.bgColor,
+    required this.conColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: ListTile(
+        contentPadding: EdgeInsets.only(left: 20.0, right: 30.0, top: 10.0),
+        leading: CircleAvatar(
+          backgroundColor: bgColor,
+          radius: 20,
+          child: Icon(menuIcon, size: 20, color: conColor),
+        ),
+        trailing: Icon(Icons.navigate_next, size: 20, color: Colors.grey),
+        horizontalTitleGap: 30.0,
+        title: MenuTitleText(menuText: menu),
+        onTap: () {
+          onTap();
+        },
+      ),
+    );
+  }
+}
+
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
   @override
@@ -40,7 +82,6 @@ class ProfileTab extends StatefulWidget {
 
 class _ProfileTabState extends State<ProfileTab> {
   int _selectedIndex = 3;
-
   User emptyUser = User(
     id: 0,
     email: "",
@@ -52,6 +93,8 @@ class _ProfileTabState extends State<ProfileTab> {
     age: 0,
     occupation: "",
     contact_number: "",
+    status: "",
+    dateCreated: "",
   );
 
   getUserData() async {
@@ -83,102 +126,206 @@ class _ProfileTabState extends State<ProfileTab> {
     });
   }
 
+  Future<void> getLogOutState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    await prefs.setBool('islogged_in', false);
+    await prefs.remove("user_data");
+    await prefs.remove("token");
+    await prefs.remove("token_type");
+    await prefs.remove("first_name");
+    await prefs.remove("last_name");
+    await prefs.remove("username");
+    await prefs.remove("is_admin");
+    await prefs.remove("is_super");
+    await prefs.remove("isbanned");
+  }
+
   @override
   Widget build(BuildContext context) {
+    const double appBarHeight = 80;
+    const double botBarHeight = 60;
     return LayoutBuilder(builder: (context, constraint) {
-      const double appBarHeight = 80;
-      const double botBarHeight = 60;
-      double bodyHeight = constraint.maxHeight - 80 - 60;
       return PopScope(
-        canPop: false,
-        child: Scaffold(
-          appBar: AppBar(
-            toolbarHeight: appBarHeight,
-            automaticallyImplyLeading: false,
-            flexibleSpace: Container(
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage('images/bg_teal_hd.png'),
-                      fit: BoxFit.fill),
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.elliptical(50, 20),
-                      bottomRight: Radius.elliptical(50, 20))),
+          canPop: false,
+          child: Scaffold(
+            appBar: AppBar(
+              toolbarHeight: 80,
+              automaticallyImplyLeading: false,
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage('images/bg_teal_hd.png'),
+                        fit: BoxFit.fill),
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.elliptical(50, 20),
+                        bottomRight: Radius.elliptical(50, 20))),
+              ),
+              title: Text("MENU",
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w900)),
+              centerTitle: true,
             ),
-            title: Text("PROFILE",
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w900)),
-            centerTitle: true,
-          ),
-          body: FutureBuilder(
-              future: getUserData(),
-              builder: (BuildContext context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.deepPurpleAccent,
-                    ),
-                  );
-                }
-                if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        'An ${snapshot.error} occurred',
-                        style: const TextStyle(fontSize: 18, color: Colors.red),
+            body: FutureBuilder(
+                future: getUserData(),
+                builder: (BuildContext context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.deepPurpleAccent,
                       ),
                     );
-                  } else if (snapshot.hasData) {
-                    final data = snapshot.data;
-                    String mystring = data.toString();
-                    //Map<String, dynamic> myjson = jsonDecode(mystring);
-                    User userdata = User.fromJson(jsonDecode(mystring));
-
-                    return Container(
-                      width: constraint.maxWidth,
-                      height: bodyHeight,
-                      child:
-                          EditProfileForm(userData: userdata, onPressed: () {}),
-                    );
                   }
-                }
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }),
-          bottomNavigationBar: SizedBox(
-            width: MediaQuery.sizeOf(context).width,
-            height: botBarHeight,
-            child: BottomNavigationBar(
-              items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                  backgroundColor: HexColor("#67ddd8"),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.mail),
-                  label: 'Messages',
-                  backgroundColor: HexColor("#5ce1e6"),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.event),
-                  label: 'Appointment',
-                  backgroundColor: HexColor("#67ddd8"),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.account_circle),
-                  label: 'Profile',
-                  backgroundColor: HexColor("#5ce1e6"),
-                ),
-              ],
-              currentIndex: _selectedIndex,
-              selectedItemColor: Colors.teal,
-              onTap: _onItemTapped,
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'An ${snapshot.error} occurred',
+                          style:
+                              const TextStyle(fontSize: 18, color: Colors.red),
+                        ),
+                      );
+                    } else if (snapshot.hasData) {
+                      final data = snapshot.data;
+                      String mystring = data.toString();
+                      User userdata = User.fromJson(jsonDecode(mystring));
+                      String firstname = userdata.firstname;
+                      String lastname = userdata.lastname;
+                      String email = userdata.email;
+
+                      return Column(
+                        children: [
+                          SizedBox(height: 20),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(20.0), //or 15.0
+                            child: Container(
+                              height: 100.0,
+                              width: 100.0,
+                              color: bgTeal,
+                              child: Icon(Icons.person,
+                                  color: conTeal, size: 80.0),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: MediaQuery.sizeOf(context).width,
+                                child: Text(
+                                  "$firstname $lastname",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 20, color: primaryGrey),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          Divider(),
+                          AccountMenuTile(
+                            menu: 'Edit Profile',
+                            menuIcon: Icons.place,
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) => ProfileTabNew())));
+                            },
+                            bgColor: bgYellow,
+                            conColor: conYellow,
+                          ),
+                          AccountMenuTile(
+                            menu: 'Settings',
+                            menuIcon: Icons.settings,
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) => Settings())));
+                            },
+                            bgColor: bgGreen,
+                            conColor: conGreen,
+                          ),
+                          AccountMenuTile(
+                            menu: 'Contact Us',
+                            menuIcon: Icons.call,
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) => ContactUs())));
+                            },
+                            bgColor: bgPeachRed,
+                            conColor: conPeachRed,
+                          ),
+                          AccountMenuTile(
+                            menu: 'About Us',
+                            menuIcon: Icons.info,
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) => AboutUs())));
+                            },
+                            bgColor: bgPurple,
+                            conColor: conPurple,
+                          ),
+                          SizedBox(height: 180),
+                          Divider(),
+                          AccountMenuTile(
+                            menu: 'Logout',
+                            menuIcon: Icons.logout,
+                            bgColor: bgRed,
+                            conColor: conRed,
+                            onTap: () {
+                              getLogOutState();
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: ((context) => LoginMainPage())));
+                            },
+                          ),
+                        ],
+                      );
+                    }
+                  }
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }),
+            bottomNavigationBar: SizedBox(
+              width: MediaQuery.sizeOf(context).width,
+              height: botBarHeight,
+              child: BottomNavigationBar(
+                items: <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home),
+                    label: 'Home',
+                    backgroundColor: HexColor("#67ddd8"),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.mail),
+                    label: 'Messages',
+                    backgroundColor: HexColor("#5ce1e6"),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.event),
+                    label: 'Appointment',
+                    backgroundColor: HexColor("#67ddd8"),
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.account_circle),
+                    label: 'Profile',
+                    backgroundColor: HexColor("#5ce1e6"),
+                  ),
+                ],
+                currentIndex: _selectedIndex,
+                selectedItemColor: Colors.teal,
+                onTap: _onItemTapped,
+              ),
             ),
-          ),
-        ),
-      );
+          ));
     });
   }
 }
@@ -212,6 +359,9 @@ class _EditProfileFormState extends State<EditProfileForm> {
       Get.put(UpdateProfileController());
   ChangePasswordController changePasswordController =
       Get.put(ChangePasswordController());
+  String updFirstName = "";
+  String updLastName = "";
+  String updUserName = "";
   User emptyUser = User(
     id: 0,
     email: "",
@@ -223,15 +373,14 @@ class _EditProfileFormState extends State<EditProfileForm> {
     age: 0,
     occupation: "",
     contact_number: "",
+    status: "",
+    dateCreated: "",
   );
-  String updFirstName = "";
-  String updLastName = "";
-  String updUserName = "";
 
   getUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    return prefs.getString('user_data') ?? jsonEncode(emptyUser).toString();
+    return prefs.getString('user_data');
   }
 
   _EditProfileFormState({required this.userData, required this.onPressed});
@@ -335,11 +484,17 @@ class _EditProfileFormState extends State<EditProfileForm> {
   Future<void> getLogOutState() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    //String? name = prefs.getString('first_name')!.toUpperCase();
-    await prefs.setString('islogged_in', "false");
-    prefs.remove("islogged_in");
-    prefs.clear();
-    //return name;
+    await prefs.setBool('islogged_in', false);
+    await prefs.remove("user_data");
+    await prefs.remove("token");
+    await prefs.remove("token_type");
+    await prefs.remove("first_name");
+    await prefs.remove("last_name");
+    await prefs.remove("username");
+    await prefs.remove("is_admin");
+    await prefs.remove("is_super");
+    await prefs.remove("isbanned");
+    //await prefs.remove("islogged_in");
   }
 
   @override

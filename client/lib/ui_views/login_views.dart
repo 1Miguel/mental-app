@@ -403,13 +403,14 @@ class _CheckboxExampleState extends State<CheckBoxExample> {
 }
 
 class LoginMainPage extends StatelessWidget {
-  Future<String?> getLoggedInState() async {
-    String? logged_in;
+  Future<bool?> getLoggedInState() async {
+    bool? logged_in;
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
     if (prefs.containsKey('islogged_in')) {
-      logged_in = prefs.getString('islogged_in')!.toUpperCase();
+      logged_in = prefs.getBool('islogged_in');
     } else {
-      logged_in = "false";
+      logged_in = false;
     }
     return logged_in;
   }
@@ -420,7 +421,7 @@ class LoginMainPage extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       body: FutureBuilder(
         future: getLoggedInState(),
-        initialData: "false",
+        initialData: false,
         builder: (BuildContext context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -439,7 +440,7 @@ class LoginMainPage extends StatelessWidget {
               );
             } else if (snapshot.hasData) {
               final data = snapshot.data;
-              if (data == 'false') {
+              if (data == false) {
                 return LoginMainView();
               } else {
                 // TODO: check one day interval for moods
@@ -468,20 +469,31 @@ class LoginMainView extends StatelessWidget {
     super.key,
   });
 
-  Future<String?> getLoggedInState() async {
-    String? logged_in;
+  Future<bool?> getLoggedInState() async {
+    bool? logged_in;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey('islogged_in')) {
-      logged_in = prefs.getString('islogged_in')!.toUpperCase();
+      logged_in = prefs.getBool('islogged_in');
     } else {
-      logged_in = "false";
+      logged_in = false;
     }
     return logged_in;
   }
 
-  Future<String?> getLogOutState() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    await preferences.clear();
+  Future<void> getLogOutState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    await prefs.setBool('islogged_in', false);
+    await prefs.remove("user_data");
+    await prefs.remove("token");
+    await prefs.remove("token_type");
+    await prefs.remove("first_name");
+    await prefs.remove("last_name");
+    await prefs.remove("username");
+    await prefs.remove("is_admin");
+    await prefs.remove("is_super");
+    await prefs.remove("isbanned");
+    //await prefs.remove("islogged_in");
   }
 
   _onAlertCloseApp(context) {
@@ -492,8 +504,8 @@ class LoginMainView extends StatelessWidget {
         desc: "Are you sure you want to close this app?",
         buttons: [
           DialogButton(
-            onPressed: () {
-              getLogOutState();
+            onPressed: () async {
+              await getLogOutState();
               SystemChannels.platform.invokeMethod('SystemNavigator.pop');
             },
             child: Text(

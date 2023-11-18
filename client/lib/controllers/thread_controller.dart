@@ -7,10 +7,13 @@ import 'package:flutter_intro/model/thread.dart';
 // Local import
 import 'package:flutter_intro/model/user.dart';
 import 'package:flutter_intro/ui_views/community_views.dart';
+import 'package:flutter_intro/ui_views/dashboard_views.dart';
+import 'package:flutter_intro/ui_views/login_views.dart';
 import 'package:flutter_intro/utils/api_endpoints.dart';
 
 // Third-party import
 import 'package:get/get.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -258,6 +261,46 @@ class ThreadController extends GetxController {
     }
   }
 
+  _showErrorDialog(context, errorMessage) {
+    Alert(
+      context: context,
+      //style: alertStyle,
+      type: AlertType.error,
+      title: "Post Error",
+      desc: errorMessage,
+      buttons: [
+        DialogButton(
+          child: Text(
+            "OK",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () => {
+            Navigator.push(context,
+                MaterialPageRoute(builder: ((context) => LoginMainPage()))),
+          },
+          color: Colors.redAccent,
+          radius: BorderRadius.circular(0.0),
+        ),
+      ],
+    ).show();
+  }
+
+  Future<void> getLogOutState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    await prefs.setBool('islogged_in', false);
+    await prefs.remove("user_data");
+    await prefs.remove("token");
+    await prefs.remove("token_type");
+    await prefs.remove("first_name");
+    await prefs.remove("last_name");
+    await prefs.remove("username");
+    await prefs.remove("is_admin");
+    await prefs.remove("is_super");
+    await prefs.remove("isbanned");
+    //await prefs.remove("islogged_in");
+  }
+
   Future<void> createPost(String username) async {
     String? token = await getToken();
     String? token_type = await getTokenType();
@@ -291,6 +334,12 @@ class ThreadController extends GetxController {
         contentController.clear();
         //go to home
         Get.off(() => SuccessPostPage());
+      } else if (response.statusCode == 403) {
+        topicController.clear();
+        contentController.clear();
+        await getLogOutState();
+        _showErrorDialog(Get.context!,
+            "This post violates our community rules and account has been auto banned.");
       } else {
         print(response.body);
         print(response.statusCode);

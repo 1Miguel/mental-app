@@ -30,12 +30,20 @@ class MainBody extends StatelessWidget {
     return dateToday;
   }
 
-  Future<String?> getLogOutState() async {
+  Future<void> getLogOutState() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String? name = prefs.getString('first_name')!.toUpperCase();
-    prefs.clear();
-    return name;
+    await prefs.setBool('islogged_in', false);
+    await prefs.remove("user_data");
+    await prefs.remove("token");
+    await prefs.remove("token_type");
+    await prefs.remove("first_name");
+    await prefs.remove("last_name");
+    await prefs.remove("username");
+    await prefs.remove("is_admin");
+    await prefs.remove("is_super");
+    await prefs.remove("isbanned");
+    //await prefs.remove("islogged_in");
   }
 
   @override
@@ -87,20 +95,16 @@ class MainBody extends StatelessWidget {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(
-                            left: 20, right: 15.0, top: 10),
-                        child: TextButton(
-                          child: Text(
-                            'Logout',
-                            style: TextStyle(
-                                fontFamily: 'Open Sans',
-                                fontWeight: FontWeight.w900,
-                                fontSize: 18,
-                                color: Colors.black87,
-                                decoration: TextDecoration.underline),
+                        padding: const EdgeInsets.only(left: 20, right: 15.0),
+                        child: IconButton(
+                          color: unselectedGray,
+                          icon: const Icon(
+                            Icons.logout,
+                            size: 30,
+                            color: Colors.black,
                           ),
-                          onPressed: () {
-                            getLogOutState();
+                          onPressed: () async {
+                            await getLogOutState();
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(

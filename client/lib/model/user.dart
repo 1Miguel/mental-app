@@ -9,6 +9,8 @@ class User {
   final int age;
   final String occupation;
   final String contact_number;
+  final String status;
+  final String dateCreated;
 
   const User({
     required this.id,
@@ -21,6 +23,8 @@ class User {
     required this.age,
     required this.occupation,
     required this.contact_number,
+    required this.status,
+    required this.dateCreated,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -34,6 +38,8 @@ class User {
     int age = json['age'];
     String occupation = json['occupation'];
     String contact_number = json['mobile_number'];
+    String status = json['status'];
+    String dateCreated = json['created'];
 
     return User(
       id: id,
@@ -46,6 +52,8 @@ class User {
       age: age,
       occupation: occupation,
       contact_number: contact_number,
+      status: status,
+      dateCreated: dateCreated,
     );
   }
 
@@ -60,6 +68,8 @@ class User {
         'age': age,
         'occupation': occupation,
         'contact_number': contact_number,
+        'status': status,
+        'created': dateCreated,
       };
 }
 

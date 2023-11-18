@@ -29,6 +29,8 @@ class MoodModalPage extends StatelessWidget {
     age: 0,
     occupation: "",
     contact_number: "",
+    status: "",
+    dateCreated: "",
   );
 
   getUserData() async {
@@ -689,7 +691,7 @@ class MoodHistoryPage extends StatelessWidget {
                   bottomLeft: Radius.elliptical(50, 20),
                   bottomRight: Radius.elliptical(50, 20))),
         ),
-        title: Text("MENU",
+        title: Text("MOOD",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
         centerTitle: true,
         leading: SizedBox(
@@ -1129,10 +1131,20 @@ class TodayMoodInfo extends StatelessWidget {
                       onPressed: () {
                         moodController.logMood(
                             todayMood.mood, moodController.noteController.text);
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                          content: Text("Note was successfully saved."),
-                        ));
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: ((context) => HappyMoodPage(
+                        //           moodName: "Happy",
+                        //           moodInfo: moodMessageList['Happy'],
+                        //           onTap: () {},
+                        //         )),
+                        //   ),
+                        // );
+                        // ScaffoldMessenger.of(context)
+                        //     .showSnackBar(const SnackBar(
+                        //   content: Text("Note was successfully saved."),
+                        // ));
                       },
                       style: ButtonStyle(
                           minimumSize:
@@ -1171,6 +1183,8 @@ class MoodLogCarouselPage extends StatelessWidget {
     age: 0,
     occupation: "",
     contact_number: "",
+    status: "",
+    dateCreated: "",
   );
 
   getUserData() async {
@@ -1312,8 +1326,50 @@ class MoodContext extends StatelessWidget {
     required this.customColor,
   });
 
+  int getMoodIndex(String moodName) {
+    if (moodName == "HAPPY") {
+      return MoodId.HAPPY.index;
+    } else if (moodName == "SAD") {
+      return MoodId.SAD.index;
+    } else if (moodName == "CONFUSED") {
+      return MoodId.CONFUSED.index;
+    } else if (moodName == "SCARED") {
+      return MoodId.SCARED.index;
+    } else if (moodName == "ANGRY") {
+      return MoodId.ANGRY.index;
+    }
+    return MoodId.HAPPY.index;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final moodMessageList = {
+      'HAPPY': {
+        'moodIcon': 'images/happy_emoji.png',
+        'mainMessage': "Glad to hear that you're feeling good!",
+        'secondaryMessage': "We hope all is well!",
+      },
+      'SAD': {
+        'moodIcon': 'images/sad_emoji.png',
+        'mainMessage': "Things are tough right now, but we're here",
+        'secondaryMessage': "We hope all is well!",
+      },
+      'CONFUSED': {
+        'moodIcon': 'images/confused_emoji.png',
+        'mainMessage': "No worries, we would be happy to help",
+        'secondaryMessage': "We hope all is well!",
+      },
+      'ANGRY': {
+        'moodIcon': 'images/angry_emoji.png',
+        'mainMessage': "Things are tough right now, but we're here",
+        'secondaryMessage': "We hope all is well!",
+      },
+      'SCARED': {
+        'moodIcon': 'images/scared_emoji.png',
+        'mainMessage': "No worries, we would be happy to help",
+        'secondaryMessage': "We hope all is well!",
+      },
+    };
     return LayoutBuilder(builder: (context, constraint) {
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -1334,7 +1390,11 @@ class MoodContext extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: ((context) => DashboardPage()),
+              builder: ((context) => MoodContextIntro(
+                  mainMessage: moodMessageList[title]!['mainMessage']!,
+                  secondaryMessage:
+                      moodMessageList[title]!['secondaryMessage']!,
+                  moodId: getMoodIndex(title))),
             ),
           );
         },
@@ -1406,6 +1466,111 @@ class MoodContext extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class MoodContextIntro extends StatelessWidget {
+  final String mainMessage;
+  final String secondaryMessage;
+  final int moodId;
+
+  MoodContextIntro({
+    super.key,
+    required this.mainMessage,
+    required this.secondaryMessage,
+    required this.moodId,
+  });
+
+  Color getMoodColor(int moodId) {
+    if (moodId == MoodId.HAPPY.index) {
+      return moodHappy;
+    } else if (moodId == MoodId.SAD.index) {
+      return moodSad;
+    } else if (moodId == MoodId.CONFUSED.index) {
+      return moodConfused;
+    } else if (moodId == MoodId.SCARED.index) {
+      return moodScared;
+    } else if (moodId == MoodId.ANGRY.index) {
+      return moodAngry;
+    }
+    return Colors.white;
+  }
+
+  String getMoodImage(int moodId) {
+    if (moodId == MoodId.HAPPY.index) {
+      return 'images/happy_img.png';
+    } else if (moodId == MoodId.SAD.index) {
+      return 'images/sad_img.png';
+    } else if (moodId == MoodId.CONFUSED.index) {
+      return 'images/confused_img.png';
+    } else if (moodId == MoodId.SCARED.index) {
+      return 'images/angry_img.png';
+    } else if (moodId == MoodId.ANGRY.index) {
+      return 'images/scared_img.png';
+    }
+    return 'images/scared_img.png';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraint) {
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          //onTap();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: ((context) => DashboardPage()),
+            ),
+          );
+        },
+        child: Container(
+          color: getMoodColor(moodId),
+          width: constraint.maxWidth,
+          height: constraint.maxHeight,
+          child: Column(
+            //color: Colors.pink,
+            // elevation: 0,
+            children: <Widget>[
+              Container(
+                width: constraint.maxWidth,
+                height: constraint.maxHeight / 4,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      width: constraint.maxWidth - 80,
+                      child: Text(
+                        mainMessage,
+                        softWrap: true,
+                        maxLines: 3,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 25,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: constraint.maxWidth,
+                height: (constraint.maxHeight / 4) * 2,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.asset(getMoodImage(moodId)),
                 ),
               ),
             ],

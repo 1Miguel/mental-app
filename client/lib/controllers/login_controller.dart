@@ -13,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 class LoginController extends GetxController {
   TextEditingController emailController = TextEditingController();
@@ -72,15 +73,30 @@ class LoginController extends GetxController {
 
           final SharedPreferences? prefs = await _prefs;
 
+          String _userId = userdata['id'].toString();
+          String _externalUserId = "userId_$_userId";
+          print("Debug OneSignal Set External ID: $_externalUserId");
+          OneSignal.login(_externalUserId);
+          bool isBanned = false;
+
+          if (userdata['status'] == "BANNED") {
+            isBanned = true;
+          }
+
           await prefs?.setString('user_data', jsonEncode(userdata));
           await prefs?.setString('token', accessToken);
           await prefs?.setString('token_type', tokenType);
+          await prefs?.setInt('id', userdata['id']);
           await prefs?.setString('first_name', userdata['firstname']);
           await prefs?.setString('last_name', userdata['lastname']);
           await prefs?.setString('username', userdata['username']);
+          await prefs?.setString('dateCreated', userdata['created']);
+          await prefs?.setString('status', userdata['status']);
           await prefs?.setBool('is_admin', userdata['is_admin']);
           await prefs?.setBool('is_super', userdata['is_super']);
-          await prefs?.setString('islogged_in', "true");
+          await prefs?.setBool('islogged_in', true);
+          await prefs?.setBool('isbanned', isBanned);
+
           emailController.clear();
           passwordController.clear();
 
@@ -91,7 +107,7 @@ class LoginController extends GetxController {
           } else {
             //Go to Home
             if (kIsWeb) {
-              await prefs?.setString('islogged_in', "false");
+              await prefs?.setBool('islogged_in', false);
               prefs?.remove("islogged_in");
               Get.off(() => LoginMainPage());
             } else {

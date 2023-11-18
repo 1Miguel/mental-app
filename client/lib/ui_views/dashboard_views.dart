@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/ui_views/calm.dart';
 import 'package:flutter_intro/ui_views/dashboard_media.dart';
 import 'package:flutter_intro/ui_views/dashboard_menu.dart';
 import 'package:flutter_intro/ui_views/dashboard_messages.dart';
@@ -277,7 +278,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       } else if (snapshot.hasData) {
                         final data = snapshot.data;
                         return Padding(
-                          padding: const EdgeInsets.only(right: 20.0, left: 20),
+                          padding: const EdgeInsets.only(left: 20),
                           child: Text(
                             'Hi, $data',
                             textAlign: TextAlign.end,
@@ -295,26 +296,6 @@ class _DashboardPageState extends State<DashboardPage> {
                     );
                   },
                 ),
-                leadingWidth: 80,
-                actions: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(right: 15.0),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.menu,
-                        color: Colors.black,
-                        size: 40,
-                      ),
-                      tooltip: 'Show Snackbar',
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: ((context) => AccountsPage())));
-                      },
-                    ),
-                  ),
-                ],
               ),
               // Other Sliver Widgets
               SliverList(
@@ -588,7 +569,10 @@ class DashboardFeatureCarousel extends StatelessWidget {
               image: 'images/calm_dashboard.png',
               content:
                   "Find wellness, peace, and balance using the app's guided meditation and mindfulness techniques.",
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: ((context) => Calm())));
+              },
             ),
             DashboardFeatureContext(
               title: 'BOOK APPOINTMENT',
@@ -1053,6 +1037,8 @@ class EditProfilePage extends StatelessWidget {
     age: 0,
     occupation: "",
     contact_number: "",
+    status: "",
+    dateCreated: "",
   );
 
   getUserData() async {
@@ -1137,7 +1123,7 @@ class EditProfilePage extends StatelessWidget {
               } else if (snapshot.hasData) {
                 final data = snapshot.data;
                 String mystring = data.toString();
-                //Map<String, dynamic> myjson = jsonDecode(mystring);
+                print("Debug $mystring");
                 User userdata = User.fromJson(jsonDecode(mystring));
                 String firstname = userdata.firstname;
                 String lastname = userdata.lastname;

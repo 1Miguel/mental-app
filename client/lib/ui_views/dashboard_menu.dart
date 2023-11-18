@@ -201,6 +201,8 @@ class AccountsPage extends StatelessWidget {
     age: 0,
     occupation: "",
     contact_number: "",
+    status: "",
+    dateCreated: "",
   );
 
   getUserData() async {
@@ -209,11 +211,20 @@ class AccountsPage extends StatelessWidget {
     return prefs.getString('user_data') ?? jsonEncode(emptyUser).toString();
   }
 
-  Future<String?> getLogOutState() async {
+  Future<void> getLogOutState() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String? name = prefs.getString('first_name')!.toUpperCase();
-    prefs.clear();
+    await prefs.setBool('islogged_in', false);
+    await prefs.remove("user_data");
+    await prefs.remove("token");
+    await prefs.remove("token_type");
+    await prefs.remove("first_name");
+    await prefs.remove("last_name");
+    await prefs.remove("username");
+    await prefs.remove("is_admin");
+    await prefs.remove("is_super");
+    await prefs.remove("isbanned");
+    //await prefs.remove("islogged_in");
   }
 
   @override
@@ -355,8 +366,8 @@ class AccountsPage extends StatelessWidget {
                       menuIcon: Icons.logout,
                       bgColor: bgRed,
                       conColor: conRed,
-                      onTap: () {
-                        getLogOutState();
+                      onTap: () async {
+                        await getLogOutState();
                         Navigator.push(
                             context,
                             MaterialPageRoute(
