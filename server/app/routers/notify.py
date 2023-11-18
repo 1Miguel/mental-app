@@ -74,8 +74,8 @@ class Notifier(object):
             include_aliases["external_id"] = external_ids
         if onesignal_ids:
             include_aliases["onesignal_id"] = onesignal_ids
-        # if include_aliases:
-        #     kwargs["include_aliases"] = include_aliases
+        if include_aliases:
+            kwargs["include_aliases"] = include_aliases
         if custom_data:
             kwargs["custom_data"] = custom_data
 
@@ -84,7 +84,7 @@ class Notifier(object):
         kwargs["name"] = name
         kwargs["contents"] = contents
         kwargs["app_id"] = app_id
-        # kwargs["target_channel"] = "push"
+        kwargs["target_channel"] = "push"
 
         self._log.info("Sending notification %s", kwargs)
         try:
