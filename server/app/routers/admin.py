@@ -189,22 +189,22 @@ class AdminManager:
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Appointment {appointment_id} invalid") from exc
 
+        notify_date_fmt = "%Y-%m-%d, %H:%M:%S"
         if ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.RESERVED:
             user_db: UserModel = await ap.patient
             await self._notifier.notify(
                 user_db,
                 topic="appointment/approved",
                 title="Appointment has been approved.",
-                message=f"Appointment has been approved.",
+                message=f"Your appointment request for {ap.service} on {ap.start_time.strftime(notify_date_fmt)} was approved.",
             )
         elif ap.status == AppointmentStatus.PENDING and update_status.status == AppointmentStatus.CANCELLED:
             user_db: UserModel = await ap.patient
-            # await notify_change_appointment_status(user_db.id, ap.start_time, "Rejected")
             await self._notifier.notify(
                 user_db,
                 topic="appointment/rejected",
                 title="Appointment has been rejected.",
-                message=f"Appointment has been rejected.",
+                message=f"Your appointment request for {ap.service} on {ap.start_time.strftime(notify_date_fmt)} was rejected.",
             )
         if ap.status != update_status.status:
             ap.status = update_status.status

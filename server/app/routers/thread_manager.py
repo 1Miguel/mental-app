@@ -147,7 +147,7 @@ class ThreadManager:
                 creator,
                 topic="thread/commented",
                 title=thread.topic,
-                message=f"{commenter.username} commented on your post.",
+                message=f"{commenter.username} commented {thread_comment.content}",
             )
         except DoesNotExist as exc:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Thread not found or does not exist") from exc
