@@ -55,9 +55,14 @@ allow_credentials=True,
 # Database
 # ------------------------------------------------------ #
 # connect to the database, create a database if does not exist
+from pathlib import Path as _Path
+db_path = _Path("tmp")
+db_path.mkdir(parents=True, exist_ok=True)
+db = _Path("tmp").joinpath("db.sqlite3")
+log.info("application starting at %s... connecting to database at %s", _Path.cwd(), db)
 register_tortoise(
     app,
-    db_url="sqlite://db.sqlite3",
+    db_url=f"sqlite://{db}",
     modules={"models": ["internal.database"]},
     generate_schemas=True,
 )
@@ -113,7 +118,7 @@ def index() -> Dict[str, str]:
 def run() -> None:
     import uvicorn
 
-    uvicorn.run(app, host="192.168.1.5", port=8080)
+    uvicorn.run(app, host="127.0.0.1", port=8080)
 
 
 if __name__ == "__main__":
