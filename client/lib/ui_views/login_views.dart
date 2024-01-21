@@ -1216,7 +1216,7 @@ class ForgotPasswordEmailVerifyState
     myauth.setConfig(
         appEmail: "pmhi.test.01@gmail.com",
         appName: "Email OTP",
-        userEmail: "pmhi.test.01@gmail.com",
+        userEmail: email,
         otpLength: 6,
         otpType: OTPType.digitsOnly);
 
@@ -2093,7 +2093,7 @@ class _SignupValidateState extends State<SignupValidatePage> {
     myauth.setConfig(
         appEmail: "pmhi.test.01@gmail.com",
         appName: "Email OTP",
-        userEmail: "pmhi.test.01@gmail.com",
+        userEmail: email,
         otpLength: 6,
         otpType: OTPType.digitsOnly);
 

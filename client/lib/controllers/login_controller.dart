@@ -97,20 +97,25 @@ class LoginController extends GetxController {
           await prefs?.setBool('islogged_in', true);
           await prefs?.setBool('isbanned', isBanned);
 
-          emailController.clear();
-          passwordController.clear();
-
-          if (userdata['email'] == "admin0@mentalapp.com") {
-            Get.off(() => AdminApp());
-          } else if (userdata['email'] == "superadmin0@mentalapp.com") {
-            Get.off(() => AdminApp());
+          if (userdata['email'] == "admin0@mentalapp.com" ||
+              userdata['email'] == "superadmin0@mentalapp.com") {
+            // emailController.clear();
+            // passwordController.clear();
+            var context = Get.context!;
+            Navigator.push(
+                context, MaterialPageRoute(builder: ((context) => AdminApp())));
+            //Get.to(() => AdminApp());
           } else {
             //Go to Home
             if (kIsWeb) {
+              // emailController.clear();
+              // passwordController.clear();
               await prefs?.setBool('islogged_in', false);
               prefs?.remove("islogged_in");
               Get.off(() => LoginMainPage());
             } else {
+              // emailController.clear();
+              // passwordController.clear();
               Get.off(() => WelcomePage());
             }
           }

@@ -82,6 +82,11 @@ class AppointmentController extends GetxController {
     String? token_type = await getTokenType();
     List<AppointmentSlot> AppointmentList = <AppointmentSlot>[];
     int advMonth = month + 1;
+    int advYear = year;
+    if (advMonth > 12) {
+      advMonth = 1;
+      advYear = year + 1;
+    }
 
     // get 2 months
     try {
@@ -103,7 +108,7 @@ class AppointmentController extends GetxController {
 
         try {
           final response2 = await http.get(
-            Uri.parse('$baseUrl/user/appointment/schedule/$year/$advMonth'),
+            Uri.parse('$baseUrl/user/appointment/schedule/$advYear/$advMonth'),
             headers: <String, String>{
               'Accept': 'application/json',
               'Authorization': '$token_type $token',

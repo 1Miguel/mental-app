@@ -351,29 +351,27 @@ class _ScreensExample extends StatelessWidget {
                         );
                     }
                   });
-            } else {
-              return AnimatedBuilder(
-                  animation: controller,
-                  builder: (context, child) {
-                    final pageTitle =
-                        _getTitleByIndex(controller.selectedIndex);
-                    switch (controller.selectedIndex) {
-                      case 0:
-                        return MainBody();
-                      case 1:
-                        return ScheduleCalendarView();
-                      case 2:
-                        return AppointmentRequestsMainView();
-
-                      default:
-                        return Text(
-                          pageTitle,
-                          style: theme.textTheme.headlineSmall,
-                        );
-                    }
-                  });
             }
           }
+          return AnimatedBuilder(
+              animation: controller,
+              builder: (context, child) {
+                final pageTitle = _getTitleByIndex(controller.selectedIndex);
+                switch (controller.selectedIndex) {
+                  case 0:
+                    return MainBody();
+                  case 1:
+                    return ScheduleCalendarView();
+                  case 2:
+                    return AppointmentRequestsMainView();
+
+                  default:
+                    return Text(
+                      pageTitle,
+                      style: theme.textTheme.headlineSmall,
+                    );
+                }
+              });
         }
         return const Center(
           child: CircularProgressIndicator(),

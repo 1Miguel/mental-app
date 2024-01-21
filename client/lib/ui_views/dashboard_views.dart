@@ -284,9 +284,9 @@ class _DashboardPageState extends State<DashboardPage> {
                             textAlign: TextAlign.end,
                             style: TextStyle(
                                 fontFamily: 'Proza Libre',
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w900,
                                 fontSize: 30,
-                                color: Colors.black),
+                                color: loginDarkTeal),
                           ),
                         );
                       }

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void _handleOptIn() {
+void _handleOptIn() async {
   OneSignal.User.pushSubscription.optIn();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('notif_on', true);
 }
 
-void _handleOptOut() {
+void _handleOptOut() async {
   //OneSignal.User.pushSubscription.optOut();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('notif_on', false);
 }
 
 class Settings extends StatefulWidget {
@@ -18,6 +23,16 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
   bool msgNotif = false;
+
+  Future<bool?> getNotifSettings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? notifSetting = false;
+
+    if (prefs.containsKey('notif_on')) {
+      notifSetting = prefs.getBool('notif_on');
+    }
+    return notifSetting;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,37 +93,64 @@ class _SettingsState extends State<Settings> {
               // ),
               // SizedBox(height: 10),
               // Divider(),
-              ListTile(
-                contentPadding:
-                    EdgeInsets.only(left: 20.0, right: 30.0, top: 10.0),
-                leading: CircleAvatar(
-                  backgroundColor: Colors.lightBlue,
-                  radius: 20,
-                  child: Icon(Icons.alarm, size: 25, color: Colors.white),
-                ),
-                trailing: Switch(
-                  // This bool value toggles the switch.
-                  value: msgNotif,
-                  activeColor: Colors.lightBlueAccent,
+              FutureBuilder(
+                  future: getNotifSettings(),
+                  initialData: false,
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.deepPurpleAccent,
+                        ),
+                      );
+                    }
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'An ${snapshot.error} occurred',
+                            style: const TextStyle(
+                                fontSize: 18, color: Colors.red),
+                          ),
+                        );
+                      } else if (snapshot.hasData) {
+                        final data = snapshot.data!;
+                        return ListTile(
+                          contentPadding: EdgeInsets.only(
+                              left: 20.0, right: 30.0, top: 10.0),
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.lightBlue,
+                            radius: 20,
+                            child: Icon(Icons.alarm,
+                                size: 25, color: Colors.white),
+                          ),
+                          trailing: Switch(
+                            // This bool value toggles the switch.
+                            value: data,
+                            activeColor: Colors.lightBlueAccent,
 
-                  onChanged: (bool value) {
-                    // This is called when the user toggles the switch.
-                    setState(() {
-                      msgNotif = value;
-                      if (msgNotif == true) {
-                        _handleOptIn();
-                      } else {
-                        _handleOptOut();
+                            onChanged: (bool value) {
+                              // This is called when the user toggles the switch.
+                              setState(() {
+                                msgNotif = value;
+                                if (msgNotif == true) {
+                                  _handleOptIn();
+                                } else {
+                                  _handleOptOut();
+                                }
+                              });
+                            },
+                          ),
+                          horizontalTitleGap: 30.0,
+                          title: Text("Message Notification"),
+                          onTap: () {
+                            //onTap();
+                          },
+                        );
                       }
-                    });
-                  },
-                ),
-                horizontalTitleGap: 30.0,
-                title: Text("Message Notification"),
-                onTap: () {
-                  //onTap();
-                },
-              ),
+                    }
+                    return CircularProgressIndicator();
+                  }),
             ],
           ),
         ),

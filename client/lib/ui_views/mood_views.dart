@@ -8,6 +8,7 @@ import 'package:flutter_intro/model/mood.dart';
 import 'package:flutter_intro/model/user.dart';
 import 'package:flutter_intro/ui_views/dashboard_views.dart';
 import 'package:flutter_intro/ui_views/membership_views.dart';
+import 'package:flutter_intro/ui_views/mood_survey.dart';
 import 'package:flutter_intro/ui_views/mood_timeline.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
 
@@ -1019,8 +1020,7 @@ class TodayMoodInfo extends StatelessWidget {
   });
 
   Future<Mood> getMoodToday() async {
-    futureMood = moodController
-        .fetchMoodToday(DateTime.now().add(const Duration(hours: 8)));
+    futureMood = moodController.fetchMoodToday(DateTime.now());
     return futureMood;
   }
 
@@ -1141,10 +1141,10 @@ class TodayMoodInfo extends StatelessWidget {
                         //         )),
                         //   ),
                         // );
-                        // ScaffoldMessenger.of(context)
-                        //     .showSnackBar(const SnackBar(
-                        //   content: Text("Note was successfully saved."),
-                        // ));
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text("Note was successfully saved."),
+                        ));
                       },
                       style: ButtonStyle(
                           minimumSize:
@@ -1528,7 +1528,7 @@ class MoodContextIntro extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: ((context) => DashboardPage()),
+              builder: ((context) => MoodSurveyPage()),
             ),
           );
         },
@@ -1557,6 +1557,7 @@ class MoodContextIntro extends StatelessWidget {
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.w700,
+                          fontFamily: "Open Sans",
                           fontSize: 25,
                           decoration: TextDecoration.none,
                         ),

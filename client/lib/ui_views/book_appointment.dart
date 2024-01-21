@@ -1717,6 +1717,29 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
     return dateList;
   }
 
+  _showErrorDialog(context, errorMessage) {
+    Alert(
+      context: context,
+      //style: alertStyle,
+      type: AlertType.error,
+      title: "Error",
+      desc: errorMessage,
+      buttons: [
+        DialogButton(
+          child: Text(
+            "OK",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          onPressed: () => {
+            Navigator.of(context, rootNavigator: true).pop(),
+          },
+          color: Colors.redAccent,
+          radius: BorderRadius.circular(0.0),
+        ),
+      ],
+    ).show();
+  }
+
   List<appModel.AppointmentSlot> blockedSlots = getSlots();
   static List<appModel.AppointmentSlot> getSlots() {
     const data = [
@@ -2069,20 +2092,24 @@ class _BookSchedulePageState extends State<BookSchedulePage> {
               children: [
                 FilledButton(
                   onPressed: () {
-                    if (scheduleValue != TimeSlot.slot0.index && dateSelected) {
+                    if ((scheduleValue != TimeSlot.slot0.index) &&
+                        dateSelected) {
                       print("Valid Schedule is selected");
                       print("startDate: $startDate endDate:$endDate");
                       print('Service Type: $selectedService');
+                      if (reschedule == true) {
+                        appointmentController.rescheduleAppointment(
+                            id, startDate, endDate, selectedService);
+                      } else {
+                        appointmentController.setAppointment(
+                            startDate, endDate, selectedService, concern);
+                      }
                     } else {
                       print("No valid schedule selected");
+                      _showErrorDialog(
+                          context, "Please select valid timeslot/date");
                     }
-                    if (reschedule == true) {
-                      appointmentController.rescheduleAppointment(
-                          id, startDate, endDate, selectedService);
-                    } else {
-                      appointmentController.setAppointment(
-                          startDate, endDate, selectedService, concern);
-                    }
+
                     // Navigator.push(
                     //     context,
                     //     MaterialPageRoute(

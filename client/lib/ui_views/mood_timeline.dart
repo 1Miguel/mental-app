@@ -111,7 +111,7 @@ class MoodTimeline extends StatelessWidget {
                 endChild: _ContainerHeader(
                     dominantMood: dominantMood, percentage: percentage),
               ),
-              Expanded(
+              Container(
                 child: SizedBox(
                     height: MediaQuery.sizeOf(context).height - 100,
                     child: FutureBuilder<List<Mood>>(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intro/ui_views/dashboard_media_course_mentalhealthcheck.dart';
 import 'package:flutter_intro/ui_views/dashboard_media_courses.dart';
 import 'package:flutter_intro/ui_views/media_videos.dart';
 import 'package:flutter_intro/utils/colors_scheme.dart';
@@ -135,6 +136,34 @@ class DashboardMedia extends StatelessWidget {
                   child: ListView(
                     children: [
                       SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) =>
+                                        CourseMentalHealthCheckSurvey())));
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: constraint.maxWidth - 30,
+                                height: (bodyHeight / 6) + 20,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.asset(
+                                      'images/courses_mental_health_check.png',
+                                      fit: BoxFit.fill),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
                         child: GestureDetector(

@@ -10,21 +10,28 @@ class Calm extends StatelessWidget {
         "title": "Rain",
         "image": "images/calm_nature_rain.png",
         "sound": "sounds/sound_nature_rain.mp3",
+        "desc":
+            "The sound of rain have a calming effect on the mind and body, helping to reduce stress, anxiety, and depression."
       },
       {
         "title": "Peaceful River",
         "image": "images/calm_nature_stream.png",
         "sound": "sounds/sound_nature_waterstream.mp3",
+        "desc":
+            "The sound of river helps relax the mind and help enhance the mood",
       },
       {
         "title": "Ocean Waves",
         "image": "images/calm_nature_ocean.png",
         "sound": "sounds/sound_nature_oceanwavebirds.mp3",
+        "desc": "This slows us down allowing us to relax and feel more engaged",
       },
       {
         "title": "Crickets",
         "image": "images/calm_nature_cricket.png",
         "sound": "sounds/sound_nature_cricket.mp3",
+        "desc":
+            "Close your eyes and enjoy the power of the night, where everything is so quiet and and so calming."
       },
     ];
     return data.map<SoundList>(SoundList.fromJson).toList();
@@ -82,7 +89,7 @@ class Calm extends StatelessWidget {
                 child: SizedBox(
                     width: mainBodyWidth,
                     child: Text(
-                      "Browse through our list of curated mediation music to help you relax",
+                      "Browse through our list of curated meditation music to help you calm and relax",
                       style: TextStyle(
                           color: Colors.black54,
                           fontSize: 15,
@@ -131,11 +138,12 @@ class Calm extends StatelessWidget {
               children: [
                 Container(
                   width: 150,
-                  height: 150,
+                  height: 300,
                   child: SoundCard(
                     title: nature.title,
                     imgFile: nature.imgFile,
                     soundFile: nature.soundFile,
+                    desc: nature.desc,
                   ),
                 ),
               ],
@@ -149,14 +157,18 @@ class SoundCard extends StatelessWidget {
   final String title;
   final String imgFile;
   final String soundFile;
+  final String desc;
 
   const SoundCard(
-      {required this.title, required this.imgFile, required this.soundFile});
+      {required this.title,
+      required this.imgFile,
+      required this.soundFile,
+      required this.desc});
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraint) {
-      double imgHeight = (constraint.maxHeight / 4) * 3;
+      double imgHeight = (constraint.maxHeight / 2);
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
@@ -188,6 +200,7 @@ class SoundCard extends StatelessWidget {
                   ),
                 ),
                 Text(title),
+                Text(desc, style: TextStyle(fontSize: 10)),
               ],
             ),
           ),
@@ -201,26 +214,31 @@ class SoundList {
   final String title;
   final String imgFile;
   final String soundFile;
+  final String desc;
 
   const SoundList({
     required this.title,
     required this.imgFile,
     required this.soundFile,
+    required this.desc,
   });
 
   factory SoundList.fromJson(Map<String, dynamic> json) {
     String def_title;
     String def_imgFile;
     String def_soundFile;
+    String def_desc;
 
     def_title = json['title'] ?? '';
     def_imgFile = json['image'] ?? '';
     def_soundFile = json['sound'] ?? '';
+    def_desc = json['desc'] ?? '';
 
     return SoundList(
       title: def_title as String,
       imgFile: def_imgFile as String,
       soundFile: def_soundFile as String,
+      desc: def_desc as String,
     );
   }
 }

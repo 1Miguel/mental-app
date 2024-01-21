@@ -101,51 +101,52 @@ class _TraumaSliderModuleState extends State<TraumaSliderModule> {
             ),
           ),
         ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: bodyWidth,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-                        child: SizedBox(
-                            width: bodyWidth,
-                            child: Text(
-                              "Course: \nOvercoming Trauma",
-                              style: TextStyle(
-                                  color: Colors.teal,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 25),
-                            )),
-                      ),
-                      Divider(),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: FlutterCarousel(
-                    items: images,
-                    options: CarouselOptions(
-                      viewportFraction: 1.0,
-                      autoPlay: false,
-                      floatingIndicator: false,
-                      enableInfiniteScroll: false,
-                      controller: _controller,
-                      slideIndicator: CircularWaveSlideIndicator(),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: bodyWidth,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                      child: SizedBox(
+                          width: bodyWidth,
+                          child: Text(
+                            "Course: \nOvercoming Trauma",
+                            style: TextStyle(
+                                color: Colors.teal,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 25),
+                          )),
                     ),
+                    Divider(),
+                  ],
+                ),
+              ),
+              Container(
+                child: FlutterCarousel(
+                  items: images,
+                  options: CarouselOptions(
+                    viewportFraction: 1.0,
+                    autoPlay: false,
+                    floatingIndicator: false,
+                    enableInfiniteScroll: false,
+                    controller: _controller,
+                    slideIndicator: CircularWaveSlideIndicator(),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 10.0, bottom: 20.0),
-                  child: Flexible(
-                    child: ProgressStepper(
+              ),
+              Container(
+                width: constraint.maxWidth,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ProgressStepper(
                       width: 300,
                       currentStep: _chevronCounter,
                       progressColor: Colors.tealAccent,
@@ -155,64 +156,61 @@ class _TraumaSliderModuleState extends State<TraumaSliderModule> {
                         });
                       },
                     ),
-                  ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 16.0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        child: TextButton(
-                          child: Row(
-                            children: [
-                              Icon(Icons.arrow_left, color: Colors.black),
-                              Text(
-                                'Previous',
-                                style: TextStyle(
+              ),
+              Container(
+                width: constraint.maxWidth,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      child: TextButton(
+                        child: Row(
+                          children: [
+                            Icon(Icons.arrow_left, color: Colors.black),
+                            Text(
+                              'Previous',
+                              style: TextStyle(
+                                fontFamily: 'Open Sans',
+                                fontWeight: FontWeight.w900,
+                                fontSize: 15,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                        onPressed: () {
+                          _controller.previousPage();
+                          _decrementChevronStepper();
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      child: TextButton(
+                        child: Row(
+                          children: [
+                            Text(
+                              'Next',
+                              style: TextStyle(
                                   fontFamily: 'Open Sans',
                                   fontWeight: FontWeight.w900,
                                   fontSize: 15,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                          onPressed: () {
-                            _controller.previousPage();
-                            _decrementChevronStepper();
-                          },
+                                  color: Colors.black),
+                            ),
+                            Icon(Icons.arrow_right, color: Colors.black),
+                          ],
                         ),
+                        onPressed: () {
+                          _controller.nextPage();
+                          _incrementChevronStepper();
+                        },
                       ),
-                      SizedBox(
-                        child: TextButton(
-                          child: Row(
-                            children: [
-                              Text(
-                                'Next',
-                                style: TextStyle(
-                                    fontFamily: 'Open Sans',
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 15,
-                                    color: Colors.black),
-                              ),
-                              Icon(Icons.arrow_right, color: Colors.black),
-                            ],
-                          ),
-                          onPressed: () {
-                            _controller.nextPage();
-                            _incrementChevronStepper();
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       );

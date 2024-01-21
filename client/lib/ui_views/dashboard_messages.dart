@@ -58,7 +58,7 @@ class _MessagesTabState extends State<MessagesTab> {
               children: [
                 Container(
                   width: constraint.maxWidth,
-                  height: 80,
+                  height: 100,
                   child: NotifCard(
                     id: notif.id,
                     title: notif.title,
@@ -216,14 +216,6 @@ class NotifCard extends StatelessWidget {
     required this.onTap,
   });
 
-  // _onBasicAlertPressed(context) {
-  //   Alert(
-  //     context: context,
-  //     title: "RFLUTTER ALERT",
-  //     desc: "Flutter is more awesome with RFlutter Alert.",
-  //   ).show();
-  // }
-
   @override
   Widget build(BuildContext context) {
     String notifDate =
@@ -281,11 +273,15 @@ class NotifCard extends StatelessWidget {
                           width: constraint.maxWidth,
                           child: Text(
                             title,
+                            softWrap: true,
+                            maxLines: 1,
                           )),
                       SizedBox(
                           width: constraint.maxWidth,
                           child: Text(
                             content,
+                            softWrap: true,
+                            maxLines: 2,
                             style: TextStyle(color: Colors.grey.shade600),
                           )),
                       SizedBox(

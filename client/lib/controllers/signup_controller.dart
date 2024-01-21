@@ -55,6 +55,7 @@ class SignupController extends GetxController {
         lastNameController.clear();
         emailController.clear();
         passwordController.clear();
+        confirmPwdController.clear();
         //go to home
         Get.off(() => SignupSuccessPage());
       } else if (response.statusCode == 409) {

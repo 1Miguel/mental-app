@@ -145,7 +145,10 @@ class _ProfileTabState extends State<ProfileTab> {
   Widget build(BuildContext context) {
     const double appBarHeight = 80;
     const double botBarHeight = 60;
+
     return LayoutBuilder(builder: (context, constraint) {
+      double maxBodyHeight =
+          constraint.maxHeight - (appBarHeight + botBarHeight + 30);
       return PopScope(
           canPop: false,
           child: Scaffold(
@@ -194,99 +197,125 @@ class _ProfileTabState extends State<ProfileTab> {
                       String lastname = userdata.lastname;
                       String email = userdata.email;
 
-                      return Column(
-                        children: [
-                          SizedBox(height: 20),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(20.0), //or 15.0
-                            child: Container(
-                              height: 100.0,
-                              width: 100.0,
-                              color: bgTeal,
-                              child: Icon(Icons.person,
-                                  color: conTeal, size: 80.0),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: MediaQuery.sizeOf(context).width,
-                                child: Text(
-                                  "$firstname $lastname",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 20, color: primaryGrey),
-                                ),
+                      return Container(
+                        width: constraint.maxWidth,
+                        height: maxBodyHeight,
+                        child: Column(
+                          children: [
+                            Container(
+                              width: constraint.maxWidth,
+                              height: (maxBodyHeight / 3) * 2,
+                              child: Column(
+                                children: [
+                                  SizedBox(height: 20),
+                                  ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.circular(20.0), //or 15.0
+                                    child: Container(
+                                      height: 100.0,
+                                      width: 100.0,
+                                      color: bgTeal,
+                                      child: Icon(Icons.person,
+                                          color: conTeal, size: 80.0),
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: MediaQuery.sizeOf(context).width,
+                                        child: Text(
+                                          "$firstname $lastname",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              fontSize: 20, color: primaryGrey),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 10),
+                                  Divider(),
+                                  AccountMenuTile(
+                                    menu: 'Edit Profile',
+                                    menuIcon: Icons.place,
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: ((context) =>
+                                                  ProfileTabNew())));
+                                    },
+                                    bgColor: bgYellow,
+                                    conColor: conYellow,
+                                  ),
+                                  AccountMenuTile(
+                                    menu: 'Settings',
+                                    menuIcon: Icons.settings,
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: ((context) =>
+                                                  Settings())));
+                                    },
+                                    bgColor: bgGreen,
+                                    conColor: conGreen,
+                                  ),
+                                  AccountMenuTile(
+                                    menu: 'Contact Us',
+                                    menuIcon: Icons.call,
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: ((context) =>
+                                                  ContactUs())));
+                                    },
+                                    bgColor: bgPeachRed,
+                                    conColor: conPeachRed,
+                                  ),
+                                  AccountMenuTile(
+                                    menu: 'About Us',
+                                    menuIcon: Icons.info,
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: ((context) =>
+                                                  AboutUs())));
+                                    },
+                                    bgColor: bgPurple,
+                                    conColor: conPurple,
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 10),
-                          Divider(),
-                          AccountMenuTile(
-                            menu: 'Edit Profile',
-                            menuIcon: Icons.place,
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) => ProfileTabNew())));
-                            },
-                            bgColor: bgYellow,
-                            conColor: conYellow,
-                          ),
-                          AccountMenuTile(
-                            menu: 'Settings',
-                            menuIcon: Icons.settings,
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) => Settings())));
-                            },
-                            bgColor: bgGreen,
-                            conColor: conGreen,
-                          ),
-                          AccountMenuTile(
-                            menu: 'Contact Us',
-                            menuIcon: Icons.call,
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) => ContactUs())));
-                            },
-                            bgColor: bgPeachRed,
-                            conColor: conPeachRed,
-                          ),
-                          AccountMenuTile(
-                            menu: 'About Us',
-                            menuIcon: Icons.info,
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) => AboutUs())));
-                            },
-                            bgColor: bgPurple,
-                            conColor: conPurple,
-                          ),
-                          SizedBox(height: 180),
-                          Divider(),
-                          AccountMenuTile(
-                            menu: 'Logout',
-                            menuIcon: Icons.logout,
-                            bgColor: bgRed,
-                            conColor: conRed,
-                            onTap: () {
-                              getLogOutState();
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) => LoginMainPage())));
-                            },
-                          ),
-                        ],
+                            ),
+                            Container(
+                              width: constraint.maxWidth,
+                              height: maxBodyHeight / 3,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Divider(),
+                                  AccountMenuTile(
+                                    menu: 'Logout',
+                                    menuIcon: Icons.logout,
+                                    bgColor: bgRed,
+                                    conColor: conRed,
+                                    onTap: () {
+                                      getLogOutState();
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: ((context) =>
+                                                  LoginMainPage())));
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       );
                     }
                   }
